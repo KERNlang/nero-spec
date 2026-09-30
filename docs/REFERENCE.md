@@ -197,6 +197,11 @@ Covered paths come from `## Changes`, else `Covers:`, else the Blast Radius sect
 - Paths come from the repo's own location and `$HOME` — nothing hardcoded.
 - Idempotent; existing entries are moved to `~/.ai/backups/` first.
 - Other agent dirs: `SPEC_TARGETS="$HOME/.foo/skills $HOME/.bar/skills" ./install.sh` (legacy whitespace-separated absolute paths). For a path containing spaces, use repeatable `./install.sh --target "$HOME/with space/skills"`. The installer checks every target before changing any destination and stores replaced entries in unique `~/.ai/backups/` reservations.
+- `SPEC_INSTALL_MODE=copy ./install.sh` copies `skill/` instead of linking it. A copy carries a `.nero-spec-install` marker, so reruns refresh it and `--uninstall` removes it; rerun the installer after `git pull`.
+
+### Windows
+
+Run `./install.sh` from Git Bash (comes with Git for Windows) or WSL. Git Bash creates a real symlink when Windows allows it (Developer Mode or an admin shell) and otherwise falls back to copy mode automatically. `--target` also accepts Windows paths such as `C:\Users\me\.claude\skills`. The `spec-check*.sh` scripts need the same bash; CI runs every test on Windows, macOS and Linux.
 
 ## Rules this skill defers to
 

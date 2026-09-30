@@ -4,6 +4,12 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- Windows support: `install.sh` runs in Git Bash and WSL, uses real symlinks when Windows allows them and falls back to a marked copy otherwise. CI now runs every test on Windows too.
+- `SPEC_INSTALL_MODE=copy` installs a copy instead of a symlink on any OS.
+- `.gitattributes` keeps scripts LF on Windows checkouts.
+
 ## [0.1.0] - 2026-09-30
 
 First public release.

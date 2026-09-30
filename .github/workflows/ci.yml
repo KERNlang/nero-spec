@@ -23,8 +23,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Configure git for test fixtures
@@ -47,7 +50,7 @@ jobs:
           home="$RUNNER_TEMP/home"
           mkdir -p "$home/.claude" "$home/.codex"
           HOME="$home" ./install.sh
-          test -L "$home/.claude/skills/spec"
+          test -f "$home/.claude/skills/spec/SKILL.md"
           test -f "$home/.codex/skills/spec/SKILL.md"
           HOME="$home" ./install.sh --uninstall
           test ! -e "$home/.claude/skills/spec"
