@@ -60,7 +60,7 @@ Then, in your agent:
 
 12 real OSS PRs merged June–September 2026 that shipped a bug later fixed by a follow-up commit (aiohttp, caddy, urfave/cli, vue core, django, echo, litestar, rails, react-router, tauri, uv, zod; Go, Rust, Python, Ruby, TypeScript). Each spec is written blind at the PR's base commit, then scored by 2 blind graders (codex, agy) on whether it would have caught that bug (catch 0–3 per case). Table values are the average of both graders, hence the halves.
 
-| Setup | Bugs caught /36 | Lines (all 12 specs) | Specs requiring the bug |
+| Setup | Points /36 | Lines (all 12 specs) | Specs requiring the bug |
 |---|---|---|---|
 | **Nero Spec + agon nero** | **27** | **2177** | **1** |
 | Nero Spec + agon nero, codex forced as critic | 27.5 | 2193 | 1 |
@@ -78,9 +78,9 @@ The same 12 cases, other spec frameworks (points /36, no critic → subagent cri
 | OpenSpec | 19.5 | 24.5 |
 | Spec Kit | 19 | 23.5 |
 
-Nero Spec is on par with Kiro and ahead of OpenSpec and Spec Kit, with far fewer spec lines. Most of the gain comes from the critic, not the template: a control run (plain spec writer vs Nero Spec, same critic) showed no clear added benefit beyond run-to-run noise.
+Nero Spec lands with Kiro at the top, but the gaps are within run-to-run noise, and Spec Kit was run under an older protocol that forced its full artifact package. Most of the gain comes from the critic, not the template: a control run (plain spec writer vs Nero Spec, same critic) showed no clear added benefit beyond noise.
 
-**1:1 build pilot vs Spec Kit** ([report and data](bench/2026-09-29-nero-vs-spec-kit/)) — one Go task on urfave/cli, same model, each framework took it from spec to working code, checked by a hidden test. Both passed. Spec Kit's first pass panicked on a valid edge case and needed a repair round; Nero Spec's first pass did not. Nero Spec wrote 1 spec file (118 lines) vs Spec Kit's 10 files (321 lines), but took about twice the wall time (20.5 vs 9 min) because of the critic calls. One case: it shows the approach holds up, not a ranking.
+**1:1 build pilot vs Spec Kit** ([report and data](bench/2026-09-29-nero-vs-spec-kit/)) — one Go task on urfave/cli, same model, each framework took it from spec to working code, checked by a preregistered hidden test. Both first passes passed it. A supplementary probe that came out of code review then made Spec Kit's first pass panic on a valid edge case, fixed in a repair round; Nero Spec's first pass handled it. Nero Spec wrote 1 spec file (118 lines, 11.6 KB) vs Spec Kit's 10 files (321 lines, 15.4 KB), but its wall time was about twice as long (20.5 vs 9 min, including critic calls and queue waits). One case: it shows the approach holds up, not a ranking.
 
 Caveats: every benchmark case is a PR that shipped a bug, so this measures recall only, not false alarms on harmless changes. 12 cases with one spec run each, and a single case can swing by 2.5 points between runs. The grading rubric and critic prompt were written by the same author as the framework, and the nero critic engine was also one of the graders.
 

@@ -37,3 +37,5 @@ Curated, path-sanitized copy of a private benchmark pilot. Start with [REPORT.md
 ## Sanitization
 - Absolute paths were replaced: `<work>` (temporary workspace), `<bench>` (pilot root), `<spec-bench>`, `<home>` (user home). No report text was reworded.
 - `SHA256SUMS.txt` is regenerated for the files published here (the original no longer matches); verify with `shasum -a 256 -c SHA256SUMS.txt`.
+
+Path mapping: the reports' `arms/nero/` and `arms/speckit/` are published as `arms/nero-first/` and `arms/speckit-first/` (plus `arms/speckit-repair/`). The reports' `frameworks/nero/skill` is not included; that snapshot predates this repository's public history.

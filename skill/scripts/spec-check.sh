@@ -188,7 +188,7 @@ split_qual() {
 
 check_status_shipped() {
   local f="$1" date="$2" entries="$3" base="${4:-}" known=0 hits=0 q p x repo rp br
-  [ -n "$base" ] || base="$(git log --diff-filter=A --format=%H -- "$f" 2>/dev/null | tail -1)"
+  [ -n "$base" ] || base="$(git log --follow --diff-filter=A --format=%H -1 -- "$f" 2>/dev/null)"
   while IFS='	' read -r q p x; do
     [ -n "$p" ] || continue
     [ "$q" = - ] && q=""
