@@ -22,12 +22,14 @@ Read `~/.config/spec/machine` (plain `key: value`):
 | `agon` | `yes` \| `no` | `no` |
 | `oracle_rules` | path to oracle design rules | `agon-oracle` rules only |
 | `mutation` | `agon` \| `tool` \| `subagent` \| `manual` | first rung that works (`criteria-test-map`) |
-| `default_paths` | `<dir>=<preset>, ...` e.g. `~/work=enterprise, ~/src=personal` | no default-path mapping |
+| `default_paths` | `<dir>=<preset>, ...` e.g. `~/work=enterprise, ~/src=personal, ~/.ai=personal` | no default-path mapping |
 
 - File missing → all defaults; mention `/spec init --machine` once.
 - Path set but file unreadable → warn, use defaults.
 
 ### Repo (first hit wins)
+
+Non-git target (no git root above it): the target directory plays the git root for the `.spec` lookup and the `default_paths` match.
 
 1. **Vendored skill in the repo** — `.agents/skills/spec/`, `.claude/skills/spec/` or `.ai/skills/spec/` inside the git root (not a symlink back to this skill) → follow that one and stop here.
 2. **`.spec` at the git root** → use it (format below).
@@ -51,7 +53,7 @@ Print exactly one line before anything else:
 Spec: preset <name> + addons [<a>, ...] (via vendored|.spec|default path|asked) (agon: on|off[ → reason]) (rules: <file>|defaults)
 ```
 
-Reasons: `not installed`, `machine: no`, `repo: off`, `ask unanswered`.
+Reasons: `not installed`, `machine: no`, `repo: off`, `ask unanswered`. `addons [...]` lists only the addons loaded at that point, not the enabled set; later loads are announced per Step 1.
 
 ## `.spec` format
 
@@ -73,6 +75,7 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 | `stack` | path, default `stack.md` next to `.spec` | stack profile from init 0c; read at core step 1: Edges feed `Callers:` greps, Traps feed Tricky inputs, Gate feeds `Done when` |
 | `mode` | `link` \| `vendored` | written by `init.md` |
 | `hook` | `yes` \| `no` | advisory pre-commit hook asked once by `init.md` |
+| `research.max_age` | days, default `90` | core step 1b: research sources older than this are re-fetched before release |
 | `e2e.path` | e.g. `.claude/e2e.md` | only with `e2e-sweep`; default `e2e.md` beside the specs folder |
 
 ## Step 1 — Load
@@ -83,7 +86,7 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 - **Other addons:** load each only when its core hook fires. Missing file → warn, continue.
 - `agon-oracle` loads only with effective agon `on`.
 - On demand, even when not enabled (blocked only by an explicit `-name` in `.spec`): `contract-discovery` when a boundary is crossed; `release-contract` for client↔backend releases; `refine` at core step 8; `criteria-test-map` when core step 2 forces it.
-- Announce each late load as `+<name> (on demand)`.
+- Every addon loaded after the Spec line, enabled or not, is announced `+<name> (on demand)` before its hook runs.
 
 ## Step 2 — Run
 
@@ -105,9 +108,9 @@ Follow `core.md` step by step. Addons plug in where `core.md` names their hook.
 | `contested-decision-scan` | 4 | Experimental, off by default: contested readings → Breaks tests, settled only by consumer evidence, else conservative pick |
 | `user-stories` | 4 | P1–P3 stories, each independently testable |
 | `success-metrics` | 4 | Measurable tech-agnostic targets, separate from acceptance criteria |
-| `criteria-test-map` | 6, 9 | Every AC and tricky input ↔ test both ways; mutation ladder proves the tests |
-| `refine` | 1 (resume), 8, release | Spec-check, contract compare both sides, re-verify claims, tricky-input/caller/real-usage check + blind spots → ACs, critique by risk, max 2 rounds, `## Refine` block |
-| `drift-guard` | 1, 4, 9 | `Verified at` + `## Changes` as anchor, STALE detection, supersede/living; `scripts/spec-check.sh`, optional pre-commit hook |
+| `criteria-test-map` | 6, 9 | Every AC and tricky input ↔ test both ways; `Eval:` ACs for agent-behaviour artifacts; mutation ladder proves the tests |
+| `refine` | 1 (resume), 8, release | Spec-check, contract compare both sides, re-verify claims, tricky-input/caller/real-usage check + blind spots → ACs, critique by risk, max 2 rounds, `## Refine` block with step coverage; re-fetches stale research |
+| `drift-guard` | 1, 4, 9 | `Verified at` (git sha, or dir-hash for non-git targets) + `## Changes` as anchor, STALE detection, supersede/living; `scripts/spec-check.sh`, optional pre-commit hook |
 | `agon-oracle` | 8 | Oracle fixtures for `agon goal`/`conquer`, holdouts, promotion rule |
 | `e2e-sweep` | 9, release, on demand | Live personas × features sweep + visual audit before release/overnight; `Device check:` ACs become rows (`scripts/e2e-matrix.sh`); project file `e2e.md` |
 
