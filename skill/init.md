@@ -10,7 +10,7 @@ Set up this machine (once) and one repo: pick a preset, adjust addons, write the
 2. **`agon`** — run `command -v agon`. Found → default `yes`; not found → default `no` and say so.
 3. **`oracle_rules`** — only if `agon: yes`. Path to oracle design rules; prefill if an agon playbook file exists on disk. Empty = `agon-oracle` rules only.
 4. **`mutation`** — `agon` (if `agon: yes`), `tool`, `subagent`, `manual`. Default: `agon` if available, else `subagent`.
-5. **`default_paths`** — optional. Folders on this machine whose repos use a preset without a `.spec`, as `<dir>=<preset>` pairs, e.g. `~/work=enterprise, ~/src=personal`. Empty = every repo without `.spec` is asked (SKILL.md Step 0). Never map a folder holding company code to `personal` or `team`.
+5. **`default_paths`** — optional. Folders on this machine whose repos use a preset without a `.spec`, as `<dir>=<preset>` pairs, e.g. `~/work=enterprise, ~/src=personal, ~/.ai=personal`. Empty = every repo without `.spec` is asked (SKILL.md Step 0). Never map a folder holding company code to `personal` or `team`.
 
 Show the file, ask, then write it (create `~/.config/spec/` if needed):
 

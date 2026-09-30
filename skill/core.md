@@ -20,9 +20,15 @@ Built-in defaults (no `rules` file):
 - **User-facing change** (UI, notifications, emails, sharing or permission semantics) → before writing, restate the concrete reading: which object and scope, where on screen, per what (user, item, session). The user confirms once; record it in `## Intent`. Skip for backend-only work and exact-value style fixes.
 - **Skip the spec** when the fix is obvious, single-file and no escalation trigger fires → read, fix, gate. Say so in one line.
 
+## 1b. Research (optional)
+
+- Trigger: requirements depend on external standards, APIs or versions. Read-only; may run before approval.
+- Output a `## Sources` table: `| ID | Title | URL | Version | Fetched | Status |`, Status `OK` \| `PARTIAL` \| `UNVERIFIED`.
+- Sources older than `.spec` `research.max_age` (days, default 90) are re-fetched before release (`refine` c).
+
 ## 2. Pick the depth
 
-- Hook: select ONE depth addon and load only that — `depth-light` (Surgical / Full) or one `tier-*`. None enabled → `depth-light`.
+- Hook: select ONE depth addon and load only that — `depth-light` (Surgical / Full) or one `tier-*`. None enabled → `depth-light`. Record the pick in `**Depth:**`.
 - **Escalation triggers — any ONE forces a spec at Full / tier 2+, regardless of file count:**
   - touches auth, sessions, tokens, guest accounts, payment, deletion or privacy;
   - changes a shared contract (API shape, exported type/enum, generator output, schema) consumed by another module, repo, team, or client;
@@ -46,7 +52,8 @@ Base template. Addons add header lines and sections; the depth addon decides whi
 ```markdown
 # [Title]
 **Date:** YYYY-MM-DD
-**Verified at:** <git rev-parse --short HEAD>
+**Depth:** <Surgical | Full | tier-N>
+**Verified at:** <git rev-parse --short HEAD> | dir-hash <sha256> root <dir>
 **Confidence:** 0.XX
 **Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE [— short note]
 
@@ -71,6 +78,7 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 ## Acceptance Criteria
 - [ ] AC-1 ...
   Tricky inputs: <named input or state>, <named input or state>
+- [ ] AC-n Eval: <property> — baseline vs treatment, n=<n> per arm, PASS at ≥ <k>, rubric <path>
 - [ ] AC-n Device check: <what to look at on a device> — screenshot/recording attached before DONE
 ## Out of Scope
 ## Open Questions
@@ -79,6 +87,7 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 ## Refine
 ```
 
+- **Verified at** — non-git target: `scripts/spec-check.sh --spec <file> --dir-hash <root>` prints the `dir-hash <sha256> root <dir>` value.
 - **Status** — the enum first; anything else goes after ` — `. Never invent a new status word.
 - **Intent** — user-facing changes only (step 1). `Picked` is the reading the user confirmed, `Not this` the plausible ones they rejected. Unconfirmed → one OPEN for the whole reading, not one per line, and Status stays SPEC. Not user-facing → omit the section, never leave it empty. Before DONE a human confirms the built behaviour matches `Picked`: the Device check for UI, one real run (sent email, notification, permission attempt) otherwise.
 - **Changes** — one line per file or glob, backtick paths, other repos as `repo:path` (name from `.spec` `repos:`), one phrase each. It is the scope fence and the drift anchor (`spec-check.sh` reads it). Generated code → list the source.
@@ -96,7 +105,7 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 
 ## 5. Claim tags — evidence binding
 
-- **VERIFIED** — confirmed by reading source, running a command, or calling an API, **and cites the exact artifact**: `path` or `path` › symbol (`:line` only when the line itself matters), `repo@sha:path`, the command plus its load-bearing output, or a captured response. No citation → ASSUMED. VERIFIED is provenance, not confidence.
+- **VERIFIED** — confirmed by reading source, running a command, or calling an API, **and cites the exact artifact**: `path` or `path` › symbol (`:line` only when the line itself matters), `repo@sha:path`, the command plus its load-bearing output, or a captured response. An external source counts only with URL + section + fetch date. No citation → ASSUMED. VERIFIED is provenance, not confidence.
 - **Negative evidence** counts only with command + date: "`grep -rn foo src` → 0 hits, 2026-01-31". Absence claims rot fastest.
 - **ASSUMED** — inferred from patterns, docs, or memory; not source-checked. Carries its date; older than the anchor → re-check or OPEN (`refine` c).
 - **OPEN** — explicitly unknown; needs human input or access not available.
@@ -136,7 +145,7 @@ Checklist, not a review.
 - Always re-run the commands behind load-bearing VERIFIED claims (all repos); changed results → Corrections Log. Release or go-live → `refine` a + b + c first.
 - Hooks: `criteria-test-map` "Prove the tests"; `drift-guard` AC-link check; `e2e-sweep` device-check rows (UI specs).
 - Each AC → `PASS` (test name + load-bearing output line), `GAP` (what is missing), or moved to Out of Scope with a reason. Device-check ACs PASS only with the screenshot/recording. With `## Intent`, DONE also needs the human `Picked` confirmation.
-- `git diff --name-only <Verified at>..HEAD` (each repo) vs Changes → list files outside it.
+- `git diff --name-only <Verified at>..HEAD` (each repo) vs Changes → list files outside it. dir-hash anchor → re-run `--dir-hash`, record the new value at DONE; files outside Changes cannot be diffed without git, so list the files you edited.
 - Add `## As-built delta`: what differs from the spec and why.
 - **DONE only when every AC is checked `- [x]` or moved out of scope**, and every consumer in Changes is merged on its shipping branch. Otherwise IN PROGRESS.
 

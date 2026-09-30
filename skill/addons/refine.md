@@ -39,6 +39,7 @@ Each confirmed mismatch → finding, severity HIGH when it touches auth/session/
 - Re-run every VERIFIED claim's citation/command against the current code, including other repos (`repo@sha:path`). Changed → fix the claim and add a Corrections Log row.
 - Re-check every ASSUMED claim. Now checkable → VERIFIED with citation, or wrong → corrected.
 - **ASSUMED older than the anchor** (`Verified at` / `Date`) or carried over from an earlier session: re-check it now or turn it into OPEN. Never build on an assumption nobody re-read (e.g. "backend is greenfield").
+- Before a release: research sources (core step 1b) older than `.spec` `research.max_age` are re-fetched; changed → Corrections Log.
 - Bump `Verified at` once done.
 
 ### d. Blind-spot pass (every depth)
@@ -90,13 +91,15 @@ Add or replace one `## Refine` block, ≤ 6 lines:
 
 ```markdown
 ## Refine
-Round 2/2, 2026-01-31, `Verified at` a1b2c3d. Critic: agon nero (normal risk).
+Round 2/2, 2026-01-31, `Verified at` a1b2c3d. Critic: agon nero (normal risk). Steps: a–g.
 Fixed: 4 (contract: `refresh_token` dropped by client type; Callers: 2 missed sites; Tricky input added: expired token on refresh retry).
 Decided: OPEN-2 → ASSUMED keep v1 endpoint (owner: backend lead).
 Rejected: 1 (critic: "`limit` may be negative" — `api/parse.go:12` rejects < 0 before any caller reaches it).
 Residual risk: old clients ≤2.2 untested on device.
 Pass: yes (0 HIGH open).
 ```
+
+Surgical records `Steps: a, d, e`. `spec-check.sh` flags `REFINE-STEPS` when a Full / tier 2+ Refine names a Critic but records no step coverage.
 
 **Pass** = no unresolved HIGH finding. Fail → Status stays SPEC; say which finding blocks.
 

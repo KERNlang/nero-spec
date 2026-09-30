@@ -32,6 +32,16 @@ Unmapped tests: none.
 - A criterion that cannot be tested is not binary — rewrite it.
 - Success metrics are not mapped here.
 
+## Eval rows
+
+Prompt, skill or doc artifacts whose acceptance is agent behaviour get an `Eval:` AC and Type `eval`.
+
+- Arms: baseline vs treatment, same model, same prompt; the prompt never names the property under test. `n` runs per arm.
+- Rubric: objective per-item pass/fail, saved before any run.
+- Outcomes: `PASS` (treatment avoids the flaw in ≥ k of the cases where baseline shows it; k fixed in the rubric), `NO-SIGNAL` (both avoid or both fail; recorded, never PASS, GAP at converge), `FAIL`.
+- ≥ 1 false-positive probe: a correct look-alike the treatment must not "fix".
+- Run the baseline before the treatment is installed globally; a global or symlinked install contaminates it.
+
 Step 6 check: any AC or tricky input without a row, any test without an AC, any test that would pass on a plausibly wrong implementation?
 
 ## Prove the tests (step 9)
@@ -42,6 +52,7 @@ A passing test proves nothing until a wrong implementation makes it fail. Use th
 2. **tool** — the repo's mutation tool if one exists (e.g. Stryker / Stryker.NET, mutmut, PIT, cargo-mutants, go-mutesting — whatever the stack already uses). Scope it to changed files.
 3. **subagent** — fresh-context subagent: mutate the changed lines one at a time (flip conditions, off-by-one, drop a call, swap args), run the mapped tests per mutant, report survivors. Restore the tree after.
 4. **manual** — flip one condition in the changed code per criterion; the mapped test must fail. Revert.
+5. **eval** — for `Eval:` rows: planted-bug fixtures with an answer key kept outside the fixture dir; the treatment must catch each planted bug.
 
 Record the result:
 

@@ -78,7 +78,7 @@ rules: ~/AGENTS.md
 agon: yes
 oracle_rules:
 mutation: agon
-default_paths: ~/work=enterprise, ~/oss=team, ~/code=personal
+default_paths: ~/work=enterprise, ~/oss=team, ~/code=personal, ~/.ai=personal
 ```
 
 Skill files reference only these keys, never literal paths.
@@ -96,7 +96,7 @@ Skill files reference only these keys, never literal paths.
 ## Resolution order
 
 1. Vendored skill in the repo (`.agents/skills/spec/`, `.claude/skills/spec/`, `.ai/skills/spec/`) → used as-is.
-2. `.spec` at the git root.
+2. `.spec` at the git root (non-git target: the target directory plays the git root here and in step 3).
 3. `default_paths` in the machine file (longest matching dir wins).
 4. Nothing → `agon: off`, suggest `/spec init`, ask. Company code never goes to external AI by default.
 
@@ -114,11 +114,13 @@ repos: backend=../api-server
 mode: link
 ```
 
+`research.max_age: 90` (days) sets when core step 1b research sources are re-fetched before release.
+
 Enterprise adds `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern`. Full key table: `skill/SKILL.md`.
 
 ## Spec lifecycle
 
-- Header carries `Verified at: <git sha>`; on resume the commands behind load-bearing VERIFIED claims are re-run.
+- Header carries `Verified at: <git sha>` (non-git target: `dir-hash <sha256> root <dir>`); on resume the commands behind load-bearing VERIFIED claims are re-run.
 - `## Changes` (`ADDED:` / `MODIFIED:` / `REMOVED:` + backtick paths, `repo:path` for other repos) is the scope fence and drift anchor.
 - `refine` runs before approval: pass = no unresolved HIGH finding.
 - At approval the spec emits one `Done when:` line (gate command + AC IDs + "no files outside Changes") for `/goal`, a Stop hook, or a human.
@@ -152,7 +154,9 @@ skill/scripts/spec-check.sh --repos backend=../api  # name other repos without w
 skill/scripts/spec-check.sh --stale [repo-dir]      # DONE specs without a sha: check drift since their last commit
 skill/scripts/spec-check.sh --strict [repo-dir]     # exit 1 on any finding
 skill/scripts/pre-commit-spec-check.sh              # git hook; advisory unless SPEC_STRICT=1 (`/spec init` offers it)
+skill/scripts/spec-check.sh --spec <file> --dir-hash <root>  # print the dir-hash anchor for a non-git target
 skill/scripts/test-spec-check.sh                    # fixture tests
+skill/scripts/test-spec-check-nogit.sh              # non-git target, dir-hash, OPEN-CAP, REFINE-STEPS fixtures
 ```
 
 Installed with the skill (e.g. `~/.claude/skills/spec/scripts/…`). Reads `specs.path` and `repos` from `.spec` (default folders `.claude/specs` and `.agents/specs`; files `spec.md`, `spec-*.md`, `*-spec.md`). `specs.path` must stay inside the repo; absolute paths, leading `-`, dot components, and symlink escapes are rejected. Spaces in directory names work. Discovered spec paths containing newline, CR, or tab fail with exit 2. Needs only bash 3.2+, git, awk.
@@ -171,6 +175,13 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, a
 | `STATUS-ENUM` | Status does not start with the enum (free text instead of `DONE — note`) |
 | `REPEAT-FIX` | ≥ 4 (`--repeat-fix`) fix/hotfix/revert commits on covered paths within 30 days (`--repeat-days`) of `Date:` → escalate, write a bigger spec |
 | `NO-STATUS` | no Status header |
+| `NO-REVIEW` | Status READY/IN PROGRESS/DONE but no `## Refine` section with a non-empty `Critic:` (or `Critics:`) line |
+| `CONTRACT-MISSING` | a `METHOD /path` in `## Contract` is absent from a named repo's default branch or HEAD; lists the branches that have it |
+| `CONTRACT-FIELDS` | a consumer's call sites of an endpoint never name a contract field the producer has |
+| `UNMERGED` | Status READY/DONE but ADDED paths are not on that repo's default branch |
+| `NO-GIT` | target is not in a git repo: file-only checks run, git checks are skipped; counts as a finding under `--strict` |
+| `OPEN-CAP` | more than 3 lines tagged OPEN (`OPEN-CAP <spec>: N OPEN (max 3) — decide the rest as ASSUMED with reasoning (core step 5)`) |
+| `REFINE-STEPS` | Full / tier 2+ spec (`**Depth:**`) whose `## Refine` names a Critic but records no `a–g` step coverage (`Steps:` may omit the conditional b) |
 
 Covered paths come from `## Changes`, else `Covers:`, else the Blast Radius section (backtick paths and path-like first cells; a cell like "backend \`app/x.py\`" resolves `backend` through `repos`).
 
