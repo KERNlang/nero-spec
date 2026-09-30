@@ -6,4 +6,4 @@ In short: be respectful, assume good faith, critique ideas rather than people, a
 
 ## Reporting
 
-Report unacceptable behavior privately to the maintainer, [@cukas](https://github.com/cukas). Reports are handled confidentially. Maintainers may remove content and block participants who break these rules.
+Report unacceptable behavior privately by email to the maintainer at cukasn@gmail.com. Reports are handled confidentially. Maintainers may remove content and block participants who break these rules.
