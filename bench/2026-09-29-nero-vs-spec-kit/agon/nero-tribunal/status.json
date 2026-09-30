@@ -1,0 +1,25 @@
+{
+  "mode": "tribunal",
+  "label": "nero-pilot-prebuild-contract",
+  "startedAt": "2026-09-29T17:20:21.160Z",
+  "endedAt": "2026-09-29T17:23:04.468Z",
+  "engines": [
+    {
+      "id": "claude",
+      "status": "ok",
+      "detail": "1 arguments"
+    },
+    {
+      "id": "codex",
+      "status": "ok",
+      "detail": "1 arguments"
+    },
+    {
+      "id": "agy",
+      "status": "ok",
+      "detail": "1 arguments"
+    }
+  ],
+  "summary": "3/3 engines argued across 1 round(s) (mode=red-team, protocol=parallel)",
+  "ok": true
+}

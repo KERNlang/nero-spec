@@ -1,0 +1,31 @@
+missing grades: [('django-01', 'raw_s1', 'zai-coding-plan-glm-5.3')] | excluded case/seed pairs: [('django-01', 's1')]
+raw_s1: n=11 catch=24.5/36 per-grader={'kimi-for-coding-k3': 24, 'zai-coding-plan-glm-5.3': 25} presc={'kimi-for-coding-k3': 4, 'zai-coding-plan-glm-5.3': 3} total/108={'kimi-for-coding-k3': 85, 'zai-coding-plan-glm-5.3': 91} lines=2241
+raw_s2: n=12 catch=28/36 per-grader={'kimi-for-coding-k3': 27, 'zai-coding-plan-glm-5.3': 29} presc={'kimi-for-coding-k3': 3, 'zai-coding-plan-glm-5.3': 2} total/108={'kimi-for-coding-k3': 95, 'zai-coding-plan-glm-5.3': 101} lines=2794
+nero_s1: n=11 catch=25/36 per-grader={'kimi-for-coding-k3': 24, 'zai-coding-plan-glm-5.3': 26} presc={'kimi-for-coding-k3': 4, 'zai-coding-plan-glm-5.3': 2} total/108={'kimi-for-coding-k3': 85, 'zai-coding-plan-glm-5.3': 92} lines=1920
+nero_s2: n=12 catch=30/36 per-grader={'kimi-for-coding-k3': 29, 'zai-coding-plan-glm-5.3': 31} presc={'kimi-for-coding-k3': 2, 'zai-coding-plan-glm-5.3': 1} total/108={'kimi-for-coding-k3': 93, 'zai-coding-plan-glm-5.3': 103} lines=2053
+margin s1 (NERO-RAW) = +0.5; per case: aiohttp+0 caddy-1 cli+0 core+0 echo+0 litestar+0 rails+0 react-1 tauri+0 uv+0.5 zod+2
+margin s2 (NERO-RAW) = +2; per case: aiohttp+0 caddy+0 cli+0 core+2.5 django+0 echo+0 litestar-0.5 rails+0 react+0 tauri+0 uv+2 zod-2
+raw avg=26.25/36; mean margin=+1.25; seed diffs={'raw': 3.5, 'nero': 5.0}
+R1 nothing-on-recall=True  R2 pays-off=False  R3 too-noisy=True  R4 inconclusive=False
+kimi vs glm on 47 new specs: exact 35, |diff|>=2 0, pearson 0.89, mean kimi 2.23 glm 2.40
+regrade old nero_sub: case code codex agy kimi glm
+   aiohttp-01 VTAG 3 3 3 3
+   caddy-01 JANP 3 3 3 3
+   cli-01 RENJ 3 3 3 3
+   core-01 PNKN 0 0 0 1
+   django-01 DDBP 1 0 2 2
+   echo-01 GXXC 3 3 3 3
+   litestar-01 IAWC 2 2 2 3
+   rails-01 SATW 3 3 3 3
+   react-router-01 JZTG 3 1 3 3
+   tauri-01 ZPES 3 3 3 3
+   uv-01 FFZY 3 3 2 2
+   zod-01 CQEJ 2 1 3 3
+sums codex 29 agy 25 kimi 30 glm 32 (n=12)
+   codex vs kimi: exact 9/12, |diff|>=2 0
+   codex vs glm: exact 7/12, |diff|>=2 0
+   agy vs kimi: exact 8/12, |diff|>=2 3
+   agy vs glm: exact 6/12, |diff|>=2 3
+   kimi vs glm: exact 10/12, |diff|>=2 0
+   codex vs agy: exact 9/12, |diff|>=2 1
+   old(codex+agy)/2 = 27, new(kimi+glm)/2 = 31, pearson 0.75

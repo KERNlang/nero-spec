@@ -1,0 +1,39 @@
+Confidence: 0.94
+
+### Attack 1: Value-based introspection in `FlagBase` fails on destination-only or nil-valued flags
+- **Finding:** The spec uses a runtime value (`f.Value`) passed to a shared helper rather than inspecting the static generic type parameter `T` (or a typed zero-value instance `*new(T)`).
+- **Concrete Failure:** In Go CLI libraries, flags are frequently declared with `Destination: &targetVar` leaving `Value` uninitialized or nil (especially for pointer or interface types). Passing an untyped `nil` value to `reflect.TypeOf(v)` returns `nil`, causing a runtime panic on dereference or causing the type switch to miss all concrete cases, returning `""` for a valid typed flag.
+- **Severity:** High
+- **Suggested Named Check:** `TestSchemaTypeFlagBase_DestinationOnlyNilValue`
+
+---
+
+### Attack 2: `extFlag.SchemaType()` panics or drops schema on standard non-getter `flag.Value`
+- **Finding:** The spec dictates that `extFlag` introspects `e.Get()` directly, assuming adapted flags are always getters.
+- **Concrete Failure:** Go's standard library `flag.Value` interface requires only `String() string` and `Set(string) error`. Third-party or custom flags registered via `flag.Var` do not implement `flag.Getter`. If `e.Get()` performs an unchecked type assertion `e.flag.Value.(flag.Getter).Get()`, calling `SchemaType()` panics at runtime. If it uses a guarded assertion and returns `nil`, `SchemaType()` returns `""`, completely ignoring the actual concrete type of `e.flag.Value`.
+- **Severity:** High
+- **Suggested Named Check:** `TestSchemaTypeExtFlag_NonGetterValueSafety`
+
+---
+
+### Attack 3: Universal `SchemaItemsTyper` implementation creates interface-assertion traps and ambiguity
+- **Finding:** Implementing `SchemaItemsTyper` across all `FlagBase` instantiations while returning `""` for non-arrays conflates "not a collection" with "collection with unknown element type".
+- **Concrete Failure:** Downstream schema consumers checking `if sit, ok := flag.(SchemaItemsTyper); ok` will receive `true` for all scalar flags (`IntFlag`, `StringFlag`, `BoolFlag`). Furthermore, when an array flag holds an unknown or untyped item type (e.g., dynamic slice in `GenericFlag`), it also returns `SchemaItemsType() == ""`. A consumer cannot distinguish whether an empty string signifies that the flag is a scalar or an array with unconstrained/any items.
+- **Severity:** Medium
+- **Suggested Named Check:** `TestSchemaItemsType_ScalarEmptyVsUntypedArrayAmbiguity`
+
+---
+
+### Attack 4: Central type mapping masks custom types implementing `SchemaTyper` inside `GenericFlag`
+- **Finding:** A hardcoded central mapping table in `flag_schema_type.go` treats `GenericFlag` as returning a blank category whenever the value is not in the predefined map, failing to check if the value itself implements `SchemaTyper`.
+- **Concrete Failure:** Users defining custom domain types with explicit `SchemaType() string` methods and wrapping them in `GenericFlag` receive `""` instead of their custom schema category because the central mapping switch only inspects known standard types and does not delegate to `v.(SchemaTyper)`.
+- **Severity:** Medium
+- **Suggested Named Check:** `TestSchemaType_GenericFlagDelegatesToValueInterface`
+
+---
+
+### Attack 5: Unpinned `go doc` snapshot diff breaks across minor Go toolchain versions
+- **Finding:** AC-4 mandates byte-for-byte equality via `cmp godoc-current.txt testdata/godoc-v3.x.txt` generated from `go doc -all .`.
+- **Concrete Failure:** Standard library documentation formatting, whitespace, and method sorting in `go doc` vary across Go minor versions. CI environments running different Go minor versions will encounter spurious snapshot diff failures without any underlying API change.
+- **Severity:** Low
+- **Suggested Named Check:** `VerifyGodocSnapshot_ToolchainNormalized`

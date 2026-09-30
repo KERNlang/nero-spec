@@ -1,0 +1,28 @@
+Confidence: 28%
+
+## Challenge 1: Generic struct method sets break optional interface segregation
+**Framework:** INVERSION
+**Failure scenario:** The spec assumes `SchemaItemsTyper` can remain an "optional" interface implemented only by slice flags while declaring generic forwarding methods directly on `FlagBase[T, C, V]` in `flag_impl.go`. In Go, methods cannot be conditionally declared on generic types based on type constraints; every method defined on `FlagBase[T, C, V]` exists on all concrete instantiations. An implementer writes `func (f *FlagBase[T, C, V]) SchemaItemsType() string` in `flag_impl.go`, returning `""` when `T` is not a slice. A downstream consumer tests for array capabilities using standard Go idiom `if itemsTyper, ok := flag.(SchemaItemsTyper); ok`. The type assertion succeeds for every scalar flag (`IntFlag`, `StringFlag`, `BoolFlag`). The planned tests (`TestSchemaTypeBuiltins/scalars`) only check that `SchemaType()` returns scalar strings, completely missing that the scalar flag instances now satisfy `SchemaItemsTyper`.
+**Impact:** `SchemaItemsTyper` ceases to be an optional discriminator. Every scalar flag falsely advertises collection capability to reflection and interface-driven schema generators.
+
+## Challenge 2: Conflating JSON Schema primitive types with format attributes
+**Framework:** SECOND-ORDER
+**Failure scenario:** AC-1 specifies that temporal scalar flags must report categories `"duration"` and `"date-time"`. An implementer implements `SchemaType()` to return these strings verbatim. A downstream JSON Schema generator reads `st.SchemaType()` and assigns it to the JSON Schema `"type"` keyword (`{"type": flag.SchemaType()}`).
+**Impact:** Generates invalid JSON Schema documents according to JSON Schema specifications (Draft 7, 2020-12, and OpenAPI 3.x), where `"type"` must be one of the primitive types (`string`, `number`, `integer`, `boolean`, `object`, `array`, `null`). In standard schemas, temporal values are `type: "string"` paired with a `"format"` attribute (`format: "date-time"` or `format: "duration"`). Any compliant downstream JSON Schema validator will reject the generated schemas as syntactically malformed.
+
+## Challenge 3: Panic and silent omission on unparsed or non-getter `extFlag` instances
+**Framework:** PRE-MORTEM
+**Failure scenario:** An implementer assumes `extFlag.Get()` is always safe to call, as specified in Implementation Options ("lets `extFlag` inspect `e.Get()` exactly as requested"). In production, a consumer constructs an `extFlag` from a standard library `flag.Value` that does not implement `flag.Getter` (e.g., standard custom flag values registered via `flag.Var`). When the schema generator runs at startup before CLI parsing, calling `e.Get()` triggers a runtime panic due to an unchecked type assertion. Alternatively, if the underlying getter returns an untyped `nil` or uninitialized pointer, a runtime type switch in `flag_schema_type.go` falls through to the default branch, returning `""`. Planned test `TestSchemaTypeExtFlag/scalars` uses pre-populated, standard non-zero flags and passes, hiding the runtime failure.
+**Impact:** Introspecting adapted third-party standard flags at application initialization either crashes the program with a nil pointer/interface panic or silently strips schema information for all uninitialized default flags.
+
+## Challenge 4: Type erasure on nil and empty collections via shared value helper
+**Framework:** INVERSION
+**Failure scenario:** The spec chooses "one shared value-to-schema helper called by `FlagBase` and `extFlag`" that accepts `any`. To inspect slice item types from `any`, an implementer relies on runtime slice contents (`reflect.ValueOf(v).Index(0)`) or inspects `reflect.TypeOf(v).Elem()`. When presented with a nil slice getter (`extFlag` wrapping an uninitialized slice) or custom collection getter, passing untyped `nil` into `reflect.TypeOf(v).Elem()` panics. If the implementer catches this with a nil check, the helper cannot determine the element type of an empty or nil slice and returns `""`. The planned test `TestSchemaTypeBuiltins/arrays` passes because `FlagBase` has compile-time type `T`, but the mutation survives into `TestSchemaTypeExtFlag/collections_and_unknown`.
+**Impact:** Adapted slice flags defined with nil defaults report `array` but drop their item types (`SchemaItemsType() == ""`), leaving schema generators unable to generate typed items schemas for empty default collections.
+
+## Challenge 5: Godoc snapshot verification is blind to interface pollution and signature drift
+**Framework:** SECOND-ORDER
+**Failure scenario:** AC-4 relies on `cmp godoc-current.txt testdata/godoc-v3.x.txt` regenerated via `go doc -all .` to ensure interface compatibility and prevent regressions. An implementer modifies `FlagBase` methods, regenerates the godoc file, promotes it to `testdata/`, and commits both. The test passes because the two files are identical.
+**Impact:** `cmp` between generated godoc snapshots verifies only text self-consistency between source and committed baseline; it does not verify that the public API contract remained backward compatible or that existing interfaces like `DocGenerationFlag` were not broken or shadowed. It creates false confidence in interface safety while allowing structural API regressions to slip through.
+
+VERDICT: FLAWED

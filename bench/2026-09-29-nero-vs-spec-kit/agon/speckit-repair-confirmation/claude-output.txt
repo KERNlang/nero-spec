@@ -1,0 +1,11 @@
+**Confirmed: the repair closes the non-Getter panic in both extFlag schema methods.** ~95% sure.
+
+- **Both methods are guarded.** `SchemaType` and `SchemaItemsType` in `flag_ext.go:29-41` check `e.f.Value.(flag.Getter)` with comma-ok and return `""` before calling `e.Get()`. The unchecked assertion inside `Get()` can no longer be reached from these methods.
+- **A nil `Value` is also safe.** A comma-ok assertion on a nil interface gives `false`, so both methods return `""` instead of panicking.
+- **`Get()` is unchanged.** It still asserts unchecked, exactly as before the repair.
+- **Getter values still work.** When the check passes, the flow is unchanged: `schemaTypeOf` / `schemaItemsTypeOf(e.Get())`, unwrapping a nested Getter, then `schemaTypeFromReflect`. The standard Bool/Int/Uint/Float64/String/Duration flags and the `schemaTestGetter` cases still get the same types.
+- **The regression test covers both methods.** `standard.Func` creates a value with only `String` and `Set`, and no `Get`. `checkSchemaTypes` uses `Errorf`, not `Fatalf`, for the value checks, so one call checks `SchemaType` and `SchemaItemsType`, both expecting `""`.
+- **Required behaviour is kept.** `duration` and `date-time` are still returned for time values, and object flags still get empty items (a map is not a slice, so items is `""`). The doc comments added in `flag.go` match this behaviour and change no API.
+- **One minor, harmless point:** the Getter check runs twice (once in the guard, again inside `Get()`). No change needed.
+
+No blocking findings. I only read the attached source; I didn't run anything.

@@ -1,0 +1,36 @@
+engines: ['codex', 'agy']; cases graded: 12 ['aiohttp-01', 'caddy-01', 'cli-01', 'core-01', 'django-01', 'echo-01', 'litestar-01', 'rails-01', 'react-router-01', 'tauri-01', 'uv-01', 'zod-01']
+
+| Framework | catch codex | catch agy | Bugs caught /36 (avg) | Total /108 (avg) | Lines | Specs requiring the bug (avg) |
+|---|---|---|---|---|---|---|
+| Nero Spec, no critic | 24 (n12) | 22 (n12) | 23 | 88.5 | 2097 | 1.5 |
+| Nero Spec + subagent critic | 29 (n12) | 25 (n12) | 27 | 89 | 2165 | 1 |
+| Nero Spec + agon nero | 28 (n12) | 26 (n12) | 27 | 92 | 2177 | 1 |
+| Nero Spec + agon nero (codex critic) | 29 (n12) | 26 (n12) | 27.5 | 92.5 | 2193 | 1 |
+| spec-kit | 21 (n12) | 17 (n12) | 19 | 71.5 | 7976 | 3.5 |
+| spec-kit + subagent critic | 25 (n12) | 22 (n12) | 23.5 | 73 | 8234 | 2.5 |
+| Kiro | 25 (n12) | 22 (n12) | 23.5 | 83.5 | 6974 | 2.5 |
+| Kiro + subagent critic | 29 (n12) | 27 (n12) | 28 | 86 | 7960 | 1.5 |
+| OpenSpec | 22 (n12) | 17 (n12) | 19.5 | 81.5 | 5927 | 3.5 |
+| OpenSpec + subagent critic | 28 (n12) | 21 (n12) | 24.5 | 81.5 | 6921 | 2.5 |
+
+Per-grader totals:
+  codex nero0: catch 24 total 85 presc 2; nero_sub: catch 29 total 84 presc 1; nero_agon: catch 28 total 89 presc 1; nero_codex: catch 29 total 87 presc 1; speckit0: catch 21 total 65 presc 4; speckit_sub: catch 25 total 66 presc 3; kiro0: catch 25 total 76 presc 2; kiro_sub: catch 29 total 79 presc 1; openspec0: catch 22 total 78 presc 4; openspec_sub: catch 28 total 77 presc 3
+  agy nero0: catch 22 total 92 presc 1; nero_sub: catch 25 total 94 presc 1; nero_agon: catch 26 total 95 presc 1; nero_codex: catch 26 total 98 presc 1; speckit0: catch 17 total 78 presc 3; speckit_sub: catch 22 total 80 presc 2; kiro0: catch 22 total 91 presc 3; kiro_sub: catch 27 total 93 presc 2; openspec0: catch 17 total 85 presc 3; openspec_sub: catch 21 total 86 presc 2
+
+Per-case catch matrix (avg of graders; per-grader in brackets):
+case                    nero0     nero_sub    nero_agon   nero_codex     speckit0  speckit_sub        kiro0     kiro_sub    openspec0  openspec_su
+aiohttp-01           2.0[3,1]     3.0[3,3]     2.5[3,2]     2.5[3,2]     2.0[3,1]     3.0[3,3]     2.5[3,2]     3.0[3,3]     2.0[3,1]     2.0[3,1]
+caddy-01             3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     0.5[0,1]     3.0[3,3]     1.0[1,1]     3.0[3,3]     1.0[1,1]     1.0[1,1]
+cli-01               3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]
+core-01              0.5[0,1]     0.0[0,0]     2.0[2,2]     3.0[3,3]     0.0[0,0]     0.0[0,0]     0.5[0,1]     0.5[0,1]     0.5[0,1]     2.0[2,2]
+django-01            0.5[1,0]     0.5[1,0]     0.5[1,0]     0.5[1,0]     1.0[1,1]     1.0[1,1]     0.5[1,0]     0.5[1,0]     0.5[1,0]     0.5[1,0]
+echo-01              3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]
+litestar-01          2.0[2,2]     2.0[2,2]     3.0[3,3]     3.0[3,3]     0.5[1,0]     1.5[2,1]     1.5[2,1]     2.0[2,2]     0.5[1,0]     1.5[2,1]
+rails-01             3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]
+react-router-01      1.0[1,1]     2.0[3,1]     1.0[1,1]     1.0[1,1]     1.0[1,1]     1.0[1,1]     3.0[3,3]     3.0[3,3]     1.0[1,1]     1.0[1,1]
+tauri-01             3.0[3,3]     3.0[3,3]     3.0[3,3]     3.0[3,3]     2.5[3,2]     2.5[3,2]     3.0[3,3]     3.0[3,3]     2.5[3,2]     2.5[3,2]
+uv-01                0.5[0,1]     3.0[3,3]     0.5[0,1]     0.0[0,0]     0.5[0,1]     0.5[0,1]     0.5[0,1]     2.0[2,2]     0.5[0,1]     3.0[3,3]
+zod-01               1.5[2,1]     1.5[2,1]     2.5[3,2]     2.5[3,2]     2.0[3,1]     2.0[3,1]     2.0[3,1]     2.0[3,1]     2.0[3,1]     2.0[3,1]
+
+Grader catch disagreement >=2: 11/120 spec pairs
+Cases every arm missed (avg catch < 1 in all arms): none

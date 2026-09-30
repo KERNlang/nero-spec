@@ -1,0 +1,92 @@
+{
+  "case_id": "cli-01",
+  "repository": "github.com/urfave/cli/v3",
+  "base_sha": "84d0da5c2dea82f19c9bce4bdf255ee1091231fa",
+  "stack": "Go CLI framework (flag API)",
+  "task_statement": "Expose typed flag introspection for JSON Schema generation (issue #2326). Add two optional interfaces in flag.go: SchemaTyper with SchemaType() string, returning the JSON Schema type name of the value a flag accepts (\"boolean\", \"integer\", \"number\", \"string\", \"array\", \"object\", plus \"duration\"/\"date-time\" for time.Duration/time.Time values, or \"\" if the flag does not map cleanly), and SchemaItemsTyper with SchemaItemsType() string, returning the element type for array-valued flags and \"\" for single-value or object flags. Implement both generically on FlagBase[T, C, V] in flag_impl.go so every built-in flag type gets them, and on BoolWithInverseFlag (flag_bool_with_inverse.go) and extFlag (flag_ext.go, wrapping standard-library flag.Flag values by inspecting e.Get()). Add tests in flag_schema_type_test.go covering the built-in flag types and extFlag type branches, and regenerate godoc-current.txt and testdata/godoc-v3.x.txt.",
+  "frameworks": {
+    "nero": {
+      "source_commit": "3cd52c378eea12394a25cd46d88698623b0e37f2",
+      "snapshot_path": "<work>/frameworks/nero/skill",
+      "installed_skill_path": "<work>/arms/nero/.agents/skills/spec",
+      "snapshot_tree_sha256": "adc0ab8918f3b832f9d90f0f7a1185f2fc72dd4bbb3d27465fd39c731d0d514e",
+      "installed_tree_sha256": "adc0ab8918f3b832f9d90f0f7a1185f2fc72dd4bbb3d27465fd39c731d0d514e",
+      "config_path": "<work>/arms/nero/.spec",
+      "config_sha256": "2bd25a4f56de391faa296625a2084cca502840db3b3c2b0ada91ffb321136668",
+      "installed_skill_mode": "link",
+      "installed_skill_target": "<work>/frameworks/nero/skill",
+      "machine_file_path": "<home>/.config/spec/machine",
+      "machine_file_sha256": "38427c5da4a166d967273553c855ef83e52bd56eb685ff935b71c21d2c54dfbc",
+      "native_effective_agon": "on (machine: yes; team preset: full)"
+    },
+    "speckit": {
+      "source_commit": "2c0a57abe1e7383a864c7d5e4dfa2457d7537734",
+      "cli_version": "1.0.14.dev0",
+      "source_path": "<work>/frameworks/spec-kit",
+      "installed_skills_path": "<work>/arms/speckit/.agents/skills",
+      "installed_skills_tree_sha256": "7995d52792b1b110ed2ca2c21b37b7187eefc743aee9ce0ee44ecd31cbe6133b",
+      "shared_infra_path": "<work>/arms/speckit/.specify",
+      "shared_infra_tree_sha256": "254b8675288ce2088805c71647d54a0f13a0e465ac20da4ce76426f90b8a9c91"
+    }
+  },
+  "arms": {
+    "nero": "<work>/arms/nero",
+    "speckit": "<work>/arms/speckit"
+  },
+  "bootstrap": {
+    "started_at_utc": "2026-09-29T17:01:37.954006Z",
+    "completed_at_utc": "2026-09-29T17:07:32.025933Z",
+    "wall_seconds_including_export_diagnosis": 354.1,
+    "task_started_at_utc": null,
+    "source_checkout_history": "The source checkout contains the base commit and available ancestor commits but is missing old blobs. A normal fetch failed. Both arms received only currently available objects reachable from base_sha via git pack-objects --revs --missing=allow-any, preserving the exact base SHA and available ancestry. No refs, remotes, or later fix object were copied.",
+    "successful_commands": [
+      "mkdir -p <work>/arms <work>/frameworks/nero",
+      "git archive 3cd52c378eea12394a25cd46d88698623b0e37f2 skill | tar -x -C <work>/frameworks/nero",
+      "git clone --no-local --no-tags <work-comparison>/spec-kit <work>/frameworks/spec-kit",
+      "git init <work>/arms/nero",
+      "set -o pipefail; printf '%s\\n' 84d0da5c2dea82f19c9bce4bdf255ee1091231fa | git -C <spec-bench>/bench6/worktrees/cli-01 pack-objects --stdout --revs --missing=allow-any | git -C <work>/arms/nero index-pack --stdin",
+      "git -C <work>/arms/nero checkout --detach 84d0da5c2dea82f19c9bce4bdf255ee1091231fa",
+      "git init -q <work>/arms/speckit",
+      "cp <work>/arms/nero/.git/objects/pack/pack-ba6c8c2850041661b591172f567f900cd3cc65da.pack <work>/arms/speckit/.git/objects/pack/",
+      "cp <work>/arms/nero/.git/objects/pack/pack-ba6c8c2850041661b591172f567f900cd3cc65da.idx <work>/arms/speckit/.git/objects/pack/",
+      "git -C <work>/arms/speckit checkout --detach 84d0da5c2dea82f19c9bce4bdf255ee1091231fa",
+      "UV_CACHE_DIR=<work>/frameworks/uv-cache uv run --project <work>/frameworks/spec-kit python -c 'import os, specify_cli; print(os.getcwd()); print(specify_cli.__file__)'",
+      "UV_CACHE_DIR=<work>/frameworks/uv-cache uv run --project <work>/frameworks/spec-kit specify init --here --force --integration codex --non-interactive --script sh",
+      "test -d .agents/skills/spec && test ! -L .agents/skills/spec && diff -qr .agents/skills/spec <work>/frameworks/nero/skill && rm -R .agents/skills/spec",
+      "ln -s <work>/frameworks/nero/skill .agents/skills/spec",
+      "printf 'preset: team\\nmode: link\\n' > .spec"
+    ],
+    "tests_run": false,
+    "ai_dispatched": false,
+    "command_workdirs": {
+      "git archive": "<home>/Web/Spec",
+      "uv run": "<work>/arms/speckit",
+      "Nero linked-mode correction": "<work>/arms/nero"
+    },
+    "superseded_commands": [
+      "mkdir -p <work>/arms/nero/.agents/skills/spec && cp -R <work>/frameworks/nero/skill/. <work>/arms/nero/.agents/skills/spec/",
+      "printf 'preset: team\\nmode: vendored\\n' > <work>/arms/nero/.spec"
+    ],
+    "original_completed_at_utc": "2026-09-29T17:04:42.492082Z",
+    "corrected_at_utc": "2026-09-29T17:07:32.025933Z",
+    "correction_note": "Replaced an exact-match copied skill that was incorrectly labeled vendored with a repo-local symlink to the frozen skill snapshot and changed .spec to native link mode before builder dispatch."
+  },
+  "common_engineering_policy": {
+    "path": "<home>/.ai/AGENTS.md",
+    "sha256": "178adb46d974d0832f6e99b114f16644a78672924422d2c1d2a130d195bd436b",
+    "passed_to_both_builders": false
+  },
+  "execution": {
+    "dispatch_recorded_at_utc": "2026-09-29T17:12:26.299610+00:00",
+    "model": "gpt-6-sol",
+    "reasoning": "high",
+    "context": "fresh per arm; no conversation fork",
+    "actors": {
+      "nero": "/root/build_nero_pilot",
+      "speckit": "/root/build_speckit_pilot"
+    },
+    "actual_start_source": "each arm .pilot/worklog.md",
+    "test_policy": "one parent-granted lease; targeted commands only",
+    "scope": "ordinary developer feature implementation; not future PO/PM handoff"
+  }
+}

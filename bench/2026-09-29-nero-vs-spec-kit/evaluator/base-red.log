@@ -1,0 +1,9 @@
+# github.com/urfave/cli/v3 [github.com/urfave/cli/v3.test]
+./eval_schema_test.go:53:29: undefined: SchemaTyper
+./eval_schema_test.go:57:30: undefined: SchemaItemsTyper
+./eval_schema_test.go:73:21: undefined: SchemaTyper
+./eval_schema_test.go:77:22: undefined: SchemaItemsTyper
+./eval_schema_test.go:134:21: undefined: SchemaTyper
+./eval_schema_test.go:138:22: undefined: SchemaItemsTyper
+FAIL	github.com/urfave/cli/v3 [build failed]
+FAIL

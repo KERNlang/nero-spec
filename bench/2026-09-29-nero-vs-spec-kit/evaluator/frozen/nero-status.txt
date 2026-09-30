@@ -1,0 +1,12 @@
+ M flag.go
+ M flag_bool_with_inverse.go
+ M flag_ext.go
+ M flag_impl.go
+ M godoc-current.txt
+ M testdata/godoc-v3.x.txt
+?? .agents/skills/spec
+?? .claude/specs/typed-flag-schema-introspection/spec.md
+?? .pilot/worklog.md
+?? .spec
+?? flag_schema_type.go
+?? flag_schema_type_test.go

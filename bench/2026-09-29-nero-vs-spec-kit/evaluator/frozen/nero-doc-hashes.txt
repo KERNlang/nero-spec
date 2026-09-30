@@ -1,0 +1,2 @@
+ffad9803bdfb02d6413123e24eaee7c90f4bdca633e409ada4780d221f55f05e  godoc-current.txt
+ffad9803bdfb02d6413123e24eaee7c90f4bdca633e409ada4780d221f55f05e  testdata/godoc-v3.x.txt

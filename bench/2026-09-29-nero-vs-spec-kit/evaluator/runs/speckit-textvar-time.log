@@ -1,0 +1,7 @@
+=== RUN   TestReviewTextVarTime
+    review_textvar_time_test.go:17: getter runtime type=*time.Time; SchemaType=""; SchemaItemsType=""
+    review_textvar_time_test.go:22: proposed pointer-aware SchemaType = "", want date-time
+--- FAIL: TestReviewTextVarTime (0.00s)
+FAIL
+FAIL	github.com/urfave/cli/v3	0.044s
+FAIL

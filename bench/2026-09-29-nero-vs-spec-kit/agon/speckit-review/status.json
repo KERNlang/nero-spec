@@ -1,0 +1,37 @@
+{
+  "mode": "review",
+  "label": "speckit-pilot-firstpass",
+  "startedAt": "2026-09-29T17:25:49.199Z",
+  "endedAt": "2026-09-29T17:27:42.172Z",
+  "engines": [
+    {
+      "id": "claude",
+      "status": "ok",
+      "durationMs": 102271,
+      "detail": "ok, 3 important, 5 nits",
+      "outputPath": "<home>/.agon/runs/review-1790702749200-qovt8c-speckit-pilot-firstpass/claude-output.txt"
+    },
+    {
+      "id": "codex",
+      "status": "blocking",
+      "durationMs": 96298,
+      "detail": "blocking, 1 blocking, 1 important",
+      "outputPath": "<home>/.agon/runs/review-1790702749200-qovt8c-speckit-pilot-firstpass/codex-output.txt"
+    },
+    {
+      "id": "agy",
+      "status": "ok",
+      "durationMs": 112821,
+      "detail": "ok, 2 important, 2 nits",
+      "outputPath": "<home>/.agon/runs/review-1790702749200-qovt8c-speckit-pilot-firstpass/agy-output.txt"
+    }
+  ],
+  "requested": [
+    "claude",
+    "codex",
+    "agy"
+  ],
+  "timeoutSec": 600,
+  "summary": "2/3 reviewed cleanly; codex: blocking",
+  "ok": false
+}

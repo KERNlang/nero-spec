@@ -1,0 +1,57 @@
+diff --git a/flag.go b/flag.go
+index c33de5f..6c444e1 100644
+--- a/flag.go
++++ b/flag.go
+@@ -112,11 +112,14 @@ type Flag interface {
+ }
+ 
+ // SchemaTyper reports the JSON Schema type of a flag's accepted value.
++// "duration" and "date-time" are extension categories for time values.
++// It returns "" when the value has no clean mapping.
+ type SchemaTyper interface {
+ 	SchemaType() string
+ }
+ 
+ // SchemaItemsTyper reports the JSON Schema element type of an array flag.
++// It returns "" for scalar and object flags, or for unknown element types.
+ type SchemaItemsTyper interface {
+ 	SchemaItemsType() string
+ }
+diff --git a/flag_ext.go b/flag_ext.go
+index 0832d8d..5ac3e02 100644
+--- a/flag_ext.go
++++ b/flag_ext.go
+@@ -27,10 +27,16 @@ func (e *extFlag) Get() any {
+ }
+ 
+ func (e *extFlag) SchemaType() string {
++	if _, ok := e.f.Value.(flag.Getter); !ok {
++		return ""
++	}
+ 	return schemaTypeOf(e.Get())
+ }
+ 
+ func (e *extFlag) SchemaItemsType() string {
++	if _, ok := e.f.Value.(flag.Getter); !ok {
++		return ""
++	}
+ 	return schemaItemsTypeOf(e.Get())
+ }
+ 
+diff --git a/flag_schema_type_test.go b/flag_schema_type_test.go
+index e87318a..5395286 100644
+--- a/flag_schema_type_test.go
++++ b/flag_schema_type_test.go
+@@ -111,10 +111,11 @@ func TestFlagSchemaTypeExternal(t *testing.T) {
+ 	standard.Float64("float", 0, "")
+ 	standard.String("string", "", "")
+ 	standard.Duration("duration", 0, "")
++	standard.Func("func", "", func(string) error { return nil })
+ 	standard.VisitAll(func(f *flag.Flag) {
+ 		want := map[string]string{
+ 			"bool": "boolean", "int": "integer", "uint": "integer",
+-			"float": "number", "string": "string", "duration": "duration",
++			"float": "number", "string": "string", "duration": "duration", "func": "",
+ 		}[f.Name]
+ 		t.Run("standard-"+f.Name, func(t *testing.T) {
+ 			checkSchemaTypes(t, &extFlag{f: f}, want, "")

@@ -1,0 +1,94 @@
+=== RUN   TestEvalSchemaFlagKinds
+=== RUN   TestEvalSchemaFlagKinds/bool
+=== RUN   TestEvalSchemaFlagKinds/inverse_bool
+=== RUN   TestEvalSchemaFlagKinds/string
+=== RUN   TestEvalSchemaFlagKinds/int
+=== RUN   TestEvalSchemaFlagKinds/int8
+=== RUN   TestEvalSchemaFlagKinds/int16
+=== RUN   TestEvalSchemaFlagKinds/int32
+=== RUN   TestEvalSchemaFlagKinds/int64
+=== RUN   TestEvalSchemaFlagKinds/uint
+=== RUN   TestEvalSchemaFlagKinds/uint8
+=== RUN   TestEvalSchemaFlagKinds/uint16
+=== RUN   TestEvalSchemaFlagKinds/uint32
+=== RUN   TestEvalSchemaFlagKinds/uint64
+=== RUN   TestEvalSchemaFlagKinds/float
+=== RUN   TestEvalSchemaFlagKinds/float32
+=== RUN   TestEvalSchemaFlagKinds/float64
+=== RUN   TestEvalSchemaFlagKinds/duration
+=== RUN   TestEvalSchemaFlagKinds/timestamp
+=== RUN   TestEvalSchemaFlagKinds/string_slice
+=== RUN   TestEvalSchemaFlagKinds/int_slice
+=== RUN   TestEvalSchemaFlagKinds/int8_slice
+=== RUN   TestEvalSchemaFlagKinds/int16_slice
+=== RUN   TestEvalSchemaFlagKinds/int32_slice
+=== RUN   TestEvalSchemaFlagKinds/int64_slice
+=== RUN   TestEvalSchemaFlagKinds/uint_slice
+=== RUN   TestEvalSchemaFlagKinds/uint8_slice
+=== RUN   TestEvalSchemaFlagKinds/uint16_slice
+=== RUN   TestEvalSchemaFlagKinds/uint32_slice
+=== RUN   TestEvalSchemaFlagKinds/uint64_slice
+=== RUN   TestEvalSchemaFlagKinds/float_slice
+=== RUN   TestEvalSchemaFlagKinds/float32_slice
+=== RUN   TestEvalSchemaFlagKinds/float64_slice
+=== RUN   TestEvalSchemaFlagKinds/string_map
+--- PASS: TestEvalSchemaFlagKinds (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/bool (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/inverse_bool (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/string (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int8 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int16 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int32 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int64 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint8 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint16 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint32 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint64 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float32 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float64 (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/duration (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/timestamp (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/string_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int8_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int16_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int32_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/int64_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint8_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint16_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint32_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/uint64_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float32_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/float64_slice (0.00s)
+    --- PASS: TestEvalSchemaFlagKinds/string_map (0.00s)
+=== RUN   TestEvalGenericFlagNilSchemaItems
+--- PASS: TestEvalGenericFlagNilSchemaItems (0.00s)
+=== RUN   TestEvalExternalFlagKinds
+=== RUN   TestEvalExternalFlagKinds/bool
+=== RUN   TestEvalExternalFlagKinds/int
+=== RUN   TestEvalExternalFlagKinds/int64
+=== RUN   TestEvalExternalFlagKinds/uint
+=== RUN   TestEvalExternalFlagKinds/uint64
+=== RUN   TestEvalExternalFlagKinds/float64
+=== RUN   TestEvalExternalFlagKinds/string
+=== RUN   TestEvalExternalFlagKinds/duration
+=== RUN   TestEvalExternalFlagKinds/date-time
+=== RUN   TestEvalExternalFlagKinds/unknown
+--- PASS: TestEvalExternalFlagKinds (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/bool (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/int (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/int64 (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/uint (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/uint64 (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/float64 (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/string (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/duration (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/date-time (0.00s)
+    --- PASS: TestEvalExternalFlagKinds/unknown (0.00s)
+PASS
+ok  	github.com/urfave/cli/v3	0.044s
