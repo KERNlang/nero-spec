@@ -41,6 +41,8 @@ task ─▶ spec ─▶ critic attacks it ─▶ fix ─▶ build ─▶ review 
 ./install.sh           # links the skill into the agents found on this machine
 ```
 
+Works on macOS, Linux and Windows (Git Bash or WSL; see [Windows](docs/REFERENCE.md#windows)).
+
 Then, in your agent:
 
 ```

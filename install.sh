@@ -3,6 +3,7 @@
 # Backups go to ~/.ai/backups/ — never inside a skills dir, where agents would load them as a duplicate skill.
 # Usage: ./install.sh [--dry-run] [--uninstall] [--target PATH ...]
 # Override targets: SPEC_TARGETS="dir1 dir2" ./install.sh, or repeat --target PATH for paths with spaces.
+# SPEC_INSTALL_MODE=copy copies instead of symlinking (automatic on Windows when symlinks are refused).
 set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skill"
@@ -26,6 +27,25 @@ done
 
 run() { if [ "$DRY" = 1 ]; then echo "  would: $*"; else "$@"; fi; }
 
+# Git Bash/MSYS silently deep-copies on `ln -s` unless nativestrict is set; without
+# Developer Mode or admin rights Windows refuses symlinks, so we fall back to a marked copy.
+IS_WINDOWS=0
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) IS_WINDOWS=1; export MSYS=winsymlinks:nativestrict CYGWIN=winsymlinks:nativestrict ;; esac
+MODE="${SPEC_INSTALL_MODE:-link}"
+case "$MODE" in link|copy) ;; *) echo "SPEC_INSTALL_MODE must be link or copy" >&2; exit 2 ;; esac
+MARKER=".nero-spec-install"
+is_ours_link() { [ -L "$1" ] && [ "$(readlink "$1")" = "$SRC" ]; }
+is_ours_copy() { [ -d "$1" ] && [ ! -L "$1" ] && [ -f "$1/$MARKER" ] && [ "$(cat "$1/$MARKER")" = "$SRC" ]; }
+install_copy() {
+  cp -R "$SRC" "$1" && printf '%s\n' "$SRC" > "$1/$MARKER"
+}
+to_posix() {
+  case "$1" in
+    [A-Za-z]:[\\/]*) if [ "$IS_WINDOWS" = 1 ] && command -v cygpath >/dev/null 2>&1; then cygpath -u "$1"; else printf '%s\n' "$1"; fi ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
 # A skills dir is a target only if its agent is installed (parent dir exists).
 if [ ${#EXPLICIT_TARGETS[@]} -gt 0 ]; then
   TARGETS=("${EXPLICIT_TARGETS[@]}")
@@ -42,6 +62,7 @@ else
 fi
 [ ${#TARGETS[@]} -gt 0 ] || { echo "no agent dirs found (~/.ai, ~/.claude, ~/.codex, ~/.gemini/config)"; exit 0; }
 
+for i in "${!TARGETS[@]}"; do TARGETS[i]="$(to_posix "${TARGETS[i]}")"; done
 for dir in "${TARGETS[@]}"; do
   case "$dir" in
     /*) ;;
@@ -62,14 +83,23 @@ for dir in "${TARGETS[@]}"; do
   bak=""
   dest="$dir/$NAME"
   if [ "$UNINSTALL" = 1 ]; then
-    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$SRC" ]; then
+    if is_ours_link "$dest"; then
       run rm "$dest"
       [ "$DRY" = 1 ] || echo "✓ removed $dest"
+    elif is_ours_copy "$dest"; then
+      run rm -rf "$dest"
+      [ "$DRY" = 1 ] || echo "✓ removed $dest (copy)"
     fi
     continue
   fi
-  if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$SRC" ]; then
+  if [ "$MODE" = link ] && is_ours_link "$dest"; then
     echo "= $dest (already linked)"; continue
+  fi
+  if [ "$MODE" = copy ] && is_ours_link "$dest"; then
+    run rm "$dest"
+  fi
+  if is_ours_copy "$dest"; then
+    run rm -rf "$dest"
   fi
   run mkdir -p "$dir"
   if [ -e "$dest" ] || [ -L "$dest" ]; then
@@ -90,8 +120,15 @@ for dir in "${TARGETS[@]}"; do
   if [ "$DRY" = 0 ] && { [ -e "$dest" ] || [ -L "$dest" ]; }; then
     echo "destination still exists after backup: $dest" >&2; exit 1
   fi
-  if ! run ln -s "$SRC" "$dest"; then
+  if [ "$MODE" = link ] && run ln -s "$SRC" "$dest" 2>/dev/null && { [ "$DRY" = 1 ] || is_ours_link "$dest"; }; then
+    [ "$DRY" = 1 ] || echo "✓ $dest → $SRC"
+  elif [ "$MODE" = copy ] || [ "$IS_WINDOWS" = 1 ]; then
+    if [ "$DRY" = 0 ] && { [ -e "$dest" ] || [ -L "$dest" ]; }; then
+      echo "destination appeared after failed link, not touching it: $dest" >&2; exit 1
+    fi
+    if ! run install_copy "$dest"; then echo "cannot copy to $dest${bak:+; backup: $bak}" >&2; exit 1; fi
+    [ "$DRY" = 1 ] || echo "✓ $dest (copy of $SRC; rerun install.sh after git pull)"
+  else
     echo "cannot link $dest${bak:+; backup: $bak}" >&2; exit 1
   fi
-  [ "$DRY" = 1 ] || echo "✓ $dest → $SRC"
 done

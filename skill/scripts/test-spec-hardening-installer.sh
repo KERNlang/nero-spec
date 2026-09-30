@@ -183,6 +183,8 @@ failed_move() {
   expect '[ -f "$dest" ] && [ "$(cat "$dest")" = original ]' 'move failure preserves destination'
 }
 
+on_windows() { case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) return 0 ;; *) return 1 ;; esac; }
+
 failed_link() {
   local dest="$T/failed-link/skills/spec" rc backup
   rm -rf "${T:?}/home" "$T/fail-bin"
@@ -192,8 +194,12 @@ failed_link() {
   chmod +x "$T/fail-bin/ln"
   HOME="$T/home" PATH="$T/fail-bin:$PATH" "$INSTALL" --target "$(dirname "$dest")" > "$T/out" 2>&1
   rc=$?
-  expect '[ "$rc" -ne 0 ]' 'link failure exits nonzero'
-  expect '[ ! -e "$dest" ] && [ ! -L "$dest" ]' 'link failure leaves destination absent'
+  if on_windows; then
+    expect '[ "$rc" = 0 ] && [ -f "$dest/.nero-spec-install" ]' 'link failure on Windows falls back to a marked copy'
+  else
+    expect '[ "$rc" -ne 0 ]' 'link failure exits nonzero'
+    expect '[ ! -e "$dest" ] && [ ! -L "$dest" ]' 'link failure leaves destination absent'
+  fi
   expect '[ "$(backup_slots)" = 1 ]' 'link failure leaves unique backup'
   # shellcheck disable=SC2034 # read inside expect string
   backup="$(find "$T/home/.ai/backups" -name spec -type f -exec cat {} \;)"

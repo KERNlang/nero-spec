@@ -5,7 +5,7 @@ Issues and pull requests are welcome. For larger changes, open an issue first so
 ## Before you open a PR
 
 - Run the script tests you touched, e.g. `bash skill/scripts/test-spec-check.sh`. Every `skill/scripts/test-*.sh` runs standalone except `test-spec-check-stacks.sh`, which `test-spec-check.sh` sources.
-- Run `shellcheck -S warning` on any shell script you changed. CI runs both on Linux and macOS; scripts must work with macOS's bash 3.2 and with GNU tools.
+- Run `shellcheck -S warning` on any shell script you changed. CI runs both on Linux, macOS and Windows (Git Bash); scripts must work with macOS's bash 3.2, GNU tools and MSYS.
 - Add a line under `Unreleased` in [CHANGELOG.md](CHANGELOG.md) for user-visible changes.
 - Keep specs and addons short. The skill aims for about 180 lines per spec, and every line an agent loads costs context.
 

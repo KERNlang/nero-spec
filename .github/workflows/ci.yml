@@ -23,8 +23,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      MSYS: winsymlinks:nativestrict
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Configure git for test fixtures
@@ -32,14 +37,14 @@ jobs:
           git config --global user.name ci
           git config --global user.email ci@example.invalid
           git config --global init.defaultBranch main
+          git config --global core.autocrlf false
       - name: Run script tests
         run: |
           status=0
           for t in skill/scripts/test-*.sh; do
             [ "$t" = skill/scripts/test-spec-check-stacks.sh ] && continue
-            echo "::group::$t"
+            echo "== $t"
             bash "$t" || status=1
-            echo "::endgroup::"
           done
           exit $status
       - name: Installer smoke test
@@ -47,7 +52,7 @@ jobs:
           home="$RUNNER_TEMP/home"
           mkdir -p "$home/.claude" "$home/.codex"
           HOME="$home" ./install.sh
-          test -L "$home/.claude/skills/spec"
+          test -f "$home/.claude/skills/spec/SKILL.md"
           test -f "$home/.codex/skills/spec/SKILL.md"
           HOME="$home" ./install.sh --uninstall
           test ! -e "$home/.claude/skills/spec"
