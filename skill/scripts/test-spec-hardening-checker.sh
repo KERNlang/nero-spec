@@ -286,7 +286,7 @@ EOF
 }
 
 critic() {
-  local r="$T/critic/repo" f status critic pass
+  local r="$T/critic/repo" f status
   new_repo "$r"; f="$r/.claude/specs/critic/spec.md"
   for status in 'READY TO BUILD' 'IN PROGRESS' DONE; do
     spec_file "$f" <<EOF

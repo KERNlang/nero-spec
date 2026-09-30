@@ -51,14 +51,17 @@ collision() {
   case "$kind" in
     files)
       expect '[ "$(backup_slots)" = 2 ]' 'two reserved file backups'
+      # shellcheck disable=SC2034 # read inside expect string
       before="$(find "$T/home/.ai/backups" -type f -exec cat {} \;)"
       expect '[ "$before" = firstsecond ] || [ "$before" = secondfirst ]' 'both file contents preserved' ;;
     dirs)
       expect '[ "$(backup_slots)" = 2 ]' 'two reserved directory backups'
+      # shellcheck disable=SC2034 # read inside expect string
       before="$(find "$T/home/.ai/backups" -name data -type f -exec cat {} \;)"
       expect '[ "$before" = firstsecond ] || [ "$before" = secondfirst ]' 'both directory contents preserved' ;;
     links)
       expect '[ "$(backup_slots)" = 2 ]' 'two reserved symlink backups'
+      # shellcheck disable=SC2034 # read inside expect string
       before="$(find "$T/home/.ai/backups" -type l -exec readlink {} \; | sort | tr '\n' ' ')"
       expect '[ "$before" = "first-target second-target " ]' 'both link targets preserved' ;;
   esac
@@ -66,7 +69,7 @@ collision() {
   rc=$?
   expect '[ "$rc" = 0 ]' "$kind repeat install exit"
   expect '[ "$(backup_slots)" = 2 ]' "$kind repeat keeps backups"
-  rm -rf "$T/a" "$T/b" "$T/home"
+  rm -rf "${T:?}/a" "${T:?}/b" "${T:?}/home"
 }
 
 space_target() {
@@ -81,7 +84,7 @@ space_target() {
 
 repeated_targets() {
   local first="$T/with one/skills/spec" second="$T/with two/skills/spec" rc
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$T/home"
   HOME="$T/home" "$INSTALL" --target "$(dirname "$first")" --target "$(dirname "$second")" > "$T/out" 2>&1
   rc=$?
@@ -119,7 +122,7 @@ preflight() {
 
 dry_run() {
   local dest="$T/dry/skills/spec" rc
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$(dirname "$dest")" "$T/home"
   printf original > "$dest"
   HOME="$T/home" SPEC_TARGETS="$T/dry/skills" "$INSTALL" --dry-run > "$T/out" 2>&1
@@ -132,7 +135,7 @@ dry_run() {
 
 root_parent_label() {
   local dir="$T/root-parent/skills" dest="$T/root-parent/skills/spec" rc backup dirname_bin
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$dir" "$T/home" "$T/root-parent-bin"
   printf original > "$dest"
   dirname_bin="$(command -v dirname)"
@@ -150,6 +153,7 @@ SH
   expect '[ "$rc" = 0 ]' 'root parent label install exit'
   expect '[ -L "$dest" ]' 'root parent label destination linked'
   expect '[ "$(backup_slots)" = 1 ]' 'root parent label backup reserved'
+  # shellcheck disable=SC2034 # read inside expect string
   backup="$(find "$T/home/.ai/backups" -name spec -type f -exec cat {} \;)"
   expect '[ "$backup" = original ]' 'root parent label preserves original'
 }
@@ -168,7 +172,7 @@ glob_target() {
 
 failed_move() {
   local dest="$T/failed-move/skills/spec" rc
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$(dirname "$dest")" "$T/home" "$T/fail-bin"
   printf original > "$dest"
   printf '#!/bin/sh\nexit 23\n' > "$T/fail-bin/mv"
@@ -181,7 +185,7 @@ failed_move() {
 
 failed_link() {
   local dest="$T/failed-link/skills/spec" rc backup
-  rm -rf "$T/home" "$T/fail-bin"
+  rm -rf "${T:?}/home" "$T/fail-bin"
   mkdir -p "$(dirname "$dest")" "$T/home" "$T/fail-bin"
   printf original > "$dest"
   printf '#!/bin/sh\nexit 23\n' > "$T/fail-bin/ln"
@@ -191,13 +195,14 @@ failed_link() {
   expect '[ "$rc" -ne 0 ]' 'link failure exits nonzero'
   expect '[ ! -e "$dest" ] && [ ! -L "$dest" ]' 'link failure leaves destination absent'
   expect '[ "$(backup_slots)" = 1 ]' 'link failure leaves unique backup'
+  # shellcheck disable=SC2034 # read inside expect string
   backup="$(find "$T/home/.ai/backups" -name spec -type f -exec cat {} \;)"
   expect '[ "$backup" = original ]' 'link failure backup preserves data'
 }
 
 uninstall_with_invalid_backup_dir() {
   local dest="$T/uninstall/skills/spec" rc source
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$(dirname "$dest")" "$T/home/.ai"
   source="$(cd "$HERE/.." && pwd)"
   ln -s "$source" "$dest"
@@ -211,10 +216,11 @@ uninstall_with_invalid_backup_dir() {
 
 terminal_dot() {
   local path rc
-  rm -rf "$T/home"
+  rm -rf "${T:?}/home"
   mkdir -p "$T/home" "$T/terminal/sub"
   for path in "$T/terminal/sub/." "$T/terminal/sub/.."; do
     HOME="$T/home" "$INSTALL" --dry-run --target "$path" > "$T/out" 2>&1
+    # shellcheck disable=SC2034 # read inside expect string
     rc=$?
     expect '[ "$rc" = 2 ]' "terminal component rejected: $path"
     expect '[ ! -e "$T/terminal/spec" ] && [ ! -e "$T/terminal/sub/spec" ]' "terminal component leaves destinations untouched: $path"

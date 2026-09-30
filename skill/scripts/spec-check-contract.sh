@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Sourced by spec-check.sh after spec-check-lib.sh. Needs: ROOT, TMP, emit, REF_CAP, FIELD_WINDOW.
 # Heuristic, advisory, language-neutral: evidence is the literal route string in any tracked non-doc file; path
 # params match `{x}` `:x` `<x>` `[x]` `${x}` `#{x}` `$x` `%s` `\(x)` or a `" +` concatenation; roles come only from the
@@ -129,7 +130,8 @@ ep_patterns() {
 }
 
 cap_refs() {
-  local f="$TMP/refs-$(key_of "$1")"
+  local f
+  f="$TMP/refs-$(key_of "$1")"
   [ -f "$f" ] || git -C "$1" for-each-ref --sort=-committerdate --format='%(objectname) %(refname:short)' refs/heads refs/remotes 2>/dev/null |
     awk -v cap="$REF_CAP" '$2 != "origin" && $2 !~ /\/HEAD$/ && !s[$1]++ && ++n <= cap { print $2 }' > "$f"
   echo "$f"
@@ -204,10 +206,11 @@ EOF
   [ "$ok" = "$total" ] && return 0
   [ "$ok" -gt 0 ] && { printf '%s: missing on %s%s' "$(basename "$repo")" "$miss" "${mismatch:+; $mismatch}"; return 0; }
   [ -n "$mismatch" ] && { printf '%s: missing on %s; %s' "$(basename "$repo")" "$miss" "$mismatch"; return 0; }
+  # shellcheck disable=SC2046 # deliberate split of ref names into args
   hits="$(grep_refs "$repo" "$pats" $(cat "$(cap_refs "$repo")"))"
   if [ -n "$hits" ]; then branches="$(printf '%s\n' "$hits" | join_list - 3)"
     printf '%s: missing on %s, only on %s' "$(basename "$repo")" "$miss" "$branches"
-  elif [ "$cls" = done ]; then printf '%s: missing everywhere (last %s refs)' "$(basename "$repo")" "$REF_CAP"; fi
+  elif [ "$cls" = "done" ]; then printf '%s: missing everywhere (last %s refs)' "$(basename "$repo")" "$REF_CAP"; fi
 }
 
 field_regex() {
@@ -275,7 +278,7 @@ to_repos() {
 
 check_contract() {
   local f="$1" cls="$2" entries="$3" ep fields pn cn prods cons named r out role line lenient
-  [ "$cls" = open ] || [ "$cls" = done ] || return 0
+  [ "$cls" = open ] || [ "$cls" = "done" ] || return 0
   named="$(printf '%s\n%s\n' "$ROOT" "$(printf '%s\n' "$entries" | while IFS='	' read -r q p x; do
     [ -n "$p" ] || continue; [ "$q" = - ] && q=""; x="$(split_qual "$q" "$p")" && echo "${x%%	*}"; done)" | awk 'NF && !s[$0]++')"
   while IFS='	' read -r ep fields pn cn; do
@@ -336,7 +339,7 @@ check_unmerged() {
       [ -n "$ref" ] && in_list "$(list_files "$repo" "$ref")" "$rp" && where="$where$ref"$'\n'
     done < "$(cap_refs "$repo")"
     if [ -n "$where" ]; then where="on $(printf '%s' "$where" | join_list - 2)"
-    elif [ "$cls" = done ]; then where="nowhere"
+    elif [ "$cls" = "done" ]; then where="nowhere"
     else continue; fi
     n=$((n + 1))
     [ "$n" -le 3 ] && items="$items${items:+; }$(basename "$repo"):$rp $where"

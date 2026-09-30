@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Sourced by spec-check.sh. Needs: ROOT, TMP, REPOMAP (lines "alias<TAB>abs path").
 
 spec_scan_dir() {
@@ -181,7 +182,7 @@ status_norm() {
 
 status_class() {
   case "$(status_norm "$1")" in
-    DONE) echo done ;;
+    DONE) echo "done" ;;
     "IN PROGRESS"|"READY TO BUILD") echo open ;;
     *) echo other ;;
   esac
@@ -280,7 +281,8 @@ def_branch() {
 }
 
 list_files() {
-  local f="$TMP/ls-$(key_of "$1" "$2")"
+  local f
+  f="$TMP/ls-$(key_of "$1" "$2")"
   if [ ! -f "$f" ]; then
     if [ -z "$2" ]; then git -C "$1" ls-files > "$f" 2>/dev/null
     else git -C "$1" ls-tree -r --name-only "$2" > "$f" 2>/dev/null; fi

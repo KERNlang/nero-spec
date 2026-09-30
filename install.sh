@@ -31,6 +31,7 @@ if [ ${#EXPLICIT_TARGETS[@]} -gt 0 ]; then
   TARGETS=("${EXPLICIT_TARGETS[@]}")
 elif [ -n "${SPEC_TARGETS:-}" ]; then
   set -f
+  # shellcheck disable=SC2206 # deliberate split; globbing is off via set -f
   TARGETS=($SPEC_TARGETS)
   set +f
 else

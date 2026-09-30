@@ -36,6 +36,7 @@ set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 for helper in spec-check-lib.sh spec-check-contract.sh; do
+  # shellcheck disable=SC1090 # helper path resolved at runtime
   [ -r "$HERE/$helper" ] && . "$HERE/$helper" || { echo "spec-check: cannot load $HERE/$helper" >&2; exit 2; }
 done
 
@@ -152,6 +153,7 @@ check_pointer() {
   while IFS= read -r line; do
     for t in $(printf '%s\n' "$line" | tr -d '`' | grep -oE '[~A-Za-z0-9_./@-]*specs/[~A-Za-z0-9_./@-]*\.md'); do
       ok=0; first="${t%%/*}"; rest="${t#*/}"
+      # shellcheck disable=SC2088 # matches a literal leading tilde
       case "$t" in "~/"*) t="$HOME/${t#\~/}" ;; esac
       if [ -e "$t" ] && case "$t" in /*) true ;; *) false ;; esac; then ok=1
       elif [ -e "$ROOT/$t" ]; then ok=1
@@ -189,6 +191,7 @@ check_status_shipped() {
     [ "$q" = - ] && q=""
     x="$(split_qual "$q" "$p")" || continue
     repo="${x%%	*}"; rp="${x#*	}"; br="$(def_branch "$repo")"
+    # shellcheck disable=SC2046 # pathspecs are newline-split under IFS with globbing off
     x="$(IFS=$'\n'; set -f; git -C "$repo" log -1 --format=%cs "$br" -- $(pathspecs "$rp") 2>/dev/null)"
     [ -n "${SPEC_CHECK_DEBUG:-}" ] && echo "  debug shipped: $(basename "$repo") $rp last=${x:-never}" >&2
     [ -n "$x" ] || continue
@@ -209,6 +212,7 @@ check_repeat_fix() {
     [ "$q" = - ] && q=""
     x="$(split_qual "$q" "$p")" || continue
     repo="${x%%	*}"; rp="${x#*	}"
+    # shellcheck disable=SC2046 # pathspecs are newline-split under IFS with globbing off
     x="$(IFS=$'\n'; set -f; git -C "$repo" log --all --since="$since 00:00:00" --until="$until 23:59:59" --format='%h	%s' -- $(pathspecs "$rp") 2>/dev/null)"
     while IFS='	' read -r q p; do
       [ -n "$p" ] && is_fix_subject "$p" && subjects="$subjects$(basename "$repo")@$q	$p"$'\n'
@@ -254,6 +258,7 @@ xrepo_record_path() {
 xrepo_changes() {
   local repo="$1" rp="$2" anchor="$3" raw="$TMP/xrepo-raw" out="$TMP/xrepo-paths" token pending="" epoch="" first=0
   : > "$out"
+  # shellcheck disable=SC2046 # pathspecs are newline-split under IFS with globbing off
   (IFS=$'\n'; set -f; git -C "$repo" log -z --name-only --format='%ct%x00' "$(def_branch "$repo")" -- $(pathspecs "$rp")) > "$raw" || return 2
   while IFS= read -r -d '' token; do
     if [ -z "$token" ]; then
@@ -298,7 +303,9 @@ EOF
 
 check_cites() {
   local f="$1" q p ranges cands r m found n maxl key base out="$TMP/cites"
-  CITE_DATE="$2"; CITE_ANCHOR="$3"
+  CITE_DATE="$2"
+  # shellcheck disable=SC2034 # read by spec-check-lib.sh
+  CITE_ANCHOR="$3"
   : > "$out"
   while IFS='	' read -r q p ranges; do
     [ -n "$p" ] || continue
@@ -365,7 +372,7 @@ check_spec() {
   [ -n "$anchor" ] && date="$(git show -s --format=%cs "$anchor")"
   entries="$(entries_of "$f")"
 
-  if [ "$cls" = done ]; then
+  if [ "$cls" = "done" ]; then
     n="$(unchecked_acs "$f")"
     [ "$n" -gt 0 ] && emit STATUS-OPEN "$f" "Status '${status%% —*}' but $n unchecked acceptance criteria"
   fi
@@ -373,7 +380,7 @@ check_spec() {
 
   if [ -n "$entries" ]; then
     if [ -n "$anchor" ]; then check_drift "$f" "$anchor" "$label" "$entries"
-    elif [ "$cls" = done ] && [ -n "$last" ] && [ "$STALE_FALLBACK" = 1 ]; then check_drift "$f" "$last" "spec last commit" "$entries"; fi
+    elif [ "$cls" = "done" ] && [ -n "$last" ] && [ "$STALE_FALLBACK" = 1 ]; then check_drift "$f" "$last" "spec last commit" "$entries"; fi
     [ -n "$date" ] && check_repeat_fix "$f" "$date" "$entries"
   fi
   [ -n "$date" ] && check_cites "$f" "$date" "${anchor:-$(base_before "$ROOT" "$date")}"

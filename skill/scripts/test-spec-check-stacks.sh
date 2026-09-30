@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Sourced by test-spec-check.sh (needs T, CHECK, PASS/FAIL, new_repo, commit_at, has, hasnt, spec).
 # Stack-neutral fixtures: C# ASP.NET, Angular, Java Spring, Kotlin, Rust; identifiers; NO-REVIEW.
 
@@ -79,6 +80,7 @@ EOF
 for r in "$N" "$G" "$J" "$K"; do commit_at "$r" 2026-01-01 base; done
 NSHA="$(git -C "$N" rev-parse --short HEAD)"
 
+# shellcheck disable=SC2034 # read by spec() in test-spec-check.sh
 S="$N/.claude/specs"
 REFINE='## Refine
 Round 1/1, 2026-01-02. Critic: agon nero (normal risk).'
@@ -170,6 +172,7 @@ commit_at "$G" 2026-02-01 change
 echo ' ' >> "$J/src/main/java/com/acme/OrderController.java"; commit_at "$J" 2026-02-01 change
 echo ' ' >> "$K/app/src/main/kotlin/com/acme/OrdersClient.kt"; commit_at "$K" 2026-02-01 change
 
+# shellcheck disable=SC2034 # read by has()
 OUT="$("$CHECK" --repos ng=../ng,spring=../spring,kt=../kt "$N" 2>&1)"
 has CONTRACT-FIELDS ".claude/specs/dotnet-angular/spec.md: ng ignores \`accessToken\` of POST /api/users/{id}/email (src/app/users/user.service.ts:6"
 hasnt CONTRACT-FIELDS ".claude/specs/dotnet-angular/spec.md: ng ignores \`accessToken\`, "

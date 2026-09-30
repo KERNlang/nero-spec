@@ -48,7 +48,7 @@ spec superseded <<'EOF'
 **Status:** SUPERSEDED by x
 - [ ] AC-1 Device check: superseded screen
 EOF
-spec done <<'EOF'
+spec "done" <<'EOF'
 # Done
 **Status:** DONE
 - [x] AC-7 Device check: done screen
