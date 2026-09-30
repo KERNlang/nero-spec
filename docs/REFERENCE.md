@@ -166,7 +166,7 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, a
 | `DEAD-CITE` | a VERIFIED citation names a file that is gone, or a line past EOF |
 | `STALE-CITE` | VERIFIED `file:line` ranges changed or moved since the spec's anchor (`Date:` → last commit before it) |
 | `STATUS-OPEN` | Status DONE/IMPLEMENTED/SHIPPED/COMPLETE with unchecked `- [ ]` under Acceptance Criteria |
-| `STATUS-SHIPPED` | Status IN PROGRESS/READY and ≥ 80 % (`--shipped-pct`) of covered paths known to the default branch changed there since `Date:` |
+| `STATUS-SHIPPED` | Status IN PROGRESS/READY and ≥ 80 % (`--shipped-pct`) of covered paths known to the default branch changed there after the spec (commits in `<anchor>..<default branch>`, anchor = Verified at / Baseline or the commit that added the spec; otherwise a last change strictly after `Date:`) |
 | `POINTER` | a short pointer spec names a `…specs/…md` target that does not exist |
 | `STATUS-ENUM` | Status does not start with the enum (free text instead of `DONE — note`) |
 | `REPEAT-FIX` | ≥ 4 (`--repeat-fix`) fix/hotfix/revert commits on covered paths within 30 days (`--repeat-days`) of `Date:` → escalate, write a bigger spec |

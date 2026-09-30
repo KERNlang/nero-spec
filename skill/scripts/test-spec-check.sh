@@ -245,6 +245,27 @@ echo more >> "$O/lib/x.ts"
 commit_at "$O" 2026-02-01 change
 echo late >> "$A/src/few.ts"; commit_at "$A" 2026-03-01 "fix: late"
 
+for i in 1 2 3; do lines 4 > "$A/src/sd$i.ts"; lines 4 > "$A/src/sy$i.ts"; done
+commit_at "$A" 2026-03-05 "feat: same-day work"
+for k in sameday-no sameday-yes; do
+  p=sd; [ "$k" = sameday-yes ] && p=sy
+  spec "$k" <<EOF
+# $k
+**Status:** IN PROGRESS
+**Date:** 2026-03-05
+
+## Blast Radius
+| File | Action |
+|---|---|
+| \`src/${p}1.ts\` | edit |
+| \`src/${p}2.ts\` | edit |
+| \`src/${p}3.ts\` | edit |
+EOF
+done
+commit_at "$A" 2026-03-05 "docs: specs"
+for i in 1 2 3; do echo more >> "$A/src/sy$i.ts"; done
+commit_at "$A" 2026-03-05 "feat: build after spec"
+
 OUT="$("$CHECK" --repos other=../other "$A" 2>&1)"; RC=$?
 has STALE ".claude/specs/drift-yes/spec.md: 1 files: src/a.ts"
 hasnt STALE ".claude/specs/drift-no/"
@@ -258,6 +279,8 @@ has STATUS-OPEN ".claude/specs/status-open/spec.md: Status 'DONE' but 1 unchecke
 hasnt STATUS-OPEN ".claude/specs/status-closed/"
 has STATUS-SHIPPED ".claude/specs/shipped-yes/spec.md: 4/4 covered paths"
 hasnt STATUS-SHIPPED ".claude/specs/shipped-no/"
+hasnt STATUS-SHIPPED ".claude/specs/sameday-no/"
+has STATUS-SHIPPED ".claude/specs/sameday-yes/spec.md: 3/3 covered paths"
 has POINTER ".claude/specs/pointer-broken/spec.md: target \`other/.claude/specs/missing/spec.md\`"
 hasnt POINTER ".claude/specs/pointer-ok/"
 has NO-STATUS ".claude/specs/no-status/"

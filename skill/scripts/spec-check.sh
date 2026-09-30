@@ -10,7 +10,9 @@
 #   STALE-CITE     VERIFIED file:line whose lines changed or moved since the anchor
 #   STATUS-OPEN    Status DONE/IMPLEMENTED/SHIPPED/COMPLETE with unchecked acceptance criteria
 #   STATUS-SHIPPED Status IN PROGRESS/READY but >= N% (default 80) of covered paths known to the default
-#                  branch changed there since Date (min 3 paths; paths never on the branch are ignored)
+#                  branch changed there after the spec (commits in anchor..branch, anchor = Verified at/Baseline or
+#                  the commit that added the spec; else last change strictly after Date). Min 3 paths; paths never
+#                  on the branch are ignored
 #   POINTER        pointer spec whose target does not exist
 #   STATUS-ENUM    Status does not start with SPEC | READY TO BUILD | IN PROGRESS | DONE (a " — note" may follow)
 #   REPEAT-FIX     >= N (default 4) fix/hotfix/revert commits on covered paths within D (default 30) days of Date
@@ -185,7 +187,8 @@ split_qual() {
 }
 
 check_status_shipped() {
-  local f="$1" date="$2" entries="$3" known=0 hits=0 q p x repo rp br
+  local f="$1" date="$2" entries="$3" base="${4:-}" known=0 hits=0 q p x repo rp br
+  [ -n "$base" ] || base="$(git log --diff-filter=A --format=%H -- "$f" 2>/dev/null | tail -1)"
   while IFS='	' read -r q p x; do
     [ -n "$p" ] || continue
     [ "$q" = - ] && q=""
@@ -196,7 +199,13 @@ check_status_shipped() {
     [ -n "${SPEC_CHECK_DEBUG:-}" ] && echo "  debug shipped: $(basename "$repo") $rp last=${x:-never}" >&2
     [ -n "$x" ] || continue
     known=$((known + 1))
-    { [ "$x" \> "$date" ] || [ "$x" = "$date" ]; } && hits=$((hits + 1))
+    if [ -n "$base" ] && git -C "$repo" merge-base --is-ancestor "$base" "$br" 2>/dev/null; then
+      # shellcheck disable=SC2046 # pathspecs are newline-split under IFS with globbing off
+      x="$(IFS=$'\n'; set -f; git -C "$repo" log -1 --format=%h "$base..$br" -- $(pathspecs "$rp") 2>/dev/null)"
+      [ -n "$x" ] && hits=$((hits + 1))
+    else
+      [ "$x" \> "$date" ] && hits=$((hits + 1))
+    fi
   done <<EOF
 $entries
 EOF
@@ -376,7 +385,7 @@ check_spec() {
     n="$(unchecked_acs "$f")"
     [ "$n" -gt 0 ] && emit STATUS-OPEN "$f" "Status '${status%% —*}' but $n unchecked acceptance criteria"
   fi
-  [ "$cls" = open ] && [ -n "$date" ] && [ -n "$entries" ] && check_status_shipped "$f" "$date" "$entries"
+  [ "$cls" = open ] && [ -n "$date" ] && [ -n "$entries" ] && check_status_shipped "$f" "$date" "$entries" "$anchor"
 
   if [ -n "$entries" ]; then
     if [ -n "$anchor" ]; then check_drift "$f" "$anchor" "$label" "$entries"
