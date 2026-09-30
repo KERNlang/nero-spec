@@ -201,7 +201,7 @@ Covered paths come from `## Changes`, else `Covers:`, else the Blast Radius sect
 
 ### Windows
 
-Run `./install.sh` from Git Bash (comes with Git for Windows) or WSL. Git Bash creates a real symlink when Windows allows it (Developer Mode or an admin shell) and otherwise falls back to copy mode automatically. `--target` also accepts Windows paths such as `C:\Users\me\.claude\skills`. The `spec-check*.sh` scripts need the same bash; CI runs every test on Windows, macOS and Linux.
+Run `./install.sh` from Git Bash (comes with Git for Windows) or WSL. Git Bash creates a real symlink when Windows allows it (Developer Mode or an admin shell) and otherwise falls back to copy mode automatically. In Git Bash, `--target` also accepts Windows paths such as `C:\Users\me\.claude\skills`; under WSL, use the `/mnt/c/...` form. The `spec-check*.sh` scripts need the same bash; CI runs every test on Windows, macOS and Linux.
 
 ## Rules this skill defers to
 

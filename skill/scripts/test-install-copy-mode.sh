@@ -35,7 +35,10 @@ check '[ "$RC" = 0 ] && cmp -s "$DEST/core.md" "$SRC/core.md"' "rerun refreshes 
 check '[ "$(backups)" = 0 ]' "refreshing its own copy makes no backup"
 
 install
-check '[ "$RC" = 0 ] && [ -L "$DEST" ]' "link mode replaces its own copy with a symlink"
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*) check '[ "$RC" = 0 ] && { [ -L "$DEST" ] || [ -f "$DEST/.nero-spec-install" ]; }' "link mode replaces its own copy (symlink, or copy if Windows refuses)" ;;
+  *) check '[ "$RC" = 0 ] && [ -L "$DEST" ]' "link mode replaces its own copy with a symlink" ;;
+esac
 check '[ "$(backups)" = 0 ]' "copy to link makes no backup"
 
 install_copy

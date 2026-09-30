@@ -123,7 +123,9 @@ for dir in "${TARGETS[@]}"; do
   if [ "$MODE" = link ] && run ln -s "$SRC" "$dest" 2>/dev/null && { [ "$DRY" = 1 ] || is_ours_link "$dest"; }; then
     [ "$DRY" = 1 ] || echo "✓ $dest → $SRC"
   elif [ "$MODE" = copy ] || [ "$IS_WINDOWS" = 1 ]; then
-    [ "$DRY" = 1 ] || { [ ! -e "$dest" ] && [ ! -L "$dest" ]; } || rm -rf "$dest"
+    if [ "$DRY" = 0 ] && { [ -e "$dest" ] || [ -L "$dest" ]; }; then
+      echo "destination appeared after failed link, not touching it: $dest" >&2; exit 1
+    fi
     if ! run install_copy "$dest"; then echo "cannot copy to $dest${bak:+; backup: $bak}" >&2; exit 1; fi
     [ "$DRY" = 1 ] || echo "✓ $dest (copy of $SRC; rerun install.sh after git pull)"
   else

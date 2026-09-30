@@ -40,9 +40,8 @@ jobs:
           status=0
           for t in skill/scripts/test-*.sh; do
             [ "$t" = skill/scripts/test-spec-check-stacks.sh ] && continue
-            echo "::group::$t"
+            echo "== $t"
             bash "$t" || status=1
-            echo "::endgroup::"
           done
           exit $status
       - name: Installer smoke test
