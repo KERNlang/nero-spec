@@ -49,7 +49,7 @@ First check that the spec has, each missing item a finding (HIGH when an escalat
 3. **Real usage** — every decision has a `Real usage:` line with evidence. Stricter accessor, narrowed input or forbidden sequence chosen without it → reopen the decision.
 4. **Waived hazards** — grep the spec for "safe", "no handling needed", "bounded", "idempotent", "not possible", "out of scope". Each without a VERIFIED citation → a Tricky input with a test.
 5. **Downstream / History** — `Downstream:` present when output feeds another layer; `History:` command run.
-6. **Mutation probe** — propose 3–5 realistic bugs an implementer could write from this spec (wrong accessor, missing await, unguarded shared state, degenerate input, reused buffer). Each must fail at least one AC's named test; a survivor becomes a Tricky input. Effective agon on → `agon nero` with this as its brief; off → the step e critic does it.
+6. **Mutation probe** — propose 3–5 realistic bugs an implementer could write from this spec (wrong accessor, missing await, unguarded shared state, degenerate input, reused buffer). Each must fail at least one AC's named test; a survivor becomes a Tricky input. Effective agon on → `agon nero` with this as its brief, launched at step e beside the critic (separate calls, not one merged brief); off → the step e critic does it.
 
 Then ask the questions that apply — Surgical: questions 1–3 only, max 3; Full: max 6. Each answer becomes an AC or Tricky input (or an Out-of-Scope line), never a new section.
 
@@ -65,7 +65,7 @@ Then ask the questions that apply — Surgical: questions 1–3 only, max 3; Ful
 
 ### e. Critique by risk
 
-Input: the spec + open findings only, never the chat history.
+Input: the spec (with step d answers already folded in) + open findings only, never the chat history. Effective agon on → launch the d.6 probe and this critic in parallel on that same snapshot, wait for both, then handle their findings together.
 
 | Condition | Critic |
 |---|---|
@@ -79,6 +79,7 @@ Rules of record decide the exact flags. Each critique finding is verified agains
 ### f. Decision push
 
 - Max **2** refine rounds (a round = steps a–e once). No third round.
+- Skip round 2 only when round 1's sole edits were added Tricky inputs or citations, no finding was downgraded, and no HIGH is open. Any other edit (decision, Changes, Contract, design section, AC) gets round 2.
 - After round 2 every remaining OPEN is either decided — recommended option, recorded `ASSUMED: <choice>, because <why> (owner: <name>)` — or escalated to the user in **one line** each.
 - `Contested:` lines (`contested-decision-scan`) keep their picked reading when forced to ASSUMED; see that addon.
 - Options that nobody will pick are deleted, not kept "for completeness".

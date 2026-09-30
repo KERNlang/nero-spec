@@ -266,6 +266,19 @@ commit_at "$A" 2026-03-05 "docs: specs"
 for i in 1 2 3; do echo more >> "$A/src/sy$i.ts"; done
 commit_at "$A" 2026-03-05 "feat: build after spec"
 
+recreated() { spec recreated <<EOF
+# Recreated
+**Status:** IN PROGRESS
+**Date:** 2026-03-07
+**Covers:** src/rc1.ts, src/rc2.ts, src/rc3.ts
+EOF
+}
+for i in 1 2 3; do lines 4 > "$A/src/rc$i.ts"; done
+recreated; commit_at "$A" 2026-03-06 "docs: first spec"
+git -C "$A" rm -rq .claude/specs/recreated; commit_at "$A" 2026-03-07 "docs: drop spec"
+for i in 1 2 3; do echo again >> "$A/src/rc$i.ts"; done; commit_at "$A" 2026-03-07 "feat: work before new spec"
+recreated; commit_at "$A" 2026-03-07 "docs: new spec"
+
 OUT="$("$CHECK" --repos other=../other "$A" 2>&1)"; RC=$?
 has STALE ".claude/specs/drift-yes/spec.md: 1 files: src/a.ts"
 hasnt STALE ".claude/specs/drift-no/"
@@ -281,6 +294,7 @@ has STATUS-SHIPPED ".claude/specs/shipped-yes/spec.md: 4/4 covered paths"
 hasnt STATUS-SHIPPED ".claude/specs/shipped-no/"
 hasnt STATUS-SHIPPED ".claude/specs/sameday-no/"
 has STATUS-SHIPPED ".claude/specs/sameday-yes/spec.md: 3/3 covered paths"
+hasnt STATUS-SHIPPED ".claude/specs/recreated/"
 has POINTER ".claude/specs/pointer-broken/spec.md: target \`other/.claude/specs/missing/spec.md\`"
 hasnt POINTER ".claude/specs/pointer-ok/"
 has NO-STATUS ".claude/specs/no-status/"
