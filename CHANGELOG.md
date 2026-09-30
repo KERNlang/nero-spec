@@ -6,14 +6,22 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Changed
 
+- Every addon loaded after the Spec line is announced `+<name> (on demand)`; the Spec line lists only loaded addons.
+- Non-git targets: the target directory plays the git root for `.spec` and `default_paths`; the `default_paths` example gains a dotfile root.
 - Refine: the mutation probe runs in parallel with the step e critic instead of before it, and round 2 is skipped when round 1 only added Tricky inputs or citations.
 
 ### Fixed
 
+- A `Critics:` line (plural) no longer triggers a false `NO-REVIEW`.
+- Non-git targets no longer exit 0 silently; `spec-check.sh` reports `NO-GIT`.
 - `STATUS-SHIPPED` no longer flags a spec whose covered files were committed earlier the same day: hits are commits after the spec's anchor commit (ancestry-based), and the date fallback is strictly after `Date:`.
 
 ### Added
 
+- `spec-check.sh` findings `NO-GIT`, `OPEN-CAP` and `REFINE-STEPS`; `--dir-hash` prints a `dir-hash <sha256> root <dir>` anchor so non-git targets can be drift-checked; `test-spec-check-nogit.sh`.
+- Core step 1b Research (`## Sources` table) and `.spec` key `research.max_age` (default 90 days).
+- `Eval:` acceptance criteria and an eval rung in `criteria-test-map`: baseline vs treatment arms, rubric before runs, `PASS` / `NO-SIGNAL` / `FAIL`.
+- `## Refine` records step coverage (`Steps: a–g`); the template gains a `**Depth:**` header.
 - `bench/2026-09-29-nero-vs-spec-kit/`: sanitized data from a 1:1 build pilot against Spec Kit (specs, oracle, gate logs, reviews).
 - README benchmark now compares Nero Spec with Kiro, OpenSpec and Spec Kit on the same 12 cases.
 - Windows support: `install.sh` runs in Git Bash and WSL, uses real symlinks when Windows allows them and falls back to a marked copy otherwise. CI now runs every test on Windows too.
