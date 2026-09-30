@@ -25,6 +25,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      MSYS: winsymlinks:nativestrict
     defaults:
       run:
         shell: bash
@@ -35,6 +37,7 @@ jobs:
           git config --global user.name ci
           git config --global user.email ci@example.invalid
           git config --global init.defaultBranch main
+          git config --global core.autocrlf false
       - name: Run script tests
         run: |
           status=0
