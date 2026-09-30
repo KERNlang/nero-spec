@@ -23,7 +23,7 @@ hex64() { printf '%s' "$1" | grep -qE '^[0-9a-f]{64}$'; }
 same_hash() { if hex64 "$2" && [ "$2" = "$3" ]; then ok; else bad "$1: '$2' != '$3'"; fi; }
 diff_hash() { if hex64 "$2" && hex64 "$3" && [ "$2" != "$3" ]; then ok; else bad "$1: '$2' vs '$3' should differ"; fi; }
 mk() { mkdir -p "$(dirname "$1")"; cat > "$1"; }
-dirhash() { run "$CHECK" --spec "$1" --dir-hash "$2"; H="${OUT#dir-hash }"; H="${H%% *}"; }
+dirhash() { run env HOME="$T/nohome" "$CHECK" --spec "$1" --dir-hash "$2"; H="${OUT#dir-hash }"; H="${H%% *}"; }
 covers() {
   local f="$T/hs/$1.md" p; shift; mkdir -p "$T/hs"
   printf '# covers\n**Status:** SPEC\n\n## Changes\n' > "$f"
@@ -186,12 +186,12 @@ mkbin "$T/bin-shasum" $TOOLS shasum
 # shellcheck disable=SC2086 # TOOLS is a word list
 mkbin "$T/bin-none" $TOOLS
 if env PATH="$T/bin-shasum" "$BASH" -c 'command -v shasum && ! command -v sha256sum' >/dev/null 2>&1; then
-  run env PATH="$T/bin-shasum" "$BASH" "$CHECK" --spec "$T/hs/golden.md" --dir-hash "$GOLD"
+  run env HOME="$T/nohome" PATH="$T/bin-shasum" "$BASH" "$CHECK" --spec "$T/hs/golden.md" --dir-hash "$GOLD"
   if [ "$OUT" = "dir-hash $GOLDEN root $GOLD" ]; then ok; else bad "AC-2 shasum fallback: '$OUT' $ERR"; fi
 else
   echo "SKIP AC-2 shasum fallback: no shasum on this system to fall back to"
 fi
-run env PATH="$T/bin-none" "$BASH" "$CHECK" --spec "$T/hs/golden.md" --dir-hash "$GOLD"
+run env HOME="$T/nohome" PATH="$T/bin-none" "$BASH" "$CHECK" --spec "$T/hs/golden.md" --dir-hash "$GOLD"
 rc_is "AC-2 neither sha256sum nor shasum exits 2" 2
 
 A="$T/anc"; AS="$A/.claude/specs"
