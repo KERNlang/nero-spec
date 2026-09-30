@@ -1,0 +1,36 @@
+name: Bug report
+description: The skill, a script or the installer does something wrong.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest reproduction
+      description: The command, spec or `/spec` prompt that shows it. Trim output to the relevant lines.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent
+      placeholder: Claude Code 2.x, Codex, agy, human, …
+    validations:
+      required: true
+  - type: dropdown
+    id: preset
+    attributes:
+      label: Preset
+      options: [personal, team, enterprise, none / not sure]
+  - type: input
+    id: env
+    attributes:
+      label: OS and bash version
+      placeholder: macOS 15, bash 3.2 / Ubuntu 24.04, bash 5.2

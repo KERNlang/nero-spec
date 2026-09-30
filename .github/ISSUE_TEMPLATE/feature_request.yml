@@ -1,0 +1,18 @@
+name: Feature or addon idea
+description: Propose a change to the core flow or a new addon.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What goes wrong today without this? A real case beats a hypothetical one.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Core change or addon? Which step does it load at, and roughly how many lines does it add to a spec?
+    validations:
+      required: true

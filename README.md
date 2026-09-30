@@ -2,6 +2,12 @@
   <img src="assets/nero-hero.svg" alt="Nero Spec — short specs, a critic attacks them first, then you build." width="820">
 </p>
 
+<p align="center">
+  <a href="https://github.com/KERNlang/nero-spec/actions/workflows/ci.yml"><img src="https://github.com/KERNlang/nero-spec/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/KERNlang/nero-spec/releases"><img src="https://img.shields.io/github/v/release/KERNlang/nero-spec" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+</p>
+
 # Nero Spec
 
 A spec skill for AI coding agents. Before anything gets built, it writes a short spec, and a critic attacks that spec. Plain markdown: Claude, Codex, Antigravity (agy) or a human can follow it. Invoked as `/spec`.
@@ -66,5 +72,5 @@ Caveats: every case is a PR that shipped a bug, so this measures recall only, no
 ## More
 
 - [docs/REFERENCE.md](docs/REFERENCE.md) — presets and addons in full, config files, spec lifecycle, drift checks, install options, writing an addon.
-- [CONTRIBUTING.md](CONTRIBUTING.md) — how to send changes.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to send changes · [CHANGELOG.md](CHANGELOG.md) · [SECURITY.md](SECURITY.md).
 - License: [MIT](LICENSE).
