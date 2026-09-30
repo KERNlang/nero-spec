@@ -133,7 +133,7 @@ changes_entries() {
     function lvl(s) { match(s, /^#+/); return RLENGTH }
     /^#+ / {
       if (inc && lvl($0) <= cl) inc = 0
-      h = tolower($0); sub(/^#+[ \t]+/, "", h); sub(/[ \t]+$/, "", h)
+      h = tolower($0); sub(/^#+[ \t]+/, "", h); sub(/[ \t\r]+$/, "", h)
       if (!inc && h == "changes") { inc = 1; cl = lvl($0) }
       next
     }
@@ -145,7 +145,7 @@ covers_entries() {
   local v; v="$(header "Covers" "$1")"
   [ -n "$v" ] || return 0
   printf '%s\n' "$v" | tr ',' '\n' | awk -v known="$(known_file)" -v aliases="$(alias_list)" "$AWK_PATHLIKE"'
-    { gsub(/`/, ""); gsub(/^[ \t]+|[ \t]+$/, ""); if ($0 != "") emit_token($0, "") }' | sort -u
+    { gsub(/`/, ""); gsub(/^[ \t]+|[ \t\r]+$/, ""); if ($0 != "") emit_token($0, "") }' | sort -u
 }
 
 verified_cites() {
@@ -196,10 +196,10 @@ refine_critic() {
       if (!inr && h ~ /^refine([^a-z]|$)/) { inr = 1; rl = lvl($0); seen = 1 }
       next
     }
-    inr && match($0, /[Cc]ritic\**:/) {
+    inr && match($0, /[Cc]ritics?\**:/) {
       v = substr($0, RSTART + RLENGTH); gsub(/<[^>]*>/, "", v); sub(/^[^A-Za-z0-9]+/, "", v)
       if (tolower(v) ~ /^(pending|unapproved|not[ \t-]*approved|awaiting[ \t-]*review|review[ \t-]*pending)([^a-z]|$)/) { pending = 1; exit }
-      gsub(/<[^>]*>|[*`_.,;:()\[\]|-]|—|[ \t]/, "", v)
+      gsub(/<[^>]*>|[*`_.,;:()\[\]|-]|—|[ \t\r]/, "", v)
       if (v != "" && tolower(v) !~ /^(none|tbd|todo|n\/?a)$/) { ok = 1; exit }
     }
     END { print (ok ? "ok" : (pending ? "pending" : (seen ? "empty" : "none"))) }' "$1"
@@ -376,4 +376,102 @@ entry_matches() {
   # shellcheck disable=SC2254
   case "$t" in $p|*/$p) return 0 ;; esac
   return 1
+}
+
+open_count() {
+  awk 'function lvl(s) { match(s, /^#+/); return RLENGTH }
+    { sub(/\r$/, "") }
+    match($0, /^[ \t]*(```|~~~)/) { c = substr($0, RSTART + RLENGTH - 3, 3); if (fence == "") { fence = c; next } if (c == fence) { fence = ""; next } }
+    fence != "" { next }
+    /^#+ / {
+      if (skip && lvl($0) <= sl) skip = 0
+      h = tolower($0); sub(/^#+[ \t]+/, "", h)
+      if (!skip && h ~ /^(refine|corrections log)([^a-z]|$)/) { skip = 1; sl = lvl($0) }
+      next
+    }
+    skip { next }
+    { l = $0; gsub(/``[^`]*``/, "", l); gsub(/`[^`]*`/, "", l); if (l ~ /(^|[^A-Za-z0-9_-])OPEN([^A-Za-z0-9_-]|-[A-Z]?[0-9]|$)/) n++ }
+    END { print n + 0 }' "$1"
+}
+
+depth_full() {
+  awk '/^[ \t]*\*\*Depth:\*\*/ { v = tolower($0); sub(/^[ \t]*\*\*depth:\*\*/, "", v); sub(/^[^a-z0-9]+/, "", v)
+      f = (v ~ /^(full|tier[ -]?[2-4])([^a-z0-9]|$)/); exit }
+    END { exit !f }' "$1"
+}
+
+refine_steps() {
+  awk 'function lvl(s) { match(s, /^#+/); return RLENGTH }
+    /^#+ / {
+      if (inr && lvl($0) <= rl) inr = 0
+      h = tolower($0); sub(/^#+[ \t]+/, "", h)
+      if (!inr && h ~ /^refine([^a-z]|$)/) { inr = 1; rl = lvl($0) }
+      next
+    }
+    !inr { next }
+    /(^|[^A-Za-z0-9_])[aA](–|-)[gG]([^A-Za-z0-9_]|$)/ { ok = 1; exit }
+    match($0, /[Ss]teps\**:/) {
+      v = substr($0, RSTART + RLENGTH); sub(/\..*/, "", v); gsub(/[^A-Za-z]+/, " ", v); n = split(tolower(v), w, " "); s = ""
+      for (i = 1; i <= n; i++) if (length(w[i]) == 1) s = s w[i]
+      if (s ~ /a/ && s ~ /c/ && s ~ /d/ && s ~ /e/ && s ~ /f/ && s ~ /g/) { ok = 1; exit }
+    }
+    END { exit !ok }' "$1"
+}
+
+tilde_path() {
+  local h
+  for h in "${HOME:-}" "$(cd "${HOME:-/}" 2>/dev/null && pwd -P)"; do
+    [ -n "$h" ] && [ "$h" != / ] || continue
+    # shellcheck disable=SC2088 # prints a literal tilde
+    case "$1" in "$h") echo '~'; return ;; "$h"/*) echo "~/${1#"$h"/}"; return ;; esac
+  done
+  printf '%s\n' "$1"
+}
+
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum; else shasum -a 256; fi
+}
+
+dir_hash() {
+  local root="$1" q p f h found=0 out="$TMP/dirhash" list="$TMP/dirhash-files"
+  command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 ||
+    { echo "spec-check: dir-hash needs sha256sum or shasum" >&2; return 2; }
+  : > "$out"
+  while IFS='	' read -r q p _; do
+    [ -n "$p" ] && [ "$q" = - ] || continue
+    case "$p" in *\**) echo "spec-check: dir-hash skips glob entry $p" >&2; continue ;; esac
+    if [ -d "$root/$p" ]; then
+      (cd "$root" && find -H "./${p%/}" \( -name .git -o -name node_modules \) -prune -o -type f ! -name .DS_Store -print0) > "$list"
+      while IFS= read -r -d '' f; do
+        f="${f#./}"
+        case "$f" in *$'\n'*|*$'\r'*|*$'\t'*) echo "spec-check: dir-hash skips unsupported path $f" >&2; continue ;; esac
+        h="$(sha256_of < "$root/$f")"; printf '%s\t%s\n' "$f" "${h%% *}" >> "$out"; found=1
+      done < "$list"
+    elif [ -f "$root/$p" ]; then
+      h="$(sha256_of < "$root/$p")"; printf '%s\t%s\n' "$p" "${h%% *}" >> "$out"; found=1
+    else
+      printf '%s\t-\n' "$p" >> "$out"
+    fi
+  done <<EOF
+$2
+EOF
+  h="$(LC_ALL=C sort -u "$out" | sha256_of)"; echo "${h%% *}"
+  [ "$found" = 1 ] || return 3
+}
+
+dirhash_anchor() {
+  header "Verified at" "$1" | tr -d '`\r' | awk 'match($0, /^[ \t]*dir-hash([ \t]|$)/) {
+    v = substr($0, RSTART + RLENGTH); sub(/^[ \t]+/, "", v); h = v; sub(/[ \t].*/, "", h); r = ""
+    if (match(v, /[ \t]root[ \t]+/)) { r = substr(v, RSTART + RLENGTH); sub(/[ \t]+$/, "", r) }
+    print h "\t" r }'
+}
+
+check_dirhash() {
+  local f="$1" want="${2%%	*}" root="${2#*	}" have
+  [ -n "$root" ] || root="$ROOT"
+  case "$root" in "~") root="${HOME:-}" ;; "~"/*) root="${HOME:-}/${root#\~/}" ;; esac
+  have="$(dir_hash "$root" "$3")"
+  [ $? = 2 ] && return 0
+  [ "${#want}" -ge 12 ] && case "$have" in "$want"*) return 0 ;; esac
+  emit STALE "$f" "covered files under $(tilde_path "$root") differ from dir-hash $(printf '%s' "$want" | cut -c1-12) (Verified at) — re-verify, then refresh with --dir-hash"
 }

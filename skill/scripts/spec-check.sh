@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Usage: spec-check.sh [--strict] [--spec FILE] [--repos name=path[,...]] [--stale] [--touching LIST]
-#                      [--shipped-pct N] [--repeat-fix N] [--repeat-days D] [--ref-cap N] [--field-window N] [repo-dir]
+#                      [--shipped-pct N] [--repeat-fix N] [--repeat-days D] [--ref-cap N] [--field-window N]
+#                      [--dir-hash] [repo-dir]
 #
 # Mechanical health checks for claim-tagged specs. Exit 1 for strict findings, 2 for broken invocation or config.
 # One line per finding, then a summary. Kinds:
-#   STALE          covered files changed since the anchor (same repo)
+#   STALE          covered files changed since the anchor (same repo), or differ from a dir-hash anchor
 #   XREPO          covered files in another repo changed since the anchor date
 #   DEAD-CITE      VERIFIED citation to a file that is gone, or a line beyond EOF
 #   STALE-CITE     VERIFIED file:line whose lines changed or moved since the anchor
@@ -22,10 +23,16 @@
 #   CONTRACT-FIELDS   a consumer's call sites of an endpoint (+/- --field-window lines, default 15) never name a
 #                  contract field the producer has (snake_case, camelCase, PascalCase or kebab-case)
 #   UNMERGED       Status READY/DONE but ADDED paths are not on that repo's default branch (branches listed)
-#   NO-REVIEW      Status READY/IN PROGRESS/DONE but no `## Refine` section with a non-empty `Critic:` line
+#   NO-REVIEW      Status READY/IN PROGRESS/DONE but no `## Refine` section with a non-empty `Critic:`/`Critics:` line
+#   REFINE-STEPS   same Status, **Depth:** Full or tier 2-4 and a Critic, but ## Refine has no a–g / `Steps:` coverage
+#   OPEN-CAP       more than 3 lines tagged OPEN outside code, fences, ## Refine and ## Corrections Log
+#   NO-GIT         target outside any git repo: root = repo-dir, else the spec's dir; git-based kinds skipped
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
+# **Verified at:** dir-hash <hex> root <dir> (git or not): STALE when the sha256 over the unqualified covered files and
+# dir/ trees under that root (else repo-dir) differs; >= 12 hex compared. --dir-hash (needs --spec) prints that value
+# for repo-dir, else the spec's dir; exit 2 when no covered file exists or neither sha256sum nor shasum is found.
 # Covered paths: ## Changes (ADDED/MODIFIED/REMOVED lines), else **Covers:**, else the Blast Radius section.
 # A token is a path when it is a glob, ends in /, starts with a directory tracked in a named repo, or ends in an
 # extension some tracked file has (any stack); identifiers like `user.id`, `Foo.Bar`, `foo.bar()` are ignored.
@@ -42,7 +49,7 @@ for helper in spec-check-lib.sh spec-check-contract.sh; do
   [ -r "$HERE/$helper" ] && . "$HERE/$helper" || { echo "spec-check: cannot load $HERE/$helper" >&2; exit 2; }
 done
 
-STRICT=0; DIR=""; ONE=""; REPOS_ARG=""; SHIPPED_PCT=80; SHIPPED_MIN=3; STALE_FLAG=0; TOUCHING=""
+STRICT=0; DIR=""; ONE=""; REPOS_ARG=""; SHIPPED_PCT=80; SHIPPED_MIN=3; STALE_FLAG=0; TOUCHING=""; DIRHASH=0
 REPEAT_MIN=4; REPEAT_DAYS=30; REF_CAP=20; FIELD_WINDOW=15
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -57,6 +64,7 @@ while [ $# -gt 0 ]; do
     --ref-cap) REF_CAP="${2:-20}"; shift ;;
     --field-window) FIELD_WINDOW="${2:-15}"; shift ;;
     --stale) STALE_FLAG=1 ;;
+    --dir-hash) DIRHASH=1 ;;
     --touching) TOUCHING="${2:-}"; shift ;;
     -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
     -*) echo "spec-check: unknown flag $1" >&2; exit 2 ;;
@@ -89,8 +97,12 @@ if [ -n "$TOUCHING" ]; then
   TOUCHING="$(cd "$(dirname "$TOUCHING")" && pwd -P)/$(basename "$TOUCHING")"
 fi
 
-ROOT="$(git -C "$DIR" rev-parse --show-toplevel 2>/dev/null)" || { echo "spec-check: not a git repo: $DIR" >&2; exit 0; }
-cd "$ROOT" || exit 0
+NOGIT=0
+if ! ROOT="$(git -C "$DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+  [ -d "$DIR" ] || { echo "spec-check: no such directory: $DIR" >&2; exit 2; }
+  NOGIT=1; ROOT="$DIR"
+fi
+cd "$ROOT" || exit 2
 ROOT="$(pwd -P)"
 TMP_BASE="$(cd "${TMPDIR:-/tmp}" && pwd -P)" || exit 2
 TMP="$(mktemp -d "$TMP_BASE/spec-check.XXXXXX")" || exit 2
@@ -358,46 +370,62 @@ check_review() {
     none) emit NO-REVIEW "$1" "Status '${2%% —*}' but no ## Refine section naming a Critic" ;;
     empty) emit NO-REVIEW "$1" "Status '${2%% —*}' but ## Refine names no Critic" ;;
     pending) emit NO-REVIEW "$1" "Status '${2%% —*}' but Critic is pending" ;;
-    *) [ "$(refine_pass "$1")" = negative ] && emit NO-REVIEW "$1" "Status '${2%% —*}' but Refine Pass is negative" ;;
+    *) [ "$(refine_pass "$1")" = negative ] && emit NO-REVIEW "$1" "Status '${2%% —*}' but Refine Pass is negative"
+       depth_full "$1" && ! refine_steps "$1" &&
+         emit REFINE-STEPS "$1" "Full-depth Refine names a Critic but records no step coverage (Steps: a–g)" ;;
   esac
 }
 
-check_spec() {
-  local f="$1" status cls date anchor="" label="" entries last n
-  if [ -n "$TOUCHING" ]; then touches "$f" "$(entries_of "$f")" || return 1; fi
-  if is_pointer "$f"; then check_pointer "$f"; return 0; fi
-  status="$(status_of "$f")"; cls="$(status_class "$status")"
-  [ -n "$status" ] || emit NO-STATUS "$f" "no **Status:** header"
-  [ -n "$status" ] && [ -z "$(status_norm "$status")" ] &&
-    emit STATUS-ENUM "$f" "'$(printf '%s' "$status" | cut -c1-40)' — lead with SPEC | READY TO BUILD | IN PROGRESS | DONE, note after ' — '"
+check_git() {
+  local f="$1" status="$2" cls="$3" entries="$4" dh="$5" date anchor="" label="" last
   date="$(spec_date "$f")"
   last="$(git log -1 --format=%H -- "$f" 2>/dev/null)"
   [ -n "$date" ] || date="$(git log -1 --format=%cs -- "$f" 2>/dev/null)"
-  for label in "Verified at" Baseline; do
+  [ -n "$dh" ] || for label in "Verified at" Baseline; do
     if [ "$label" = Baseline ]; then anchor="$(baseline_sha "$f")"; else anchor="$(header "$label" "$f" | grep -oE '[0-9a-f]{7,40}' | head -1)"; fi
     [ -n "$anchor" ] && git cat-file -e "$anchor^{commit}" 2>/dev/null && break
     anchor=""
   done
   [ -n "$anchor" ] && date="$(git show -s --format=%cs "$anchor")"
-  entries="$(entries_of "$f")"
-
-  if [ "$cls" = "done" ]; then
-    n="$(unchecked_acs "$f")"
-    [ "$n" -gt 0 ] && emit STATUS-OPEN "$f" "Status '${status%% —*}' but $n unchecked acceptance criteria"
-  fi
   [ "$cls" = open ] && [ -n "$date" ] && [ -n "$entries" ] && check_status_shipped "$f" "$date" "$entries" "$anchor"
 
   if [ -n "$entries" ]; then
     if [ -n "$anchor" ]; then check_drift "$f" "$anchor" "$label" "$entries"
-    elif [ "$cls" = "done" ] && [ -n "$last" ] && [ "$STALE_FALLBACK" = 1 ]; then check_drift "$f" "$last" "spec last commit" "$entries"; fi
+    elif [ -z "$dh" ] && [ "$cls" = "done" ] && [ -n "$last" ] && [ "$STALE_FALLBACK" = 1 ]; then check_drift "$f" "$last" "spec last commit" "$entries"; fi
     [ -n "$date" ] && check_repeat_fix "$f" "$date" "$entries"
   fi
   [ -n "$date" ] && check_cites "$f" "$date" "${anchor:-$(base_before "$ROOT" "$date")}"
   check_contract "$f" "$cls" "$entries"
   check_unmerged "$f" "$cls" "$status"
+}
+
+check_spec() {
+  local f="$1" status cls entries n dh
+  if [ -n "$TOUCHING" ]; then touches "$f" "$(entries_of "$f")" || return 1; fi
+  [ "$NOGIT" = 1 ] && emit NO-GIT "$f" "$(tilde_path "$ROOT") is not in a git repo — git-based checks skipped; anchor with --dir-hash"
+  if is_pointer "$f"; then check_pointer "$f"; return 0; fi
+  status="$(status_of "$f")"; cls="$(status_class "$status")"
+  [ -n "$status" ] || emit NO-STATUS "$f" "no **Status:** header"
+  [ -n "$status" ] && [ -z "$(status_norm "$status")" ] &&
+    emit STATUS-ENUM "$f" "'$(printf '%s' "$status" | cut -c1-40)' — lead with SPEC | READY TO BUILD | IN PROGRESS | DONE, note after ' — '"
+  if [ "$cls" = "done" ]; then
+    n="$(unchecked_acs "$f")"
+    [ "$n" -gt 0 ] && emit STATUS-OPEN "$f" "Status '${status%% —*}' but $n unchecked acceptance criteria"
+  fi
+  n="$(open_count "$f")"
+  [ "$n" -gt 3 ] && emit OPEN-CAP "$f" "$n OPEN (max 3) — decide the rest as ASSUMED with reasoning (core step 5)"
+  entries="$(entries_of "$f")"; dh="$(dirhash_anchor "$f")"
+  [ -n "$dh" ] && check_dirhash "$f" "$dh" "$entries"
+  [ "$NOGIT" = 1 ] || check_git "$f" "$status" "$cls" "$entries" "$dh"
   check_review "$f" "$status"
   return 0
 }
+
+if [ "$DIRHASH" = 1 ]; then
+  [ -n "$ONE" ] || { echo "spec-check: --dir-hash needs --spec FILE" >&2; exit 2; }
+  h="$(dir_hash "$ROOT" "$(entries_of "$ONE")")" || { [ $? = 3 ] && echo "spec-check: no covered file of $ONE exists under $ROOT" >&2; exit 2; }
+  echo "dir-hash $h root $(tilde_path "$ROOT")"; exit 0
+fi
 
 count=0
 while IFS= read -r f; do
