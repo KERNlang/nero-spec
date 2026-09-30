@@ -39,10 +39,15 @@ jobs:
           git config --global init.defaultBranch main
           git config --global core.autocrlf false
       - name: Run script tests
+        env:
+          INSTALLER_ONLY: ${{ runner.os == 'Windows' && github.event_name == 'pull_request' }}
         run: |
           status=0
           for t in skill/scripts/test-*.sh; do
             [ "$t" = skill/scripts/test-spec-check-stacks.sh ] && continue
+            if [ "$INSTALLER_ONLY" = true ]; then
+              case "$t" in *test-install-copy-mode.sh|*test-spec-hardening-installer.sh) ;; *) continue ;; esac
+            fi
             echo "== $t"
             bash "$t" || status=1
           done
