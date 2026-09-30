@@ -180,8 +180,8 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, a
 | `CONTRACT-FIELDS` | a consumer's call sites of an endpoint never name a contract field the producer has |
 | `UNMERGED` | Status READY/DONE but ADDED paths are not on that repo's default branch |
 | `NO-GIT` | target is not in a git repo: file-only checks run, git checks are skipped; counts as a finding under `--strict` |
-| `OPEN-CAP` | more than 3 OPEN claims (`OPEN-CAP <spec>: N OPEN (max 3) — decide the rest as ASSUMED with reasoning (core step 5)`) |
-| `REFINE-STEPS` | Full / tier 2+ spec (`**Depth:**`) whose `## Refine` names a Critic but records no `a–g` step coverage |
+| `OPEN-CAP` | more than 3 lines tagged OPEN (`OPEN-CAP <spec>: N OPEN (max 3) — decide the rest as ASSUMED with reasoning (core step 5)`) |
+| `REFINE-STEPS` | Full / tier 2+ spec (`**Depth:**`) whose `## Refine` names a Critic but records no `a–g` step coverage (`Steps:` may omit the conditional b) |
 
 Covered paths come from `## Changes`, else `Covers:`, else the Blast Radius section (backtick paths and path-like first cells; a cell like "backend \`app/x.py\`" resolves `backend` through `repos`).
 

@@ -149,6 +149,10 @@ covers s5 a.txt 'd/*.txt'
 dirhash "$T/hs/s5.md" "$R1"
 same_hash "AC-2 glob entry skipped" "$H" "$H3"
 case "$ERR" in *'d/*.txt'*) ok ;; *) bad "AC-2 glob skip note on stderr: '$ERR'" ;; esac
+printf 'secret\n' > "$T/outside.txt"
+covers s7 a.txt ../outside.txt "$T/outside.txt" d/../../outside.txt
+dirhash "$T/hs/s7.md" "$R1"
+same_hash "AC-2 entries escaping root never hashed" "$H" "$H3"
 mkdir -p "$T/r4" "$T/r5"
 printf 'alpha\n' > "$T/r4/a.txt"; printf 'beta\n' > "$T/r4/b.txt"
 printf 'beta\n' > "$T/r5/a.txt"; printf 'alpha\n' > "$T/r5/b.txt"

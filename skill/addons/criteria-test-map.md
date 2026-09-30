@@ -38,7 +38,7 @@ Prompt, skill or doc artifacts whose acceptance is agent behaviour get an `Eval:
 
 - Arms: baseline vs treatment, same model, same prompt; the prompt never names the property under test. `n` runs per arm.
 - Rubric: objective per-item pass/fail, saved before any run.
-- Outcomes: `PASS` (treatment avoids the flaw in ≥ k cases where baseline shows it), `NO-SIGNAL` (both avoid or both fail; recorded, never PASS, GAP at converge), `FAIL`.
+- Outcomes: `PASS` (treatment avoids the flaw in ≥ k of the cases where baseline shows it; k fixed in the rubric), `NO-SIGNAL` (both avoid or both fail; recorded, never PASS, GAP at converge), `FAIL`.
 - ≥ 1 false-positive probe: a correct look-alike the treatment must not "fix".
 - Run the baseline before the treatment is installed globally; a global or symlinked install contaminates it.
 

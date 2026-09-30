@@ -23,7 +23,7 @@ Built-in defaults (no `rules` file):
 ## 1b. Research (optional)
 
 - Trigger: requirements depend on external standards, APIs or versions. Read-only; may run before approval.
-- Output a `## Sources` table: `| ID | Title | URL | Version / date | Status |`, Status `OK` \| `PARTIAL` \| `UNVERIFIED`.
+- Output a `## Sources` table: `| ID | Title | URL | Version | Fetched | Status |`, Status `OK` \| `PARTIAL` \| `UNVERIFIED`.
 - Sources older than `.spec` `research.max_age` (days, default 90) are re-fetched before release (`refine` c).
 
 ## 2. Pick the depth
@@ -78,7 +78,7 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 ## Acceptance Criteria
 - [ ] AC-1 ...
   Tricky inputs: <named input or state>, <named input or state>
-- [ ] AC-n Eval: <property> — baseline vs treatment, n=<k> per arm, rubric <path>
+- [ ] AC-n Eval: <property> — baseline vs treatment, n=<n> per arm, PASS at ≥ <k>, rubric <path>
 - [ ] AC-n Device check: <what to look at on a device> — screenshot/recording attached before DONE
 ## Out of Scope
 ## Open Questions
