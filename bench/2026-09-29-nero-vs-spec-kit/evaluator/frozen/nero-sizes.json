@@ -1,0 +1,77 @@
+{
+  "product_go": [
+    {
+      "path": "flag.go",
+      "bytes": 6363,
+      "base_bytes": 5978,
+      "net_bytes": 385,
+      "sha256": "aa1dfc4d46b821527aa687720319504f8733421b16f3bade87f950f6b68df4b6"
+    },
+    {
+      "path": "flag_bool_with_inverse.go",
+      "bytes": 8539,
+      "base_bytes": 8391,
+      "net_bytes": 148,
+      "sha256": "c978ba11b40c1242b628364f30e6ec2ca9d4c78e8c791d148b2b9e3757825420"
+    },
+    {
+      "path": "flag_ext.go",
+      "bytes": 1303,
+      "base_bytes": 926,
+      "net_bytes": 377,
+      "sha256": "ae47851ff6591d4fdd79e4016a7034a73cc4779b7f32b5be441d673ebc91ef45"
+    },
+    {
+      "path": "flag_impl.go",
+      "bytes": 10794,
+      "base_bytes": 10566,
+      "net_bytes": 228,
+      "sha256": "21e735823fb9c91a0b136e17fed25e6d55aff17ab70f869cf3618066892e79fc"
+    },
+    {
+      "path": "flag_schema_type.go",
+      "bytes": 1016,
+      "base_bytes": 0,
+      "net_bytes": 1016,
+      "sha256": "86f8d89b9e8d3ebc8e07fe154190c3ec8c2ea71cc66a2fc2f533d58f4c315c01"
+    },
+    {
+      "path": "flag_schema_type_test.go",
+      "bytes": 6257,
+      "base_bytes": 0,
+      "net_bytes": 6257,
+      "sha256": "69d21447cc637f2b66dbaf1069aa82a861ee3447264287edc371401828d25c48"
+    }
+  ],
+  "generated_docs": [
+    {
+      "path": "godoc-current.txt",
+      "bytes": 58244,
+      "base_bytes": 57641,
+      "net_bytes": 603,
+      "sha256": "ffad9803bdfb02d6413123e24eaee7c90f4bdca633e409ada4780d221f55f05e"
+    },
+    {
+      "path": "testdata/godoc-v3.x.txt",
+      "bytes": 58244,
+      "base_bytes": 57641,
+      "net_bytes": 603,
+      "sha256": "ffad9803bdfb02d6413123e24eaee7c90f4bdca633e409ada4780d221f55f05e"
+    }
+  ],
+  "authored_framework_artifacts": [
+    {
+      "path": ".claude/specs/typed-flag-schema-introspection/spec.md",
+      "bytes": 11552,
+      "base_bytes": 0,
+      "net_bytes": 11552,
+      "sha256": "0ba9bc27f47ceb46886b1d33ee086b593e72e167515386918d4326343fbe5033"
+    }
+  ],
+  "product_go_total_bytes": 34272,
+  "product_go_net_bytes": 8411,
+  "generated_docs_total_bytes": 116488,
+  "generated_docs_net_bytes": 1206,
+  "authored_framework_artifacts_total_bytes": 11552,
+  "authored_framework_artifacts_net_bytes": 11552
+}

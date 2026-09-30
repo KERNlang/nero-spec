@@ -1,0 +1,61 @@
+**Verdict:** there are no blocking findings, but I'd hold the merge for the first two items. **Confidence: ~0.8.**
+
+**Important**
+
+1. **`duration` and `date-time` are not JSON Schema types.** `flag_schema_type.go:31-36`
+ - `SchemaTyper` says it returns "the JSON Schema type" (`flag.go:114-117`).
+ - JSON Schema allows only these `type` values: null, boolean, object, array, number, string, integer.
+ - `duration` and `date-time` belong in `format`, not `type`. A consumer that emits `{"type": f.SchemaType()}` for `DurationFlag` or `TimestampFlag` produces a schema that strict validators reject.
+ - The tests lock this behaviour in (`flag_schema_type_test.go:56-57, 127-129`).
+ - Once released, changing it is a breaking API change.
+ - **Fix:** return `"string"` and add a separate `SchemaFormater` interface returning `"duration"` / `"date-time"`. If the non-standard values are intended, reword the interface docs so they don't claim to be JSON Schema.
+ - Confidence 0.8. I'd call it blocking if the output is meant to be a validatable schema.
+
+2. **`extFlag.SchemaType()` can panic.** `flag_ext.go:25-35`
+ - `SchemaType` and `SchemaItemsType` call `e.Get()`, which does an unchecked `e.f.Value.(flag.Getter)`.
+ - Standard-library `flag.Func` / `flag.BoolFunc` values, and many third-party `flag.Var` values, don't implement `Getter`.
+ - Any schema generator that walks all flags would panic on a command with `AllowExtFlags` and such a flag.
+ - The panic in `Get()` already existed, but this change gives it a new caller that is meant to sweep every flag.
+ - **Fix:** call `schemaTypeOf(e.f.Value)` / `schemaItemsTypeOf(e.f.Value)`. Those helpers already unwrap `Getter`, and a non-`Getter` `funcValue` resolves to `""`. Better still, make `Get()` use a checked assertion.
+ - Confidence 0.8.
+
+3. **The public API grew but the generated godoc files are unchanged.** `flag.go:114-122`, `flag_impl.go:219-225`, `flag_bool_with_inverse.go:266-273`
+ - New exported interfaces and methods were added, but neither `godoc-current.txt` nor `testdata/godoc-v3.x.txt` is in the change set. urfave/cli's CI generate/diff check is likely to fail.
+ - The new exported methods also have no doc comments, unlike most exported methods in these files.
+ - **Fix:** run the repo's generate step and commit both files. Add one-line docs on the exported methods.
+ - Confidence 0.6.
+
+**Nits**
+
+4. **`FlagBase` reads the type from the runtime value rather than `T`.** `flag_impl.go:219-225`
+ - For non-generic flags `T` is known at compile time, so reflecting on `Get()` is indirect and could change across the flag's lifecycle.
+ - **Fix:** use `reflect.TypeOf((*T)(nil)).Elem()`. Fall back to the runtime value only when its kind is `Interface`, as with `GenericFlag`.
+ - Confidence 0.55.
+
+5. **The map value type is never exposed.** `flag_schema_type.go:16-25, 49-52`
+ - `StringMapFlag` reports `"object"`, but `SchemaItemsType()` returns `""` for maps, so consumers can't set `additionalProperties`.
+ - **Fix:** return the map's element type for string-keyed maps, or add a dedicated interface.
+ - Confidence 0.5.
+
+6. **Tests cover only zero-value flags before `PreParse`.** `flag_schema_type_test.go:36-80`
+ - Missing cases: after `Set` / `PreParse`, with `Destination` set, and an `extFlag` wrapping `flag.Func` (which would have caught item 2).
+ - **Fix:** add those three cases.
+ - Confidence 0.7.
+
+7. **Some reflect kinds fall through to `""`.** `flag_schema_type.go:37-54`
+ - `reflect.Array` returns `""`, and `SchemaItemsType` only handles `Slice`. `Uintptr` also returns `""`.
+ - A user type such as `type D time.Duration` is reported as `"integer"`, not `"duration"`.
+ - **Fix:** treat `Array` like `Slice`. Otherwise document these as out of scope.
+ - Confidence 0.45.
+
+8. **Type lookups and test maps are rebuilt on every call.** `flag_schema_type.go:31, 34` and `flag_schema_type_test.go:117-120`
+ - `reflect.TypeOf(time.Duration(0))` and `reflect.TypeOf(time.Time{})` run each call. Move them to package vars.
+ - The `want` map in the test is rebuilt per `VisitAll` iteration, and a newly added std flag silently gets `""`. Hoist it and fail when a name is missing.
+ - Confidence 0.6.
+
+**Checked and fine:** `BoolWithInverseFlag` hard-coding `"boolean"`; unwrapping `GenericFlag` through `Getter` (consistent before and after `PreParse`); typed-nil slices and maps still reflect to the right type; both interfaces are optional, so existing code is unaffected.
+
+<!--AGON_REVIEW_FINDINGS_v1-->
+```json
+[{"file":"flag_schema_type.go","lines":"31-36","severity":"important","blocking":false,"confidence":0.8,"problem":"SchemaType returns \"duration\"/\"date-time\", which are not valid JSON Schema type values (they are format values), contradicting the SchemaTyper doc contract; emitted schemas fail strict validation","minimalFix":"Return \"string\" and expose format via a separate SchemaFormater interface, or reword the interface doc to not claim JSON Schema types"},{"file":"flag_ext.go","lines":"25-35","severity":"important","blocking":false,"confidence":0.8,"problem":"SchemaType/SchemaItemsType call e.Get(), which does an unchecked e.f.Value.(flag.Getter); ext flags from flag.Func/BoolFunc or custom flag.Var values without Get panic when a schema generator walks all flags","minimalFix":"Use schemaTypeOf(e.f.Value)/schemaItemsTypeOf(e.f.Value) (already unwrap Getter safely) or make Get() use a checked assertion"},{"file":"flag.go","lines":"114-122","severity":"important","blocking":false,"confidence":0.6,"problem":"New exported interfaces/methods added but godoc-current.txt and testdata/godoc-v3.x.txt not regenerated; repo CI generate/diff check likely fails. New exported methods also lack doc comments","minimalFix":"Run the repo generate target, commit updated godoc files, add one-line docs to exported SchemaType/SchemaItemsType methods"},{"file":"flag_impl.go","lines":"219-225","severity":"nit","blocking":false,"confidence":0.55,"problem":"FlagBase schema type derived from runtime Get() value instead of static T, making it indirect and potentially lifecycle-dependent","minimalFix":"Use reflect.TypeOf((*T)(nil)).Elem(); fall back to runtime value only when kind is Interface (GenericFlag)"},{"file":"flag_schema_type.go","lines":"16-25","severity":"nit","blocking":false,"confidence":0.5,"problem":"For object (map) flags the value type is never exposed; SchemaItemsType returns \"\" so consumers cannot emit additionalProperties","minimalFix":"Return map element schema type for string-keyed maps or add a dedicated interface"},{"file":"flag_schema_type_test.go","lines":"36-80","severity":"nit","blocking":false,"confidence":0.7,"problem":"Tests only cover zero-value flags before PreParse; no post-Set/PreParse, Destination, or non-Getter extFlag (flag.Func) case, which would have caught the panic","minimalFix":"Add post-PreParse cases and an extFlag wrapping flag.Func"},{"file":"flag_schema_type.go","lines":"37-54","severity":"nit","blocking":false,"confidence":0.45,"problem":"reflect.Array and Uintptr fall through to \"\"; named types over time.Duration report \"integer\"","minimalFix":"Treat Array like Slice in both helpers, or document as unsupported"},{"file":"flag_schema_type.go","lines":"31-34","severity":"nit","blocking":false,"confidence":0.6,"problem":"reflect.TypeOf(time.Duration(0))/time.Time{} recomputed per call; test want-map rebuilt per VisitAll iteration and silently yields \"\" for unlisted flags","minimalFix":"Hoist reflect types to package vars; hoist test map and t.Fatalf on missing key"}]
+```

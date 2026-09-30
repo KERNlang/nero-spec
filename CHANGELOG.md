@@ -4,8 +4,14 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Fixed
+
+- `STATUS-SHIPPED` no longer flags a spec whose covered files were committed earlier the same day: hits are commits after the spec's anchor commit (ancestry-based), and the date fallback is strictly after `Date:`.
+
 ### Added
 
+- `bench/2026-09-29-nero-vs-spec-kit/`: sanitized data from a 1:1 build pilot against Spec Kit (specs, oracle, gate logs, reviews).
+- README benchmark now compares Nero Spec with Kiro, OpenSpec and Spec Kit on the same 12 cases.
 - Windows support: `install.sh` runs in Git Bash and WSL, uses real symlinks when Windows allows them and falls back to a marked copy otherwise. CI now runs every test on Windows too.
 - `SPEC_INSTALL_MODE=copy` installs a copy instead of a symlink on any OS.
 - `.gitattributes` keeps scripts LF on Windows checkouts.

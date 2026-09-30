@@ -1,0 +1,8 @@
+{
+  "session_id": 543,
+  "project": "nero-spec",
+  "mode": "paired-benchmark",
+  "outcome": "achieved",
+  "scope": "one completed pilot; no general ranking",
+  "notes": "One same-model normal-developer Go task, both gpt-6-sol/high. Both frozen first passes passed preregistered behavioral, regression, build, vet and docs gates. Postreview non-Getter flag.Func probe: Nero first pass green, Spec Kit first pass panic; one Spec Kit repair green and independently confirmed. Shared TextVar pointer mapping is an exploratory limitation, not retroactive scoring. Three-seat Agon source reviews completed. No original Nero source changes or pushes. Outcome is completed pilot, not framework superiority. Artifact bytes are not token usage. Report: <bench>/REPORT.md. Counts and value estimates are conservative; files_touched counts 8 product paths per arm, not report/setup artifacts."
+}

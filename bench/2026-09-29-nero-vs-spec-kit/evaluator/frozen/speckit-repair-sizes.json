@@ -1,0 +1,126 @@
+{
+  "product_go": [
+    {
+      "path": "flag.go",
+      "bytes": 6443,
+      "base_bytes": 5978,
+      "net_bytes": 465,
+      "sha256": "cd25398d9ddc859e99d985cf4f9e8b20f34704a8e22dedbe598d59fad0bc2a99"
+    },
+    {
+      "path": "flag_bool_with_inverse.go",
+      "bytes": 8539,
+      "base_bytes": 8391,
+      "net_bytes": 148,
+      "sha256": "c7f63322341b85394253a8cf757c29c934dd7ba2cf31df6f5d4f1dba99c19648"
+    },
+    {
+      "path": "flag_ext.go",
+      "bytes": 1200,
+      "base_bytes": 926,
+      "net_bytes": 274,
+      "sha256": "0987159bfe1d75cbe0c9c28810ea263aa3b392a8d9dc4e049c61df14cb2a9e2e"
+    },
+    {
+      "path": "flag_impl.go",
+      "bytes": 10742,
+      "base_bytes": 10566,
+      "net_bytes": 176,
+      "sha256": "d1396e83eef6126ad7890ccc70ea011ed3db81766a91e6e9c1dc5dba4e38f9f0"
+    },
+    {
+      "path": "flag_schema_type.go",
+      "bytes": 1139,
+      "base_bytes": 0,
+      "net_bytes": 1139,
+      "sha256": "cae6c625da6645c383a00455d23d00c75f45370ecdb1c4de3104f12a61ad0659"
+    },
+    {
+      "path": "flag_schema_type_test.go",
+      "bytes": 4943,
+      "base_bytes": 0,
+      "net_bytes": 4943,
+      "sha256": "0503c8b49f95cbf9097d083b85beb4f800dead2310ababfd0c97b8ce998ea7f2"
+    }
+  ],
+  "generated_docs": [
+    {
+      "path": "godoc-current.txt",
+      "bytes": 58325,
+      "base_bytes": 57641,
+      "net_bytes": 684,
+      "sha256": "52fd38ec4e956ffe9d0533cf572ffd1a6ba5e4189302ab83588df2a349fb52ae"
+    },
+    {
+      "path": "testdata/godoc-v3.x.txt",
+      "bytes": 58325,
+      "base_bytes": 57641,
+      "net_bytes": 684,
+      "sha256": "52fd38ec4e956ffe9d0533cf572ffd1a6ba5e4189302ab83588df2a349fb52ae"
+    }
+  ],
+  "authored_framework_artifacts": [
+    {
+      "path": "specs/001-typed-flag-schema/checklists/requirements.md",
+      "bytes": 1042,
+      "base_bytes": 0,
+      "net_bytes": 1042,
+      "sha256": "adc3cfb8dd512663b6a3bfa448cfd0f2691fc504394264f8e5b2b4cc60e863a3"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/contracts/flag-schema.md",
+      "bytes": 816,
+      "base_bytes": 0,
+      "net_bytes": 816,
+      "sha256": "2f2b58a37f1625297d17a99457ad20e0f4c010f0a6e212853c4d8a6a7281dad6"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/data-model.md",
+      "bytes": 459,
+      "base_bytes": 0,
+      "net_bytes": 459,
+      "sha256": "7a7c572296c4b87df946f9c051546ede7a3a366004980ace076d9f860dd36628"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/plan.md",
+      "bytes": 2184,
+      "base_bytes": 0,
+      "net_bytes": 2184,
+      "sha256": "ae6b57fe73e70ad85290f623e09275a0fca6cac484386245e9f042092a41652b"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/quickstart.md",
+      "bytes": 580,
+      "base_bytes": 0,
+      "net_bytes": 580,
+      "sha256": "4cbdc9c1f04a94bcfb5b8f12793127d990acf5431ae8db70a72157cf11ac408e"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/research.md",
+      "bytes": 959,
+      "base_bytes": 0,
+      "net_bytes": 959,
+      "sha256": "681ffa2abe67975ec889ba9b65c26b0fa40483cdecdd2dca5db0f394db6cd978"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/spec.md",
+      "bytes": 4686,
+      "base_bytes": 0,
+      "net_bytes": 4686,
+      "sha256": "bc4f67cbe7d3ae644952d2e4c47019068f61bd13f5534c42de675ee454328f92"
+    },
+    {
+      "path": "specs/001-typed-flag-schema/tasks.md",
+      "bytes": 2181,
+      "base_bytes": 0,
+      "net_bytes": 2181,
+      "sha256": "30cfc2150529b141a00b8ee4553fed52bc0aaf14f221fb671f8c6861cae85d10"
+    }
+  ],
+  "product_go_total_bytes": 33006,
+  "product_go_net_bytes": 7145,
+  "generated_docs_total_bytes": 116650,
+  "generated_docs_net_bytes": 1368,
+  "authored_framework_artifacts_total_bytes": 12907,
+  "authored_framework_artifacts_net_bytes": 12907
+}

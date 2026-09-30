@@ -1,0 +1,73 @@
+=== RUN   TestBoolWithInverseBasic
+=== RUN   TestBoolWithInverseBasic/--no-envfalse_true_<nil>
+=== RUN   TestBoolWithInverseBasic/--envtrue_true_<nil>
+=== RUN   TestBoolWithInverseBasic/false_false_<nil>
+=== RUN   TestBoolWithInverseBasic/--env_--no-envfalse_false_cannot_set_both_flags_`--env`_and_`--no-env`
+Incorrect Usage: invalid value "true" for flag -no-env: cannot set both flags `--env` and `--no-env`
+
+NAME:
+   prog - A new cli application
+
+USAGE:
+   prog [global options]
+
+GLOBAL OPTIONS:
+   --[no-]env  (default: false)
+   --help, -h  show help
+--- PASS: TestBoolWithInverseBasic (0.00s)
+    --- PASS: TestBoolWithInverseBasic/--no-envfalse_true_<nil> (0.00s)
+    --- PASS: TestBoolWithInverseBasic/--envtrue_true_<nil> (0.00s)
+    --- PASS: TestBoolWithInverseBasic/false_false_<nil> (0.00s)
+    --- PASS: TestBoolWithInverseBasic/--env_--no-envfalse_false_cannot_set_both_flags_`--env`_and_`--no-env` (0.00s)
+=== RUN   TestIntFlagExt
+=== RUN   TestIntFlagExt/valid
+=== RUN   TestIntFlagExt/valid#01
+=== RUN   TestIntFlagExt/valid_hex
+    flag_int_test.go:364: skipping "valid hex" with base 16, only base 10 is supported
+=== RUN   TestIntFlagExt/valid_hex_default
+    flag_int_test.go:364: skipping "valid hex default" with base 16, only base 10 is supported
+=== RUN   TestIntFlagExt/invalid
+--- PASS: TestIntFlagExt (0.00s)
+    --- PASS: TestIntFlagExt/valid (0.00s)
+    --- PASS: TestIntFlagExt/valid#01 (0.00s)
+    --- SKIP: TestIntFlagExt/valid_hex (0.00s)
+    --- SKIP: TestIntFlagExt/valid_hex_default (0.00s)
+    --- PASS: TestIntFlagExt/invalid (0.00s)
+=== RUN   TestStringSliceFlagApply_SetsAllNames
+NAME:
+   . - A new cli application
+
+USAGE:
+   . [global options]
+
+GLOBAL OPTIONS:
+   --goat string, -G string, --gooots string [ --goat string, -G string, --gooots string ]  
+   --help, -h                                                                               show help
+--- PASS: TestStringSliceFlagApply_SetsAllNames (0.00s)
+=== RUN   TestGenericFlagApply_SetsAllNames
+NAME:
+   . - A new cli application
+
+USAGE:
+   . [global options]
+
+GLOBAL OPTIONS:
+   --orbs value, -O value, --obrs value  (default: 19,s)
+   --help, -h                            show help
+--- PASS: TestGenericFlagApply_SetsAllNames (0.00s)
+=== RUN   TestDocGetValue
+--- PASS: TestDocGetValue (0.00s)
+=== RUN   TestUintFlagExt
+=== RUN   TestUintFlagExt/valid
+=== RUN   TestUintFlagExt/valid#01
+=== RUN   TestUintFlagExt/valid_hex
+=== RUN   TestUintFlagExt/valid_hex_default
+=== RUN   TestUintFlagExt/invalid
+--- PASS: TestUintFlagExt (0.00s)
+    --- PASS: TestUintFlagExt/valid (0.00s)
+    --- PASS: TestUintFlagExt/valid#01 (0.00s)
+    --- PASS: TestUintFlagExt/valid_hex (0.00s)
+    --- PASS: TestUintFlagExt/valid_hex_default (0.00s)
+    --- PASS: TestUintFlagExt/invalid (0.00s)
+PASS
+ok  	github.com/urfave/cli/v3	0.041s

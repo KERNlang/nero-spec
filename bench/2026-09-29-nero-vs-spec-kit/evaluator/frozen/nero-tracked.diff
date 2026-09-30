@@ -1,0 +1,191 @@
+diff --git a/flag.go b/flag.go
+index 1b849f1..0366835 100644
+--- a/flag.go
++++ b/flag.go
+@@ -111,6 +111,18 @@ type Flag interface {
+ 	IsSet() bool
+ }
+ 
++// SchemaTyper reports the JSON Schema type accepted by a flag.
++// It returns an empty string when the value has no clear schema type.
++type SchemaTyper interface {
++	SchemaType() string
++}
++
++// SchemaItemsTyper reports the JSON Schema element type of an array flag.
++// It returns an empty string for scalar and object flags.
++type SchemaItemsTyper interface {
++	SchemaItemsType() string
++}
++
+ // RequiredFlag is an interface that allows us to mark flags as required
+ // it allows flags required flags to be backwards compatible with the Flag interface
+ type RequiredFlag interface {
+diff --git a/flag_bool_with_inverse.go b/flag_bool_with_inverse.go
+index bc12c25..f273e9d 100644
+--- a/flag_bool_with_inverse.go
++++ b/flag_bool_with_inverse.go
+@@ -250,6 +250,14 @@ func (bif *BoolWithInverseFlag) GetValue() string {
+ 	return ""
+ }
+ 
++func (bif *BoolWithInverseFlag) SchemaType() string {
++	return "boolean"
++}
++
++func (bif *BoolWithInverseFlag) SchemaItemsType() string {
++	return ""
++}
++
+ func (bif *BoolWithInverseFlag) TakesValue() bool {
+ 	return false
+ }
+diff --git a/flag_ext.go b/flag_ext.go
+index 9972af7..c4fe05e 100644
+--- a/flag_ext.go
++++ b/flag_ext.go
+@@ -1,6 +1,9 @@
+ package cli
+ 
+-import "flag"
++import (
++	"flag"
++	"reflect"
++)
+ 
+ type extFlag struct {
+ 	f *flag.Flag
+@@ -26,6 +29,24 @@ func (e *extFlag) Get() any {
+ 	return e.f.Value.(flag.Getter).Get()
+ }
+ 
++func (e *extFlag) schemaValueType() reflect.Type {
++	if e.f == nil {
++		return nil
++	}
++	if _, ok := e.f.Value.(flag.Getter); !ok {
++		return nil
++	}
++	return reflect.TypeOf(e.Get())
++}
++
++func (e *extFlag) SchemaType() string {
++	return schemaTypeFor(e.schemaValueType())
++}
++
++func (e *extFlag) SchemaItemsType() string {
++	return schemaItemsTypeFor(e.schemaValueType())
++}
++
+ func (e *extFlag) Names() []string {
+ 	return []string{e.f.Name}
+ }
+diff --git a/flag_impl.go b/flag_impl.go
+index ab97da8..1fd68fa 100644
+--- a/flag_impl.go
++++ b/flag_impl.go
+@@ -88,6 +88,14 @@ func (f *FlagBase[T, C, V]) GetValue() string {
+ 	return v.ToString(f.Value)
+ }
+ 
++func (f *FlagBase[T, C, V]) SchemaType() string {
++	return schemaTypeFor(reflect.TypeOf((*T)(nil)).Elem())
++}
++
++func (f *FlagBase[T, C, V]) SchemaItemsType() string {
++	return schemaItemsTypeFor(reflect.TypeOf((*T)(nil)).Elem())
++}
++
+ // TypeName returns the type of the flag.
+ func (f *FlagBase[T, C, V]) TypeName() string {
+ 	ty := reflect.TypeOf(f.Value)
+diff --git a/godoc-current.txt b/godoc-current.txt
+index f84d047..0900798 100644
+--- a/godoc-current.txt
++++ b/godoc-current.txt
+@@ -407,6 +407,10 @@ func (bif *BoolWithInverseFlag) PreParse() error
+ 
+ func (bif *BoolWithInverseFlag) RunAction(ctx context.Context, cmd *Command) error
+ 
++func (bif *BoolWithInverseFlag) SchemaItemsType() string
++
++func (bif *BoolWithInverseFlag) SchemaType() string
++
+ func (bif *BoolWithInverseFlag) Set(name, val string) error
+ 
+ func (bif *BoolWithInverseFlag) SetCategory(c string)
+@@ -1044,6 +1048,10 @@ func (f *FlagBase[T, C, V]) PreParse() error
+ func (f *FlagBase[T, C, V]) RunAction(ctx context.Context, cmd *Command) error
+     RunAction executes flag action if set
+ 
++func (f *FlagBase[T, C, V]) SchemaItemsType() string
++
++func (f *FlagBase[T, C, V]) SchemaType() string
++
+ func (f *FlagBase[T, C, V]) Set(_ string, val string) error
+     Set applies given value from string
+ 
+@@ -1308,6 +1316,18 @@ type RequiredFlag interface {
+     it allows flags required flags to be backwards compatible with the Flag
+     interface
+ 
++type SchemaItemsTyper interface {
++	SchemaItemsType() string
++}
++    SchemaItemsTyper reports the JSON Schema element type of an array flag.
++    It returns an empty string for scalar and object flags.
++
++type SchemaTyper interface {
++	SchemaType() string
++}
++    SchemaTyper reports the JSON Schema type accepted by a flag. It returns an
++    empty string when the value has no clear schema type.
++
+ type Serializer interface {
+ 	Serialize() string
+ }
+diff --git a/testdata/godoc-v3.x.txt b/testdata/godoc-v3.x.txt
+index f84d047..0900798 100644
+--- a/testdata/godoc-v3.x.txt
++++ b/testdata/godoc-v3.x.txt
+@@ -407,6 +407,10 @@ func (bif *BoolWithInverseFlag) PreParse() error
+ 
+ func (bif *BoolWithInverseFlag) RunAction(ctx context.Context, cmd *Command) error
+ 
++func (bif *BoolWithInverseFlag) SchemaItemsType() string
++
++func (bif *BoolWithInverseFlag) SchemaType() string
++
+ func (bif *BoolWithInverseFlag) Set(name, val string) error
+ 
+ func (bif *BoolWithInverseFlag) SetCategory(c string)
+@@ -1044,6 +1048,10 @@ func (f *FlagBase[T, C, V]) PreParse() error
+ func (f *FlagBase[T, C, V]) RunAction(ctx context.Context, cmd *Command) error
+     RunAction executes flag action if set
+ 
++func (f *FlagBase[T, C, V]) SchemaItemsType() string
++
++func (f *FlagBase[T, C, V]) SchemaType() string
++
+ func (f *FlagBase[T, C, V]) Set(_ string, val string) error
+     Set applies given value from string
+ 
+@@ -1308,6 +1316,18 @@ type RequiredFlag interface {
+     it allows flags required flags to be backwards compatible with the Flag
+     interface
+ 
++type SchemaItemsTyper interface {
++	SchemaItemsType() string
++}
++    SchemaItemsTyper reports the JSON Schema element type of an array flag.
++    It returns an empty string for scalar and object flags.
++
++type SchemaTyper interface {
++	SchemaType() string
++}
++    SchemaTyper reports the JSON Schema type accepted by a flag. It returns an
++    empty string when the value has no clear schema type.
++
+ type Serializer interface {
+ 	Serialize() string
+ }

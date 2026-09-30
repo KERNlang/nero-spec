@@ -1,0 +1,37 @@
+{
+  "mode": "review",
+  "label": "nero-pilot-firstpass",
+  "startedAt": "2026-09-29T17:35:42.752Z",
+  "endedAt": "2026-09-29T17:37:53.435Z",
+  "engines": [
+    {
+      "id": "claude",
+      "status": "ok",
+      "durationMs": 86564,
+      "detail": "ok, 3 important, 5 nits",
+      "outputPath": "<home>/.agon/runs/review-1790703342754-y06uml-nero-pilot-firstpass/claude-output.txt"
+    },
+    {
+      "id": "codex",
+      "status": "ok",
+      "durationMs": 96359,
+      "detail": "ok, 1 important",
+      "outputPath": "<home>/.agon/runs/review-1790703342754-y06uml-nero-pilot-firstpass/codex-output.txt"
+    },
+    {
+      "id": "agy",
+      "status": "ok",
+      "durationMs": 130503,
+      "detail": "ok, 3 important, 4 nits",
+      "outputPath": "<home>/.agon/runs/review-1790703342754-y06uml-nero-pilot-firstpass/agy-output.txt"
+    }
+  ],
+  "requested": [
+    "claude",
+    "codex",
+    "agy"
+  ],
+  "timeoutSec": 600,
+  "summary": "3/3 reviewed cleanly",
+  "ok": true
+}

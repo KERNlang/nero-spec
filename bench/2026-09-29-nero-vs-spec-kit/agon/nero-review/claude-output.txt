@@ -1,0 +1,44 @@
+**Verdict:** no confirmed blocking bugs. The main risk is the public API contract: `SchemaType()` can return values that are not valid JSON Schema types, and exported API is hard to change after release. The code is otherwise correct for the built-in flags. ~85% sure.
+
+**Important**
+
+1. **`flag_schema_type.go:17-22` returns `"duration"` and `"date-time"`, which are not JSON Schema types** (important, 0.85).
+ - The doc comment at `flag.go:114-118` promises a "JSON Schema type". The only valid values are null, boolean, object, array, number, string and integer.
+ - `date-time` and `duration` are `format` keywords for strings. A consumer building `{"type": f.SchemaType()}` would produce an invalid schema, and strict validators (for example ajv, or MCP tool-schema checks) would reject it.
+ - The tests assert these values (`flag_schema_type_test.go` "temporal/*"), so this looks intentional. The doc and the behavior still disagree, and this is exported v3 API.
+ - **Fix:** return `"string"` and add a separate `SchemaFormater{ SchemaFormat() string }`, or reword the doc so it no longer claims these are JSON Schema types.
+
+2. **Even as formats, the parsing rules don't match** (`flag_schema_type.go:17-22`) (important, 0.70).
+ - `DurationFlag` parses Go syntax (`1h30m`) through `time.ParseDuration`. JSON Schema's `duration` format means ISO 8601 (`PT1H30M`).
+ - `TimestampFlag` parses the layouts in `Config.Layouts`, not RFC 3339.
+ - A schema-driven client (for example an LLM tool caller) would send values the flag rejects.
+ - **Fix:** for Duration, report `"string"` with no format, or a Go-duration hint. For Timestamp, only report `date-time` when the layouts include `time.RFC3339`.
+
+3. **The godoc snapshots were not regenerated** (`godoc-current.txt`, `testdata/godoc-v3.x.txt`) (important, 0.65).
+ - Two new exported interfaces and four exported methods were added, but neither snapshot is in the changed-file list.
+ - urfave/cli CI normally runs `make generate` plus a diff check and `v3diff`, so this should fail CI. I couldn't confirm that from the files provided.
+ - **Fix:** run `make generate` and `make v3approve`, then commit the snapshots.
+
+**Nits**
+
+4. **`flag_ext.go:33-35`:** the `e.f == nil` guard doesn't match the rest of the type. Every other `extFlag` method dereferences `f` without a check, and no test covers the nil case. Drop the guard, or add a test and apply it everywhere. (0.80)
+
+5. **`flag_impl.go:91-97`, `flag_bool_with_inverse.go:253-259`:** the new exported methods have no doc comments, while their neighbours (`GetValue`, `TypeName`) do. Add a one-line doc to each. (0.60)
+
+6. **`flag_impl.go:91-93`:** `GenericFlag` always returns `""` because `T` is the `Value` interface. Custom `Value` types have no way to opt in. **Fix:** in `FlagBase.SchemaType`, if `any(f.Value)` implements `SchemaTyper`, use its answer. (0.50)
+
+7. **`flag_ext.go:39`:** pointer-typed getters return `""`. `flag.TextVar(&t time.Time)` gives `*time.Time`, while `TimestampFlag` returns `date-time`. **Fix:** dereference `reflect.Ptr` once in `schemaTypeFor`. (0.55)
+
+8. **`flag_schema_type.go:36-39`:** object flags don't expose their value type. `StringMapFlag` can't say its values are strings (JSON Schema's `additionalProperties`). **Fix:** have `SchemaItemsType` return the map's value type too, and update the `SchemaItemsTyper` doc. (0.45)
+
+**Verified OK**
+- Using the static type `reflect.TypeOf((*T)(nil)).Elem()` is correct. It works for nil slices and maps, and before and after `PreParse`.
+- `nodocFlag` doesn't satisfy the new interfaces, so they stay optional and nothing breaks.
+- Non-getter and nil `flag.Value` are handled by the `ok` check at `flag_ext.go:36`.
+
+Next step: decide on type vs. format (1/2) before merging, because this API can't be changed cheaply once released.
+
+<!--AGON_REVIEW_FINDINGS_v1-->
+```json
+[{"file":"flag_schema_type.go","lines":"17-22","severity":"important","blocking":false,"confidence":0.85,"problem":"SchemaType returns \"duration\"/\"date-time\", which are not JSON Schema types (they are string formats); contradicts SchemaTyper doc (flag.go:114-118) and yields invalid schemas for consumers","minimalFix":"Return \"string\" and add a separate SchemaFormat() interface for date-time/duration, or reword the SchemaTyper doc"},{"file":"flag_schema_type.go","lines":"17-22","severity":"important","blocking":false,"confidence":0.7,"problem":"Format semantics mismatch: DurationFlag parses Go duration syntax (not ISO 8601) and TimestampFlag parses Config.Layouts (not RFC 3339); schema-driven clients will send values the flag rejects","minimalFix":"Report plain string for Duration; only advertise date-time when layouts include time.RFC3339"},{"file":"godoc-current.txt","lines":"1","severity":"important","blocking":false,"confidence":0.65,"problem":"New exported API (SchemaTyper, SchemaItemsTyper, FlagBase/BoolWithInverseFlag methods) added without regenerating godoc-current.txt and testdata/godoc-v3.x.txt; CI diffcheck/v3diff likely fails","minimalFix":"Run make generate and make v3approve; commit updated snapshots"},{"file":"flag_ext.go","lines":"33-35","severity":"nit","blocking":false,"confidence":0.8,"problem":"e.f == nil guard is inconsistent (all other extFlag methods deref f unguarded) and untested","minimalFix":"Drop the guard or add a test and apply consistently"},{"file":"flag_impl.go","lines":"91-97","severity":"nit","blocking":false,"confidence":0.6,"problem":"New exported methods SchemaType/SchemaItemsType lack doc comments unlike neighboring exported methods (also flag_bool_with_inverse.go:253-259)","minimalFix":"Add one-line doc comments"},{"file":"flag_impl.go","lines":"91-93","severity":"nit","blocking":false,"confidence":0.5,"problem":"GenericFlag always reports empty schema type; custom Value implementations cannot opt in","minimalFix":"If any(f.Value) implements SchemaTyper/SchemaItemsTyper, delegate to it"},{"file":"flag_ext.go","lines":"39","severity":"nit","blocking":false,"confidence":0.55,"problem":"Pointer-typed getter values (e.g. flag.TextVar with *time.Time) return empty while TimestampFlag returns date-time; inconsistent","minimalFix":"Dereference reflect.Ptr once in schemaTypeFor"},{"file":"flag_schema_type.go","lines":"36-39","severity":"nit","blocking":false,"confidence":0.45,"problem":"Object flags expose no value type (additionalProperties), so consumers cannot know StringMapFlag values are strings","minimalFix":"Report map value type via SchemaItemsType or a dedicated method and update interface doc"}]
+```

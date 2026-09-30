@@ -1,0 +1,11 @@
+=== RUN   TestReviewExternalNonGetter
+=== RUN   TestReviewExternalNonGetter/SchemaType
+    review_ext_nogetter_test.go:26: panic: interface conversion: flag.funcValue is not flag.Getter: missing method Get
+=== RUN   TestReviewExternalNonGetter/SchemaItemsType
+    review_ext_nogetter_test.go:26: panic: interface conversion: flag.funcValue is not flag.Getter: missing method Get
+--- FAIL: TestReviewExternalNonGetter (0.00s)
+    --- FAIL: TestReviewExternalNonGetter/SchemaType (0.00s)
+    --- FAIL: TestReviewExternalNonGetter/SchemaItemsType (0.00s)
+FAIL
+FAIL	github.com/urfave/cli/v3	0.041s
+FAIL

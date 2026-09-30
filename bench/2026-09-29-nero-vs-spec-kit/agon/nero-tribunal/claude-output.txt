@@ -1,0 +1,21 @@
+**Defender: spec is sound, additive, and safe to ship with the open finding downgraded.**
+
+**Why the open finding (external consumers unavailable) is non-blocking**
+- **Purely additive.** New optional interfaces; `Flag` and `DocGenerationFlag` are unchanged. No existing implementer or caller can stop compiling.
+- **Opt-in consumption.** External code only gets new behavior if it type-asserts `SchemaTyper`/`SchemaItemsTyper`. Absent assertion → identical behavior.
+- **Name collision is harmless.** A third-party flag with its own `SchemaType()` of a different signature simply won't satisfy the interface. Nothing breaks.
+- **Severity: low.** Keep the ASSUMED tag. Add check `CHK-ADDITIVE`: `git diff` shows no changed signatures in `Flag` or `DocGenerationFlag`.
+
+**Design rationale**
+- **One shared mapping helper.** `FlagBase` and `extFlag` call the same helper, so their categories cannot drift. The Change Dependency Matrix makes this explicit.
+- **"All FlagBase instantiations" requirement is met structurally.** Generic methods on `FlagBase[T,C,VC]` cover every alias. Add `CHK-IFACE-ASSERT`: compile-time `var _ SchemaTyper = ...` / `var _ SchemaItemsTyper = ...` for `*FlagBase` aliases, `*BoolWithInverseFlag`, and `*extFlag`.
+- **Temporal names kept as requested** (`duration`, `date-time`). The spec does not normalize them away.
+- **Tricky inputs cover real history.** Zero-value inverse bool and pre/post-parse ext values match past fix commits.
+
+**Gaps I concede in advance (fix, don't block)**
+- **Vocabulary not enumerated as literals.** AC-1/2 should list the exact return strings, e.g. `"integer"` for all int/uint widths and `""` for no item type. Severity: medium. Check `CHK-VOCAB` is a table test asserting the literal strings.
+- **AC-3 "cleanly mapped custom collection getters" is vague.** Pin it to named Go kinds: slice/array → `array` plus element kind; map → `object`. Severity: low.
+- **Godoc regen command is likely wrong.** `go doc -all .` may not match what `scripts/build.go` generates. The spec should cite the build script's generate step instead. Severity: medium, because the snapshot diff would fail CI. Check `CHK-GODOC`: run the repo's generate step, then `cmp` both snapshots.
+- **Non-`Getter` `flag.Value` under `extFlag`.** Needs an explicit guard `if g, ok := e.f.Value.(flag.Getter)`. It is already in the AC-3 tricky inputs; keep it tested.
+
+~85% sure the spec passes after these four edits.

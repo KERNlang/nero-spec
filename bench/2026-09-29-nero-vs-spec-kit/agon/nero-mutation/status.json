@@ -1,0 +1,19 @@
+{
+  "mode": "nero",
+  "label": "nero-pilot-prebuild-mutation",
+  "startedAt": "2026-09-29T17:18:16.420Z",
+  "endedAt": "2026-09-29T17:18:50.572Z",
+  "engines": [
+    {
+      "id": "agy",
+      "status": "ok",
+      "detail": "flawed (top-rated/critique)"
+    }
+  ],
+  "summary": "agy: flawed",
+  "ok": true,
+  "requested": [
+    "agy"
+  ],
+  "timeoutSec": 600
+}

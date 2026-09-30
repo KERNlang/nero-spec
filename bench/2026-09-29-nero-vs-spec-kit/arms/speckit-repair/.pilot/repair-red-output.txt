@@ -1,0 +1,25 @@
+--- FAIL: TestFlagSchemaTypeExternal (0.00s)
+    --- FAIL: TestFlagSchemaTypeExternal/standard-func (0.00s)
+panic: interface conversion: flag.funcValue is not flag.Getter: missing method Get [recovered, repanicked]
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0x100e9b9a0, 0x7380d7d7a3f0})
+	/opt/homebrew/Cellar/go/1.26.3/libexec/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/opt/homebrew/Cellar/go/1.26.3/libexec/src/testing/testing.go:1977 +0x318
+panic({0x100e9b9a0?, 0x7380d7d7a3f0?})
+	/opt/homebrew/Cellar/go/1.26.3/libexec/src/runtime/panic.go:860 +0x12c
+github.com/urfave/cli/v3.(*extFlag).Get(...)
+	<work>/arms/speckit/flag_ext.go:26
+github.com/urfave/cli/v3.(*extFlag).SchemaType(0x100f889c0?)
+	<work>/arms/speckit/flag_ext.go:30 +0x6c
+github.com/urfave/cli/v3.checkSchemaTypes(0x7380d7d58908, {0x100f25170, 0x7380d7c94160}, {0x0, 0x0}, {0x0, 0x0})
+	<work>/arms/speckit/flag_schema_type_test.go:28 +0x12c
+github.com/urfave/cli/v3.TestFlagSchemaTypeExternal.func2.1(0x7380d7d58908)
+	<work>/arms/speckit/flag_schema_type_test.go:121 +0x84
+testing.tRunner(0x7380d7d58908, 0x7380d7cf0720)
+	/opt/homebrew/Cellar/go/1.26.3/libexec/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 7
+	/opt/homebrew/Cellar/go/1.26.3/libexec/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/urfave/cli/v3	0.046s
+FAIL

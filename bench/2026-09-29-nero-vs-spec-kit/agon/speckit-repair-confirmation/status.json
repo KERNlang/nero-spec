@@ -1,0 +1,21 @@
+{
+  "mode": "ask",
+  "label": "speckit-pilot-repair-confirmation",
+  "startedAt": "2026-09-29T17:40:08.778Z",
+  "endedAt": "2026-09-29T17:40:21.981Z",
+  "engines": [
+    {
+      "id": "claude",
+      "status": "ok",
+      "exitCode": 0,
+      "durationMs": 12752,
+      "detail": "exit=0"
+    }
+  ],
+  "summary": "claude answered",
+  "ok": true,
+  "requested": [
+    "claude"
+  ],
+  "timeoutSec": 600
+}

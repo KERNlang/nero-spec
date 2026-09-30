@@ -1,0 +1,38 @@
+# Risk Register — Typed Flag Schema Introspection Spec (#2326)
+
+| # | Risk | Severity | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|---|
+| R1 | `extFlag` non-getter panic: `extFlag.Get()` performs an unchecked `flag.Getter` assertion; `flag.Func` and `flag.Var`-registered values panic at runtime instead of returning empty categories per AC-3. Found independently by codex and agy. | High | High | Runtime panic in public API for a supported construction path (`AllowExtFlags`) | Guard: `if g, ok := e.f.Value.(flag.Getter); ok`. Add `TestSchemaTypeExtFlag_NonGetterDoesNotCallGet` covering the `AllowExtFlags` path. |
+| R2 | Lifecycle ambiguity: mapping source (declared type `T` vs `f.Value` vs `Get()`) is undefined; results may differ before/after `PreParse`, especially for `GenericFlag`. Found by codex (stability) and agy (nil-value panic via `reflect.TypeOf(nil)`). | High | Medium | Inconsistent schema output for identical flags; possible panic on nil/untyped values | Spec must pin the introspection source. Prefer static generic parameter `T` / typed zero value over runtime value. Add `TestSchemaTypeGenericFlagStableBeforeAndAfterParse` and `TestSchemaTypeFlagBase_NilValue`. |
+| R3 | Open finding (external consumer unavailable) downgraded to ASSUMED while Confidence is 0.90 and the spec claims "No missing product decision." Per refine rules this must be OPEN, owned in Open Questions, and caps confidence below 0.90. | High | Certain (process violation) | Unverified compatibility expectations (empty fallback, vocabulary, lifecycle timing) ship as if verified | Restore OPEN status, assign owner via `ExternalConsumerContractReview`, lower Confidence to ≤0.89 until resolved. |
+| R4 | Structural requirement "both methods exist on all `FlagBase` instantiations" is only covered by alias table tests — current built-ins could pass while the generic guarantee is unenforced. | Medium | Low | Silent regression for future/custom instantiations | Compile-time assertions: `var _ SchemaTyper = ...` / `var _ SchemaItemsTyper = ...` on `*FlagBase` with a novel custom instantiation. Add `TestFlagBaseAllInstantiationsImplementSchemaTypers`. |
+| R5 | Universal `SchemaItemsTyper` on all `FlagBase` instantiations conflates "scalar (no items)" with "array with unknown item type" — both return `""`, and type-assertion succeeds for scalars. | Medium | High | Downstream consumers cannot distinguish the two cases; semantic trap in the public contract | Requirement to keep both methods on all instantiations stands; mitigate by documenting `""` semantics precisely and considering a sentinel or pairing rule (only meaningful when `SchemaType()=="array"`). Add `TestSchemaItemsType_ScalarEmptyVsUntypedArrayAmbiguity`. |
+| R6 | `GenericFlag` does not delegate to values that themselves implement `SchemaTyper` — central mapping returns `""` for custom domain types with explicit schema methods. | Medium | Medium | Custom types silently lose their declared schema category | Central helper should check `v.(SchemaTyper)` / `v.(SchemaItemsTyper)` before the static switch. Add `TestSchemaType_GenericFlagDelegatesToValueInterface`. |
+| R7 | Return-string vocabulary not enumerated as literals; "category: integer" etc. is prose. | Medium | Medium | Implementations may diverge on literal strings; downstream consumers break on spelling | Enumerate exact literals in AC-1/2 (`"boolean"`, `"integer"`, `"number"`, `"string"`, `"duration"`, `"date-time"`, `"array"`, `"object"`, `""`). Add `CHK-VOCAB` literal table test. |
+| R8 | Godoc snapshot verification cites `go doc -all .`, which likely does not match the repo's generate step in `scripts/build.go`; output also varies across Go minor toolchains. | Medium | Medium | Spurious or missed snapshot-diff CI failures | Cite the build script's `GenerateActionFunc`/`V3Diff` step explicitly; pin or normalize toolchain in CI. Checks `CHK-GODOC` and `VerifyGodocSnapshot_ToolchainNormalized`. |
+| R9 | AC-3 phrase "cleanly mapped custom collection getters" is vague. | Low | High | Test implementer guesses at scope | Pin to named Go kinds: slice/array → `array` + element kind; map → `object`. |
+
+## 1. Critical Risks (must address before proceeding)
+
+- **R1 — extFlag non-getter panic.** A runtime panic on a supported flag registration path directly contradicts AC-3's empty-fallback promise. Confirmed by two independent attackers.
+- **R2 — undefined introspection source / lifecycle instability.** The spec's core mechanism is unspecified; this determines correctness of every acceptance criterion.
+- **R3 — process violation on the OPEN finding.** The external-consumer gap must stay OPEN with an owner, and Confidence must drop below 0.90. This is a gating rule, not a judgment call.
+- **R7 — vocabulary literals.** Cheap to fix, but shipping an interface contract without pinned return strings invites incompatible implementations.
+
+## 2. Accepted Risks (acknowledged, acceptable)
+
+- **R5** — interface-assertion ambiguity on scalars. The "both methods on all FlagBase instantiations" requirement is fixed; precise `""` documentation is sufficient mitigation for an additive optional interface.
+- **R6** — GenericFlag non-delegation. Returns `""` per the spec's stated fallback; delegation is an enhancement that can follow.
+- **R8/R9** — tooling and phrasing issues; editorial fixes during implementation.
+- Defender's additive-compatibility argument holds: no existing implementer or caller breaks, and the "name collision" concern is correctly dismissed as harmless.
+
+## 3. Overall Assessment
+
+**Not safe to proceed as written; safe to proceed after targeted revision.** The additive design and shared-helper architecture are sound, and both attackers' highest findings converge on two concrete, fixable defects (R1, R2) rather than a flawed direction. The path forward:
+
+1. Guard the `flag.Getter` assertion in `extFlag` and test the `AllowExtFlags` non-getter path.
+2. Pin the introspection source (prefer the static type parameter `T`) and define pre/post-parse stability.
+3. Restore the external-consumer finding to OPEN with an owner and reduce Confidence below 0.90.
+4. Enumerate the exact vocabulary literals and add compile-time interface assertions for all `FlagBase` instantiations.
+
+With those changes, the spec is ready for implementation; without them, it risks shipping a panicking public method and an unspecified core behavior behind an overstated confidence rating.

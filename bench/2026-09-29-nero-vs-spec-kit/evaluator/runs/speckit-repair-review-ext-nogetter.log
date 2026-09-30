@@ -1,0 +1,8 @@
+=== RUN   TestReviewExternalNonGetter
+=== RUN   TestReviewExternalNonGetter/SchemaType
+=== RUN   TestReviewExternalNonGetter/SchemaItemsType
+--- PASS: TestReviewExternalNonGetter (0.00s)
+    --- PASS: TestReviewExternalNonGetter/SchemaType (0.00s)
+    --- PASS: TestReviewExternalNonGetter/SchemaItemsType (0.00s)
+PASS
+ok  	github.com/urfave/cli/v3	0.040s

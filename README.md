@@ -67,9 +67,22 @@ Then, in your agent:
 | Nero Spec + subagent critic | 27 | 2165 | 1 |
 | Nero Spec, no critic | 23 | 2097 | 1.5 |
 
-Short specs, about 180 lines each on average. The critic is the biggest single factor: +3 to +5 caught bugs for every critic variant and under both graders separately; which critic runs (agy, codex or a subagent) barely matters.
+Short specs, about 180 lines each on average. The critic is the biggest single factor: +3 to +5 points for every critic variant and under both graders separately; which critic runs (agy, codex or a subagent) barely matters.
 
-Caveats: every case is a PR that shipped a bug, so this measures recall only, not false alarms on harmless changes. 12 cases with one spec run each, and a single case can swing by 2.5 points between runs. The grading rubric and critic prompt were written by the same author as the framework. The nero critic engine (agy, or codex when forced) was also one of the graders. This is a self-measurement, not a comparison with other spec frameworks. Raw specs, blind keys and grader outputs are kept locally, not yet published.
+The same 12 cases, other spec frameworks (points /36, no critic → subagent critic):
+
+| Framework | No critic | Subagent critic |
+|---|---|---|
+| Kiro | 23.5 | 28 |
+| **Nero Spec** | **23** | **27** |
+| OpenSpec | 19.5 | 24.5 |
+| Spec Kit | 19 | 23.5 |
+
+Nero Spec is on par with Kiro and ahead of OpenSpec and Spec Kit, with far fewer spec lines. Most of the gain comes from the critic, not the template: a control run (plain spec writer vs Nero Spec, same critic) showed no clear added benefit beyond run-to-run noise.
+
+**1:1 build pilot vs Spec Kit** ([report and data](bench/2026-09-29-nero-vs-spec-kit/)) — one Go task on urfave/cli, same model, each framework took it from spec to working code, checked by a hidden test. Both passed. Spec Kit's first pass panicked on a valid edge case and needed a repair round; Nero Spec's first pass did not. Nero Spec wrote 1 spec file (118 lines) vs Spec Kit's 10 files (321 lines), but took about twice the wall time (20.5 vs 9 min) because of the critic calls. One case: it shows the approach holds up, not a ranking.
+
+Caveats: every benchmark case is a PR that shipped a bug, so this measures recall only, not false alarms on harmless changes. 12 cases with one spec run each, and a single case can swing by 2.5 points between runs. The grading rubric and critic prompt were written by the same author as the framework, and the nero critic engine was also one of the graders.
 
 ## More
 

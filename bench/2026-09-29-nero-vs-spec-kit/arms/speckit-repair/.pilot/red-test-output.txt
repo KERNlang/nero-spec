@@ -1,0 +1,120 @@
+--- FAIL: TestFlagSchemaTypeBuiltins (0.00s)
+    --- FAIL: TestFlagSchemaTypeBuiltins/bool (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[bool,github.com/urfave/cli/v3.BoolConfig,github.com/urfave/cli/v3.boolValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[int,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int8 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[int8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int8]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int16 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[int16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int16]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int32 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[int32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int32]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int64 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[int64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int64]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[uint,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint8 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[uint8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint8]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint16 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[uint16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint16]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint32 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[uint32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint32]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint64 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[uint64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint64]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float64]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float32 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[float32,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float32]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float64 (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float64]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/string (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[string,github.com/urfave/cli/v3.StringConfig,github.com/urfave/cli/v3.stringValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/duration (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[time.Duration,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.durationValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/timestamp (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[time.Time,github.com/urfave/cli/v3.TimestampConfig,github.com/urfave/cli/v3.timestampValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]int,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[int,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int8-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]int8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[int8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int8]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int16-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]int16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[int16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int16]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int32-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]int32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[int32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int32]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/int64-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]int64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[int64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.intValue[int64]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]uint,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[uint,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint8-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]uint8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[uint8,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint8]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint16-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]uint16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[uint16,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint16]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint32-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]uint32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[uint32,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint32]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/uint64-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]uint64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.SliceBase[uint64,github.com/urfave/cli/v3.IntegerConfig,github.com/urfave/cli/v3.uintValue[uint64]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.SliceBase[float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float64]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float32-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]float32,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.SliceBase[float32,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float32]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/float64-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.SliceBase[float64,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.floatValue[float64]]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/string-slice (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[[]string,github.com/urfave/cli/v3.StringConfig,github.com/urfave/cli/v3.SliceBase[string,github.com/urfave/cli/v3.StringConfig,github.com/urfave/cli/v3.stringValue]] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeBuiltins/string-map (0.00s)
+        flag_schema_type_test.go:76: *cli.FlagBase[map[string]string,github.com/urfave/cli/v3.StringConfig,github.com/urfave/cli/v3.MapBase[string,github.com/urfave/cli/v3.StringConfig,github.com/urfave/cli/v3.stringValue]] does not implement SchemaTyper
+--- FAIL: TestFlagSchemaTypeUnknown (0.00s)
+    --- FAIL: TestFlagSchemaTypeUnknown/nil (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/bool (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/slice (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/map (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/unknown-struct (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/unknown-pointer (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/unknown-slice-item (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeUnknown/non-string-map-key (0.00s)
+        flag_schema_type_test.go:97: *cli.FlagBase[github.com/urfave/cli/v3.Value,github.com/urfave/cli/v3.NoConfig,github.com/urfave/cli/v3.genericValue] does not implement SchemaTyper
+--- FAIL: TestFlagSchemaTypeSpecial (0.00s)
+    flag_schema_type_test.go:103: *cli.BoolWithInverseFlag does not implement SchemaTyper
+--- FAIL: TestFlagSchemaTypeExternal (0.00s)
+    --- FAIL: TestFlagSchemaTypeExternal/standard-bool (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/standard-duration (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/standard-float (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/standard-int (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/standard-string (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/standard-uint (0.00s)
+        flag_schema_type_test.go:120: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/time (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/array-string (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/array-duration (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/array-time (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/array-unknown-item (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/object (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/non-string-map-key (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/unknown-struct (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/unknown-pointer (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+    --- FAIL: TestFlagSchemaTypeExternal/nil (0.00s)
+        flag_schema_type_test.go:141: *cli.extFlag does not implement SchemaTyper
+FAIL
+FAIL	github.com/urfave/cli/v3	0.041s
+FAIL
