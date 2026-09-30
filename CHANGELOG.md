@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Changed
+
+- Refine: the mutation probe runs in parallel with the step e critic instead of before it, and round 2 is skipped when round 1 only added Tricky inputs or citations.
+
 ### Fixed
 
 - `STATUS-SHIPPED` no longer flags a spec whose covered files were committed earlier the same day: hits are commits after the spec's anchor commit (ancestry-based), and the date fallback is strictly after `Date:`.
