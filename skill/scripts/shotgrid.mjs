@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Low-RAM visual check: one headless browser, one page; viewport and color scheme are switched in place.
-// Measured on a Nuxt map app: ~800 MB peak for ~15 s, freed on exit.
+// Measured on a Nuxt web app: ~800 MB peak for ~15 s, freed on exit.
 // Usage: node shotgrid.mjs <https-url> [out-dir] [--wait <css-selector>]
 import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
