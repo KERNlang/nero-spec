@@ -4,6 +4,11 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Intent, Tricky inputs, Device check, Done when / As-built delta, Callers, Real usage, the mandatory critic, the length budget and the OPEN cap while active.
+- Addon `visual-grid` with `scripts/shotgrid.mjs`: one low-RAM screenshot grid (desktop + mobile × light + dark) per UI change.
+
 ### Changed
 
 - Every addon loaded after the Spec line is announced `+<name> (on demand)`; the Spec line lists only loaded addons.

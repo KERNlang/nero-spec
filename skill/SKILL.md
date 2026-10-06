@@ -61,7 +61,7 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 
 | Key | Values | Notes |
 |---|---|---|
-| `preset` | `personal` \| `team` \| `enterprise` | required |
+| `preset` | `personal` \| `team` \| `enterprise` \| `operator-reviewed` | required |
 | `addons` | `+name, -name, ...` | relative to preset defaults; bare name = `+` |
 | `specs.path` | e.g. `.claude/specs/{slug}/spec.md` | Repo-relative; placeholders `{slug}`, `{TICKET}`. A leading `./` and spaces are allowed; absolute paths, leading `-`, `.`/`..` components, and symlink escapes are rejected by bundled scanners. |
 | `ticket.regex` | e.g. `[A-Z][A-Z0-9]+-\d+` | only with `jira-ticket` |
@@ -113,5 +113,6 @@ Follow `core.md` step by step. Addons plug in where `core.md` names their hook.
 | `drift-guard` | 1, 4, 9 | `Verified at` (git sha, or dir-hash for non-git targets) + `## Changes` as anchor, STALE detection, supersede/living; `scripts/spec-check.sh`, optional pre-commit hook |
 | `agon-oracle` | 8 | Oracle fixtures for `agon goal`/`conquer`, holdouts, promotion rule |
 | `e2e-sweep` | 9, release, on demand | Live personas × features sweep + visual audit before release/overnight; `Device check:` ACs become rows (`scripts/e2e-matrix.sh`); project file `e2e.md` |
+| `visual-grid` | 4, 9 | One low-RAM screenshot grid (desktop + mobile × light + dark) per UI change (`scripts/shotgrid.mjs`); used by `operator-reviewed` |
 
 Task: $ARGUMENTS

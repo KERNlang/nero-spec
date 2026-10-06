@@ -53,7 +53,7 @@ Then, in your agent:
 ## Building blocks
 
 - **Core** (`skill/core.md`) — the flow above, the same for everyone.
-- **Presets** — `personal`, `team` or `enterprise`: which addons are on, and the house rules (commits, reviews, which AI vendors may see the code).
+- **Presets** — `personal`, `team`, `enterprise` or the opt-in `operator-reviewed`: which addons are on, and the house rules (commits, reviews, which AI vendors may see the code).
 - **Addons** — one concern each (contract checks, drift checks, test mapping, Jira tickets, …). They load only when their step comes up. Switch one on or off per repo in `.spec`: `addons: +contested-decision-scan, -issue-link`.
 
 ## Benchmark
