@@ -40,7 +40,7 @@ node "$script" http://localhost:3000/app --dry-run >/dev/null 2>&1 || { echo "FA
 mkdir -p node_modules/playwright-core
 printf 'module.exports={chromium:{launch:async()=>{console.log("CWD-STUB");process.exit(0)}}};' > node_modules/playwright-core/index.js
 printf '{"name":"playwright-core","main":"index.js"}' > node_modules/playwright-core/package.json
-out="$(PW_CORE= node "$script" https://x 2>&1)"
+out="$(PW_CORE='' node "$script" https://x 2>&1)"
 case "$out" in *CWD-STUB*) ;; *) echo "FAIL: playwright-core in cwd not resolved: $out"; fail=1 ;; esac
 
 [ "$fail" -eq 0 ] && echo "PASS test-shotgrid"
