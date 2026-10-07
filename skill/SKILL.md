@@ -86,6 +86,7 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 - **Other addons:** load each only when its core hook fires. Missing file → warn, continue.
 - `agon-oracle` loads only with effective agon `on`.
 - On demand, even when not enabled (blocked only by an explicit `-name` in `.spec`): `contract-discovery` when a boundary is crossed; `release-contract` for client↔backend releases; `refine` at core step 8; `criteria-test-map` when core step 2 forces it.
+- An addon line `Replaces core <rule>` wins over that core rule while the addon is loaded; the preset constitution still wins over both.
 - Every addon loaded after the Spec line, enabled or not, is announced `+<name> (on demand)` before its hook runs.
 
 ## Step 2 — Run
@@ -113,6 +114,9 @@ Follow `core.md` step by step. Addons plug in where `core.md` names their hook.
 | `drift-guard` | 1, 4, 9 | `Verified at` (git sha, or dir-hash for non-git targets) + `## Changes` as anchor, STALE detection, supersede/living; `scripts/spec-check.sh`, optional pre-commit hook |
 | `agon-oracle` | 8 | Oracle fixtures for `agon goal`/`conquer`, holdouts, promotion rule |
 | `e2e-sweep` | 9, release, on demand | Live personas × features sweep + visual audit before release/overnight; `Device check:` ACs become rows (`scripts/e2e-matrix.sh`); project file `e2e.md` |
-| `visual-grid` | 4, 9 | One low-RAM screenshot grid (desktop + mobile × light + dark) per UI change (`scripts/shotgrid.mjs`); used by `operator-reviewed` |
+| `visual-grid` | 4, 9 | One low-RAM screenshot grid (desktop + mobile × light + dark) per UI change (`scripts/shotgrid.mjs`); hard gate replacing `Device check:` for UI ACs; used by `operator-reviewed` |
+| `ticket-interpretation` | 1, 4, 8 | Purpose and authority + Ticket interpretation (Accepted/Proposed/Open) replace `## Intent`; ticket re-read before approval and PR; used by `operator-reviewed` |
+| `changed-things` | 4 | Changed things table (kind, contract change, used by, evidence) + Precedent replace `Callers:` / `Real usage:`; used by `operator-reviewed` |
+| `completion-conditions` | 8, 9 | `## Completion conditions`, per-AC met/not met, `## What was not done` replace `Done when` / As-built delta; used by `operator-reviewed` |
 
 Task: $ARGUMENTS

@@ -6,7 +6,8 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Added
 
-- Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Intent, Tricky inputs, Device check, Done when / As-built delta, Callers, Real usage, the mandatory critic, the length budget and the OPEN cap while active.
+- Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Tricky inputs, the mandatory critic, the length budget and the OPEN cap while active; the other overrides ship as addons.
+- Addons `ticket-interpretation` (replaces Intent), `changed-things` (replaces Callers / Real usage) and `completion-conditions` (replaces Done when / As-built delta); each states the core rule it replaces. `visual-grid` now replaces the per-AC `Device check:` for UI ACs.
 - Addon `visual-grid` with `scripts/shotgrid.mjs`: one low-RAM screenshot grid (desktop + mobile × light + dark) per UI change.
 
 ### Changed
