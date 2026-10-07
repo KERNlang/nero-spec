@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 // Low-RAM visual check: one headless browser, one page; viewport and color scheme are switched in place.
 // Measured on a Nuxt web app: ~800 MB peak for ~15 s, freed on exit.
-// Usage: node shotgrid.mjs <https-url> [out-dir] [--wait <css-selector>]
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+const USAGE = 'Usage: node shotgrid.mjs <https-url> [out-dir] [--wait <css-selector>] [--dry-run]';
 const GRID = [
   { name: 'desktop-light', width: 1440, height: 900, scheme: 'light' },
   { name: 'desktop-dark', width: 1440, height: 900, scheme: 'dark' },
@@ -15,16 +14,42 @@ const GRID = [
 ];
 const SETTLE_MS = 1500;
 
-function newestMatch(root, pattern, leaf) {
-  if (!existsSync(root)) {
-    return null;
+function fail(message) {
+  console.error(message ? `${message}\n${USAGE}` : USAGE);
+  process.exit(2);
+}
+
+function parseArgs(argv) {
+  const positional = [];
+  let wait;
+  let dryRun = false;
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--help' || arg === '-h') {
+      console.log(USAGE);
+      process.exit(0);
+    } else if (arg === '--dry-run') {
+      dryRun = true;
+    } else if (arg === '--wait') {
+      wait = argv[i + 1];
+      if (!wait || wait.startsWith('--')) {
+        fail('--wait needs a css selector');
+      }
+      i += 1;
+    } else if (arg.startsWith('--')) {
+      fail(`unknown flag ${arg}`);
+    } else {
+      positional.push(arg);
+    }
   }
-  const hits = readdirSync(root)
-    .filter((name) => pattern.test(name))
-    .map((name) => join(root, name, leaf))
-    .filter((path) => existsSync(path))
-    .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
-  return hits[0] ?? null;
+  const [url, outDir = 'screens', ...extra] = positional;
+  if (!url?.startsWith('https://')) {
+    fail('an https:// url is required');
+  }
+  if (extra.length > 0) {
+    fail(`unexpected argument ${extra[0]}`);
+  }
+  return { url, outDir, wait, dryRun };
 }
 
 function playwrightCore(require) {
@@ -35,28 +60,16 @@ function playwrightCore(require) {
     try {
       return require.resolve(name);
     } catch {
-      // not installed under this name; try the next one
+      continue;
     }
   }
-  const found = newestMatch(join(homedir(), '.npm/_npx'), /.+/, 'node_modules/playwright-core');
-  if (!found) {
-    throw new Error('playwright-core not found; install it or set PW_CORE.');
-  }
-  return found;
+  throw new Error('playwright-core not found; install it (npm i -D playwright-core) or set PW_CORE');
 }
 
-function headlessShell() {
-  if (process.env.PW_EXE) {
-    return process.env.PW_EXE;
-  }
-  return newestMatch(join(homedir(), '.cache/ms-playwright'), /^chromium_headless_shell-/,
-    'chrome-headless-shell-linux64/chrome-headless-shell');
-}
-
-const [url, outDir = 'screens', flag, selector] = process.argv.slice(2);
-if (!url?.startsWith('https://')) {
-  console.error('Usage: node shotgrid.mjs <https-url> [out-dir] [--wait <css-selector>]');
-  process.exit(2);
+const { url, outDir, wait, dryRun } = parseArgs(process.argv.slice(2));
+if (dryRun) {
+  console.log(JSON.stringify({ url, outDir, wait: wait ?? null }));
+  process.exit(0);
 }
 mkdirSync(outDir, { recursive: true });
 
@@ -64,7 +77,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require(playwrightCore(require));
 const browser = await chromium.launch({
   headless: true,
-  executablePath: headlessShell() ?? undefined,
+  executablePath: process.env.PW_EXE || undefined,
   args: ['--disable-gpu', '--disable-dev-shm-usage'],
 });
 try {
@@ -74,9 +87,11 @@ try {
     await page.setViewportSize({ width: shot.width, height: shot.height });
     await page.emulateMedia({ colorScheme: shot.scheme });
     if (index === 0) {
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-      if (flag === '--wait' && selector) {
-        await page.waitForSelector(selector, { timeout: 30000 });
+      await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+      // streaming and tile pages never go idle; settle briefly, then move on
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+      if (wait) {
+        await page.waitForSelector(wait, { timeout: 30000 });
       }
     }
     await page.waitForTimeout(SETTLE_MS);
