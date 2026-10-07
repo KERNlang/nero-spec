@@ -28,7 +28,7 @@ body:
     id: preset
     attributes:
       label: Preset
-      options: [personal, team, enterprise, none / not sure]
+      options: [personal, team, enterprise, operator-reviewed, none / not sure]
   - type: input
     id: env
     attributes:

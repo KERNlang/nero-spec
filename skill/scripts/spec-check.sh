@@ -117,7 +117,7 @@ drift_guard_on() {
   local a; a="$(cfg addons | tr -d ' ')"
   case ",$a," in *,-drift-guard,*) return 1 ;; *,drift-guard,*|*,+drift-guard,*) return 0 ;; esac
   [ -n "$(cfg drift)" ] && return 0
-  case "$(cfg preset | tr -d ' ')" in personal|team|enterprise) return 0 ;; esac
+  case "$(cfg preset | tr -d ' ')" in personal|team|enterprise|operator-reviewed) return 0 ;; esac
   return 1
 }
 STALE_FALLBACK=0; drift_guard_on && STALE_FALLBACK=1

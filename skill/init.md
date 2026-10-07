@@ -53,7 +53,7 @@ Show it; the user edits or accepts. Accepted → `stack.md` next to `.spec`. Ref
 
 One question at a time. Always offer the default from the chosen preset; Enter = accept.
 
-1. **Preset** — `personal` (solo), `team` (working with others), `enterprise` (company work). Unknown location → no default; say that company code never goes to external AI until answered.
+1. **Preset** — `personal` (solo), `team` (working with others), `enterprise` (company work), `operator-reviewed` (one human owns every decision and reviews each slice). Unknown location → no default; say that company code never goes to external AI until answered.
 2. **Addons** — show the preset's defaults marked `[x]`, all others `[ ]`, one line each (table in SKILL.md). Ask which to add or remove. Note: task/parallel breakdown is not an addon.
 3. **Enterprise only**, one at a time:
    - Jira prefixes (`ticket.prefixes`) — empty = ask for the full key each time;

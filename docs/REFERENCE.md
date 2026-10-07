@@ -15,10 +15,11 @@ skill/
   SKILL.md          router: resolve config → load core + preset + addons → run
   core.md           shared flow
   init.md           /spec init
-  presets/          personal, team, enterprise
+  presets/          personal, team, enterprise, operator-reviewed
   addons/           depth-light, tier-1..4, refine, contract-discovery, release-contract,
                     success-metrics, user-stories, criteria-test-map,
-                    agon-oracle, jira-ticket, issue-link, drift-guard, e2e-sweep,
+                    agon-oracle, jira-ticket, issue-link, drift-guard, e2e-sweep, visual-grid,
+                    ticket-interpretation, changed-things, completion-conditions,
                     contested-decision-scan (experimental)
   scripts/
     spec-check.sh       advisory spec health scan (drift, citations, status, pointers, repeated fixes)
@@ -43,6 +44,7 @@ skill/
 | personal | depth-light, refine, drift-guard, criteria-test-map (goal/conquer + forced triggers), agon-oracle | full | `.claude/specs/{slug}/spec.md` |
 | team | tier-1, tier-2, refine, drift-guard, contract-discovery, criteria-test-map, success-metrics (tier 2), issue-link, agon-oracle | full | `.claude/specs/{slug}/spec.md` |
 | enterprise | jira-ticket, tier-1..4, refine, drift-guard, contract-discovery, success-metrics, criteria-test-map, user-stories (tier 4), e2e-sweep (release) | ask (= off until answered) | `.agents/specs/{TICKET}-{slug}/spec.md` |
+| operator-reviewed | depth-light, refine, drift-guard, criteria-test-map, visual-grid, ticket-interpretation, changed-things, completion-conditions | ask (= off until granted) | `.claude/specs/{slug}/spec.md` |
 
 On demand, regardless of preset: `contract-discovery` when a boundary is crossed, `release-contract` for client↔backend releases, higher tiers (team/enterprise) when a trigger demands them, `criteria-test-map` for auth/guest/payment/persistence/deletion/privacy. A `-name` in `.spec` blocks that.
 
@@ -55,6 +57,10 @@ On demand, regardless of preset: `contract-discovery` when a boundary is crossed
 | `contract-discovery` / `release-contract` | Both sides of a boundary; old clients, compat window, deploy order |
 | `criteria-test-map` | AC ↔ test both ways, mutation-proven |
 | `e2e-sweep` | Before release / overnight: live personas × features sweep, leak/offline/error/i18n checks, visual audit vs code tokens (Figma optional), crash-safe REPORT.md; spec `Device check:` ACs become rows (`scripts/e2e-matrix.sh`) and gate DONE. Project specifics in `e2e.md` (`.spec` `e2e.path`). Suggested for personal/team, on for enterprise |
+| `visual-grid` | One low-RAM screenshot grid (desktop + mobile × light + dark) per UI change via `scripts/shotgrid.mjs`; hard gate replacing `Device check:` for UI ACs; on in `operator-reviewed` |
+| `ticket-interpretation` | Replaces core `## Intent`: Purpose and authority + Ticket interpretation (Accepted/Proposed/Open); ticket re-read before approval and PR. On in `operator-reviewed` |
+| `changed-things` | Replaces `Callers:` / `Real usage:`: Changed things table with contract change, used-by count and evidence, plus Precedent per option. On in `operator-reviewed` |
+| `completion-conditions` | Replaces `Done when` / As-built delta: `## Completion conditions`, per-AC met / not met, `## What was not done`. On in `operator-reviewed` |
 | `contested-decision-scan` | Experimental, off by default. Before drafting: finds choices with two defensible readings, turns each reading's breakage into a test, settles only on consumer evidence, else ships the less restrictive reading |
 | `depth-light` / `tier-1..4` | Depth: Surgical (≤ ~60 lines) or Full (≤ ~300, then split) |
 | `success-metrics`, `user-stories`, `agon-oracle`, `jira-ticket`, `issue-link` | See `skill/SKILL.md` |
