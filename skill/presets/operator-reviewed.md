@@ -10,7 +10,7 @@ branch.pattern: {type}/{slug}
 
 One human operator owns every decision, reviews each slice in the IDE, and approves every commit, push and
 public post. Fits frontend product work with thin tickets, Figma layouts and small reviewed PRs. Opt-in: the
-overrides below and the addons above replace the named core.md rules only while this preset is active.
+overrides below and the addons above replace or extend the named core.md rules only while this preset is active.
 
 ## Overrides of core.md
 
@@ -19,9 +19,11 @@ Carried by addons: `ticket-interpretation` (Intent), `visual-grid` (Device check
 1. **Test cases from real data** replace `Tricky inputs` (step 4): cases come only from real data, the ticket, or
    real users (`input · expected result · preview link`). No fixed count, nothing invented. A named hazard is still
    never waived: test it or cite why it cannot happen.
-2. **Critic is offered, not forced** (step 8): the operator reviews every decision; that review is the critic
-   (`Critic: operator review, YYYY-MM-DD`). Before a larger build, offer one extra critic — `agon nero` when the
-   operator granted Agon for this task, else a fresh-context subagent — and run it only on yes.
+2. **Operator review adds to the critic, never replaces it** (step 8): the operator reviews every decision, and
+   `refine` step e still runs on the spec alone — `agon nero` at normal risk, `agon tribunal` or `council` at high
+   risk, once the operator granted Agon for this task; else a fresh-context subagent. The operator shared the
+   chat that made the decisions, so only a critic without it finds what both missed. `## Refine` names both:
+   `Critic: <critic> · Operator review: YYYY-MM-DD` (`Critics:` when tribunal or council ran).
 3. **No length budget, no OPEN cap** (step 5, step 6): depth follows the work. Every decision is the operator's:
    big ones one at a time (concept, options table, recommendation, one question); small ones as one list of
    proposed defaults, tagged ASSUMED until confirmed.
