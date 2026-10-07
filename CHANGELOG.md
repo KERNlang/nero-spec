@@ -4,12 +4,6 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
-### Added
-
-- Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Tricky inputs, the mandatory critic, the length budget and the OPEN cap while active; the other overrides ship as addons.
-- Addons `ticket-interpretation` (replaces Intent), `changed-things` (replaces Callers / Real usage) and `completion-conditions` (replaces Done when / As-built delta); each states the core rule it replaces. `visual-grid` now replaces the per-AC `Device check:` for UI ACs.
-- Addon `visual-grid` with `scripts/shotgrid.mjs`: one low-RAM screenshot grid (desktop + mobile × light + dark) per UI change.
-
 ### Changed
 
 - Every addon loaded after the Spec line is announced `+<name> (on demand)`; the Spec line lists only loaded addons.
@@ -24,6 +18,9 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Added
 
+- Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Tricky inputs, the mandatory critic, the length budget and the OPEN cap while active; the other overrides ship as addons.
+- Addons `ticket-interpretation` (replaces Intent), `changed-things` (replaces Callers / Real usage) and `completion-conditions` (replaces Done when / As-built delta); each states the core rule it replaces. `visual-grid` now replaces the per-AC `Device check:` for UI ACs.
+- Addon `visual-grid` with `scripts/shotgrid.mjs`: one low-RAM screenshot grid (desktop + mobile × light + dark) per UI change.
 - `spec-check.sh` findings `NO-GIT`, `OPEN-CAP` and `REFINE-STEPS`; `--dir-hash` prints a `dir-hash <sha256> root <dir>` anchor so non-git targets can be drift-checked; `test-spec-check-nogit.sh`.
 - Core step 1b Research (`## Sources` table) and `.spec` key `research.max_age` (default 90 days).
 - `Eval:` acceptance criteria and an eval rung in `criteria-test-map`: baseline vs treatment arms, rubric before runs, `PASS` / `NO-SIGNAL` / `FAIL`.

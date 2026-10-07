@@ -3,9 +3,10 @@
 // Measured on a Nuxt web app: ~800 MB peak for ~15 s, freed on exit.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const USAGE = 'Usage: node shotgrid.mjs <https-url> [out-dir] [--wait <css-selector>] [--dry-run]';
+const USAGE = 'Usage: node shotgrid.mjs <url> [out-dir] [--wait <css-selector>] [--dry-run]';
 const GRID = [
   { name: 'desktop-light', width: 1440, height: 900, scheme: 'light' },
   { name: 'desktop-dark', width: 1440, height: 900, scheme: 'dark' },
@@ -32,19 +33,19 @@ function parseArgs(argv) {
       dryRun = true;
     } else if (arg === '--wait') {
       wait = argv[i + 1];
-      if (!wait || wait.startsWith('--')) {
+      if (!wait || wait.startsWith('-')) {
         fail('--wait needs a css selector');
       }
       i += 1;
-    } else if (arg.startsWith('--')) {
+    } else if (arg.startsWith('-')) {
       fail(`unknown flag ${arg}`);
     } else {
       positional.push(arg);
     }
   }
   const [url, outDir = 'screens', ...extra] = positional;
-  if (!url?.startsWith('https://')) {
-    fail('an https:// url is required');
+  if (!/^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$))/.test(url ?? '')) {
+    fail('url must be https://, or http:// on localhost');
   }
   if (extra.length > 0) {
     fail(`unexpected argument ${extra[0]}`);
@@ -58,7 +59,7 @@ function playwrightCore(require) {
   }
   for (const name of ['playwright-core', 'playwright']) {
     try {
-      return require.resolve(name);
+      return require.resolve(name, { paths: [process.cwd(), dirname(fileURLToPath(import.meta.url))] });
     } catch {
       continue;
     }

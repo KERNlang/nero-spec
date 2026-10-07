@@ -2,7 +2,7 @@
 
 Hook: core step 4 (UI changes), step 9 (converge).
 
-Replaces core per-AC `Device check:` for UI ACs while loaded.
+Replaces how core's per-AC `Device check:` is met for UI ACs while loaded: the check is the grid.
 
 ## When to use
 
@@ -13,10 +13,12 @@ surfaces it touches. Not for backend-only work.
 
 - One `Visual grid:` line in the Verification or Completion section: URL, screens folder, result.
 - Grid: desktop 1440×900 and mobile 390×844, each light and dark (`prefers-color-scheme` emulated).
-- Tool: `node scripts/shotgrid.mjs <https-url> <spec-dir>/screens/<slice> [--wait <css-selector>]`.
+- Each UI AC keeps one line `Device check: visual grid → <screens folder>`, so `e2e-sweep` (`scripts/e2e-matrix.sh`)
+  still collects it.
+- Tool: `node <skill-dir>/scripts/shotgrid.mjs <url> <spec-dir>/screens/<slice> [--wait <css-selector>]`.
   One headless browser and one page; viewport and color scheme switch in place. Measured on a Nuxt web app:
-  ~800 MB peak for ~15 s, freed on exit. Needs Node and `playwright-core` with its headless shell.
-- Every UI change gets one grid: desktop + mobile × light + dark, scoped to the touched surfaces.
+  ~800 MB peak for ~15 s, freed on exit. Needs Node and `playwright-core` with its headless shell;
+  `PW_CORE` / `PW_EXE` override where they are found. URL: https, or http on localhost.
 - Hard gate: a UI AC is not met without its grid, and the agent has looked at all four shots.
 
 ## Required patterns
