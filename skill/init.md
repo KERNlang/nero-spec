@@ -61,12 +61,14 @@ One question at a time. Always offer the default from the chosen preset; Enter =
    - branch pattern (`branch.pattern`), default `feat/{TICKET}-{slug}`;
    - commit convention and whether AI co-author trailers are allowed (goes into the constitution, not `.spec`);
    - allowed AI tooling: `full`, `restricted` (+ which engines → `agon_engines`), `off`. Unsure → `ask`.
+   - company policy: offer to collect the answers above into one policy file instead of `.spec` keys and a vendored copy → 2e.
 4. **`agon`** (personal/team) — confirm the preset default. Machine `agon: no` → note that the repo setting has no effect on this machine.
 5. **`drift`** — unless `drift-guard` was removed: `record` (default) or `living`.
 6. **`specs.path`** — show the preset default; accept or change. Keep it repo-relative; the bundled scanners reject absolute paths, leading `-`, `.`/`..` components, and symlink escapes. Directory names may contain spaces.
 7. **Mode** — `link` (default for personal/team) or `vendored` (default for enterprise/company repos, required when the team must own the skill or must not depend on personal paths).
 8. **Pre-commit hook** — ask once per repo: "Install the advisory spec pre-commit hook (never blocks unless `SPEC_STRICT=1`)?" Default no. Record `hook: yes|no` in `.spec` so it is never asked again.
 9. **E2E sweep** — only if the repo has a UI (web/mobile/desktop) or a public API. Ask: "Enable `e2e-sweep` (live personas × features + visual audit before release / overnight)?" Default: enterprise yes, personal/team no. Yes → `addons: +e2e-sweep` (enterprise: already on) and draft `e2e.md` (2d).
+10. **Company policy** — ask once: "Does this repo follow company conventions or have its own agent skills?" Yes → 2e after writing `.spec`. Default: enterprise yes, personal/team no.
 
 Then show the result and ask to write.
 
@@ -92,7 +94,7 @@ Ask for the location; default `.agents/skills/spec/`. Write:
   SKILL.md        new router that reads the repo .spec (template below)
   core.md         copy, then scrubbed
   addons/<name>.md   only the chosen addons, scrubbed
-  scripts/           spec-check.sh, spec-check-lib.sh, spec-check-contract.sh, pre-commit-spec-check.sh (refine and drift-guard call them); + e2e-matrix.sh with e2e-sweep
+  scripts/           spec-check.sh, spec-check-lib.sh, spec-check-contract.sh, spec-check-policy.sh (never spec-check-policy-local.sh), pre-commit-spec-check.sh (refine and drift-guard call them); + e2e-matrix.sh with e2e-sweep
 <git root>/.spec     machine-readable repo config shared by the checker, hook, and E2E matrix
 ```
 
@@ -121,9 +123,12 @@ argument-hint: "[feature or change description]"
 Define WHAT before HOW. Read the repo `.spec`, load `core.md` + the addons below, then run core step by step.
 
 ## Config
-Read `preset`, `specs.path`, `addons`, ticket/branch keys, and `agon` from the repo `.spec`.
+Read `preset`, `specs.path`, `addons`, ticket/branch keys, `agon` and `policy` from the repo `.spec`.
+`policy` set → read that file before anything else and apply it: its format keys replace `.spec`, `agon.max`/`agon_engines`/`critic` only tighten, `addons.require`/
+`addons.deny`, `rules` files join the Rules of record, its `## Constitution` wins over the one below on conflict,
+and each `skills` step loads that repo skill (spec owns WHAT, skill owns HOW). Invalid policy → stop and report.
 
-Print: `Spec: vendored + addons [...]`
+Print: `Spec: vendored + addons [...] (policy: <path>|none)`
 
 ## Rules of record
 <confidence, challenge and review policy of this team, or "self-audit + fresh-context subagent in the approved runtime + team PR review">
@@ -170,6 +175,24 @@ Path: `.spec` `e2e.path` if set, else `e2e.md` beside the specs folder (`.claude
 - **Figma** — ask only if the user wants `design_source: figma`; then file URL + frame map (screen → frame). Default off.
 
 Show the draft and ask to write it; never overwrite an existing `e2e.md` without the diff.
+
+## 2e. Company policy and repo skills (only on yes)
+
+One file for the whole company, so every colleague gets the same conventions and skills without their own setup. Shape and keys: SKILL.md Step 0 Policy, REFERENCE.md "Company policy".
+
+1. **Where** — mode `vendored` → in the repo (a vendored copy has no machine lookup). Otherwise ask: in the repo (`.nero-spec/policy.md` + `.spec` `policy:`; everyone who pulls gets it) or only on this machine until it is shared (machine `policy_paths: <repo dir>=<absolute .md>`, a folder outside the repo). Default: repo for enterprise, this machine when the user is trying it out first.
+2. **Formats** — reuse the enterprise answers (ticket prefixes, fallback, branch pattern, commit convention); ask only what is missing: PR title format, required headers, sections required from READY TO BUILD on, words a spec must never contain (internal tool names, codenames).
+3. **AI** — `agon.max`, `agon_engines`, `critic` (`subagent` when no external AI is approved) from the allowed-tooling answer.
+4. **Rules of record** — propose the repo's guideline files and `AGENTS.md` files found by a read-only scan; the user picks.
+5. **Repo skills** — run `scripts/list-skills.sh` (read-only). No skills found → skip. Otherwise:
+   - show the skills grouped by suggested step (`understand`, `design`, `critic`, `build`, `tests`, `review`, `tickets`, `retro`, `-` = no match), name + one-line description;
+   - ask one step at a time: "build → `ui-dev`, `api-dev`? (Enter = yes, or name others, `none`)". The suggestion is a keyword guess; the user decides;
+   - several skills per step are fine (`build=ui-dev|api-dev`): at that step the agent loads the one matching the touched area;
+   - skills that change shared files (retros, docs publishing, ticket creation) → ask explicitly before mapping them;
+   - set `skills.path` to the folders of the chosen skills (comma list; skipped when all sit in `.agents/skills`, `.claude/skills` or `.ai/skills`). The same skill name in two folders → ask which one and list that folder first.
+6. **Write** the file (frontmatter + `## Constitution` from the commit/push/release answers), show it, and on yes save it. Machine choice → also add the `policy_paths` entry to the machine file.
+7. **Validate** — run `scripts/spec-check.sh` on the repo: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix with the user before finishing. `POLICY-HEADER/SECTION/TICKET/WORD` on specs written before the policy → list them; the user decides whether to update those specs now, later, or leave them. Print the Spec line; it must show `(policy: <path>)`.
+8. **Repo choice** — suggest committing `.nero-spec/policy.md` with `.spec`, but do not commit.
 
 ## 3. Finish
 

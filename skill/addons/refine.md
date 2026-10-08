@@ -50,7 +50,7 @@ First check that the spec has, each missing item a finding (HIGH when an escalat
 3. **Real usage** — every decision has a `Real usage:` line with evidence. Stricter accessor, narrowed input or forbidden sequence chosen without it → reopen the decision.
 4. **Waived hazards** — grep the spec for "safe", "no handling needed", "bounded", "idempotent", "not possible", "out of scope". Each without a VERIFIED citation → a Tricky input with a test.
 5. **Downstream / History** — `Downstream:` present when output feeds another layer; `History:` command run.
-6. **Mutation probe** — propose 3–5 realistic bugs an implementer could write from this spec (wrong accessor, missing await, unguarded shared state, degenerate input, reused buffer). Each must fail at least one AC's named test; a survivor becomes a Tricky input. Effective agon on → `agon nero` with this as its brief, launched at step e beside the critic (separate calls, not one merged brief); off → the step e critic does it.
+6. **Mutation probe** — propose 3–5 realistic bugs an implementer could write from this spec (wrong accessor, missing await, unguarded shared state, degenerate input, reused buffer). Each must fail at least one AC's named test; a survivor becomes a Tricky input. Effective agon on (and no policy `critic: subagent`) → `agon nero` with this as its brief, launched at step e beside the critic (separate calls, not one merged brief); off → the step e critic does it.
 
 Then ask the questions that apply — Surgical: questions 1–3 only, max 3; Full: max 6. Each answer becomes an AC or Tricky input (or an Out-of-Scope line), never a new section.
 
@@ -73,6 +73,9 @@ Input: the spec (with step d answers already folded in) + open findings only, ne
 | Effective agon on, normal risk | `agon nero "<spec path>"` |
 | Effective agon on, high risk (auth, guest, payment, persistence, deletion, privacy, destructive fs/process ops, shared contracts) | `agon tribunal` or `agon council` |
 | `agon: restricted` | same mode, only `agon_engines`, passed explicitly; report the shortfall if the risk needs more |
+| Any `agon nero` call | exactly one engine, `-e <one>` (the rules of record pick it, else the first allowed engine); never hand nero a list to auto-pick from |
+| Policy `critic: subagent` | fresh-context subagent for the critic and the d.6 probe, whatever agon allows; this row wins over the agon rows |
+| Policy `critic: agon` | an agon row above is required; effective agon off → stop and report, never fall back silently |
 | Effective agon off, or restricted without engines | fresh-context subagent (or a new session, never the writing one) with steps b–d as its checklist; say it is same-model |
 
 Rules of record decide the exact flags. Each critique finding is verified against the code before it changes the spec. Rejecting a finding needs evidence that disproves it: a code citation that covers every construction path, or command output; a requirement, UX or external-system finding needs the owner's decision instead. Without that evidence a code finding becomes a Tricky input with a named test — test it, don't argue it.

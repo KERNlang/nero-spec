@@ -25,6 +25,9 @@ skill/
     spec-check.sh       advisory spec health scan (drift, citations, status, pointers, repeated fixes)
     spec-check-lib.sh   parsing helpers sourced by spec-check.sh
     spec-check-contract.sh  contract checks sourced by spec-check.sh
+    spec-check-policy.sh    company policy load + checks sourced by spec-check.sh
+    spec-check-policy-local.sh  optional policy_paths lookup (not copied into vendored repos)
+    list-skills.sh      read-only scan of the repo's own agent skills with a suggested step (used by /spec init 2e)
     pre-commit-spec-check.sh  optional advisory git hook (staged specs + specs whose Changes are staged)
     spec-drift.sh       alias for spec-check.sh
     test-spec-check.sh  fixture tests for spec-check.sh
@@ -76,6 +79,7 @@ On demand, regardless of preset: `contract-discovery` when a boundary is crossed
 | `oracle_rules` | path to oracle design rules for `agon goal`/`conquer`; empty = `agon-oracle` rules only |
 | `mutation` | starting rung: `agon` \| `tool` \| `subagent` \| `manual` |
 | `default_paths` | `<dir>=<preset>, ...` — preset for repos without `.spec` under that dir; empty = ask |
+| `policy_paths` | `<dir>=<absolute .md>, ...` — company policy kept outside the repo (pilot, or repos that cannot carry it); repo `.spec` `policy:` wins |
 
 Example:
 
@@ -106,7 +110,39 @@ Skill files reference only these keys, never literal paths.
 3. `default_paths` in the machine file (longest matching dir wins).
 4. Nothing → `agon: off`, suggest `/spec init`, ask. Company code never goes to external AI by default.
 
-Every run prints: `Spec: preset <x> + addons [...] (via vendored|.spec|default path|asked) (agon: on|off → reason) (rules: <file>|defaults)`.
+Every run prints: `Spec: preset <x> + addons [...] (via vendored|.spec|default path|asked) (agon: on|off → reason) (rules: <file>|defaults) (policy: <path>|none)`.
+
+## Company policy
+
+Instead of forking the skill, a company keeps one policy file: in its repo (`.spec` `policy: .nero-spec/policy.md`) or, before it is shared, on one machine (`policy_paths`). Full key table: `skill/SKILL.md` Step 0 Policy.
+
+```markdown
+---
+format: nero-spec-policy/v1
+ticket.regex: ORG-\d+
+branch.pattern: ORG-{n}_{Name}
+pr.title: <type>: <summary> #ORG-<n>
+headers: Ticket, Confidence
+sections: Release Notes
+words.deny: codename
+addons.require: refine, criteria-test-map
+agon.max: off
+critic: subagent
+rules: docs/coding-guidelines.md, AGENTS.md
+skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review, critic=design-critic
+skills.path: .ai/skills
+---
+
+## Constitution
+
+- Every spec belongs to an ORG ticket. Never invent a key.
+- Release notes in the product language; mark internal-only changes.
+```
+
+- **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
+- **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
+- **Onboarding:** `/spec init` step 2e asks where the policy lives (repo or this machine), collects formats, AI ceiling and rules, then runs `scripts/list-skills.sh` and asks per step which repo skills to map (suggestions are keyword guesses), writes the file and validates it with `spec-check.sh`.
+- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
 
 ## `.spec`
 

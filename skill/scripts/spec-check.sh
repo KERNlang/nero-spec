@@ -27,6 +27,13 @@
 #   REFINE-STEPS   same Status, **Depth:** Full or tier 2-4 and a Critic, but ## Refine has no a–g / `Steps:` coverage
 #   OPEN-CAP       more than 3 lines tagged OPEN outside code, fences, ## Refine and ## Corrections Log
 #   NO-GIT         target outside any git repo: root = repo-dir, else the spec's dir; git-based kinds skipped
+#   POLICY-CONFLICT  .spec loosens the company policy (owned format keys, agon above agon.max, engines, addons)
+#   POLICY-RULES   a policy rules file is missing, a symlink or outside the repo
+#   POLICY-SKILL   a skill named in the policy `skills` has no SKILL.md inside the repo
+#   POLICY-HEADER / POLICY-SECTION / POLICY-TICKET / POLICY-WORD  spec misses a required header or section
+#                  (sections only at READY/IN PROGRESS/DONE), Ticket fails ticket.regex, or uses a denied word
+# Policy: `.spec` `policy: <repo-relative .md>`, else the local lookup in spec-check-policy-local.sh when present.
+# Invalid policy file → exit 2.
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
@@ -44,10 +51,12 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-for helper in spec-check-lib.sh spec-check-contract.sh; do
+for helper in spec-check-lib.sh spec-check-contract.sh spec-check-policy.sh; do
   # shellcheck disable=SC1090 # helper path resolved at runtime
   [ -r "$HERE/$helper" ] && . "$HERE/$helper" || { echo "spec-check: cannot load $HERE/$helper" >&2; exit 2; }
 done
+# shellcheck disable=SC1091 # optional helper, absent in vendored copies
+[ -r "$HERE/spec-check-policy-local.sh" ] && . "$HERE/spec-check-policy-local.sh"
 
 STRICT=0; DIR=""; ONE=""; REPOS_ARG=""; SHIPPED_PCT=80; SHIPPED_MIN=3; STALE_FLAG=0; TOUCHING=""; DIRHASH=0
 REPEAT_MIN=4; REPEAT_DAYS=30; REF_CAP=20; FIELD_WINDOW=15
@@ -121,6 +130,7 @@ drift_guard_on() {
   return 1
 }
 STALE_FALLBACK=0; drift_guard_on && STALE_FALLBACK=1
+policy_load || exit 2
 
 REPOMAP=""
 add_repos() {
@@ -157,6 +167,7 @@ list_specs() {
   spec_list_files "$SPEC_DIRS" | sort
 }
 SPEC_FILES="$(list_specs)" || exit 2
+[ "$DIRHASH" = 1 ] || policy_check_repo
 
 is_pointer() {
   [ "$(grep -c '[^[:space:]]' "$1")" -le 6 ] && tr -d '`' < "$1" | grep -qE '[~A-Za-z0-9_./@-]*specs/[~A-Za-z0-9_./@-]*\.md'
@@ -403,7 +414,7 @@ check_spec() {
   local f="$1" status cls entries n dh
   if [ -n "$TOUCHING" ]; then touches "$f" "$(entries_of "$f")" || return 1; fi
   [ "$NOGIT" = 1 ] && emit NO-GIT "$f" "$(tilde_path "$ROOT") is not in a git repo — git-based checks skipped; anchor with --dir-hash"
-  if is_pointer "$f"; then check_pointer "$f"; return 0; fi
+  if is_pointer "$f"; then check_pointer "$f"; [ -n "$POLICY_FILE" ] && policy_check_words "$f"; return 0; fi
   status="$(status_of "$f")"; cls="$(status_class "$status")"
   [ -n "$status" ] || emit NO-STATUS "$f" "no **Status:** header"
   [ -n "$status" ] && [ -z "$(status_norm "$status")" ] &&
@@ -418,6 +429,7 @@ check_spec() {
   [ -n "$dh" ] && check_dirhash "$f" "$dh" "$entries"
   [ "$NOGIT" = 1 ] || check_git "$f" "$status" "$cls" "$entries" "$dh"
   check_review "$f" "$status"
+  policy_check_spec "$f" "$status"
   return 0
 }
 

@@ -23,6 +23,7 @@ Read `~/.config/spec/machine` (plain `key: value`):
 | `oracle_rules` | path to oracle design rules | `agon-oracle` rules only |
 | `mutation` | `agon` \| `tool` \| `subagent` \| `manual` | first rung that works (`criteria-test-map`) |
 | `default_paths` | `<dir>=<preset>, ...` e.g. `~/work=enterprise, ~/src=personal, ~/.ai=personal` | no default-path mapping |
+| `policy_paths` | `<dir>=<absolute .md>, ...` e.g. `~/work/acme=~/policies/acme/policy.md` | no machine policy; a local company policy for repos that do not ship their own (longest dir match) |
 
 - File missing → all defaults; mention `/spec init --machine` once.
 - Path set but file unreadable → warn, use defaults.
@@ -38,22 +39,47 @@ Non-git target (no git root above it): the target directory plays the git root f
 
 Merge: preset frontmatter defaults ← `.spec` values. Unknown keys → warn once, ignore.
 
+### Policy (company module)
+
+One file holds a company's conventions so the skill itself stays unchanged. Resolve: `.spec` `policy:` (repo-relative `.md` inside the git root, no symlinks) → else machine `policy_paths` → else none. Invalid or unreadable policy → stop and report; never run with half a policy.
+
+Frontmatter: flat `key: value`, whole-line `#` comments, unknown or duplicate key = invalid. `format: nero-spec-policy/v1` is required.
+
+| Key | Meaning |
+|---|---|
+| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy: they replace the preset and `.spec` values |
+| `pr.title` | PR title format, e.g. `<type>: <summary> #ORG-<n>` |
+| `headers` | Header fields every spec must carry, e.g. `Ticket, Confidence` |
+| `sections` | Sections required from READY TO BUILD on, e.g. `Release Notes` |
+| `words.deny` | Words a spec must never contain (internal tool names, codenames) |
+| `addons.require`, `addons.deny` | `.spec` cannot remove a required addon or enable a denied one |
+| `agon.max` | `off` \| `ask` \| `restricted` \| `full` — ceiling; effective repo agon = the lower of `.spec`/preset and this |
+| `agon_engines` | Allowed engines; effective list = `.spec` list ∩ this |
+| `critic` | `subagent` \| `agon` \| `any` — who may run the refine critique (`subagent` = never an external AI) |
+| `rules` | Rules-of-record files (repo-relative), read with the machine `rules` file |
+| `skills` | The company's own repo skills per step: `<step>=<skill>[\|<skill>], ...`, steps `understand`, `design`, `critic`, `build`, `tests`, `review`, `tickets`, `retro` |
+| `skills.path` | Repo-relative folders holding `<skill>/SKILL.md`, comma list, first match wins; default `.agents/skills`, `.claude/skills`, `.ai/skills`. A `SKILL.md` that is a symlink, or a skill folder resolving outside the repo, never counts |
+
+**Repo skills per step.** When the policy names a skill for a step, load that skill at the step and announce `+skill <name> (policy: <step>)`; several names = the skill matching the touched area (e.g. frontend vs backend), else the first. Steps: `understand` core 1 (unclear ticket, terms) · `design` core 4 Implementation Options · `critic` refine step e, run in a fresh context and still bound by agon/`critic` · `build` implementation after approval · `tests` writing the tests `criteria-test-map` names · `review` before core 9 Converge · `tickets` splitting an approved spec · `retro` after Converge. Split: the spec owns WHAT (ACs, claim tags, evidence, gates, Status); the repo skill owns HOW (code style, test patterns, review axes) and wins on those. A skill never lowers a spec gate.
+
+Body: `## Constitution` (binding prose) and optional `## Header and extra sections`. Precedence: the policy may only tighten agon and the critic, never loosen them; its formats win over preset and `.spec`; `.spec` still owns operational keys (`stack`, `repos`, extra addons). `scripts/spec-check.sh` enforces the mechanical part (`POLICY-*` findings).
+
 ### Effective agon
 
 `on` only when ALL hold, else `off`:
 - machine `agon: yes`;
 - `command -v agon` succeeds;
-- repo/preset `agon` is `full` or `restricted` (`ask` unanswered = off).
+- repo/preset `agon` is `full` or `restricted` (`ask` unanswered = off), capped by the policy `agon.max`.
 
 ### Spec line
 
 Print exactly one line before anything else:
 
 ```
-Spec: preset <name> + addons [<a>, ...] (via vendored|.spec|default path|asked) (agon: on|off[ → reason]) (rules: <file>|defaults)
+Spec: preset <name> + addons [<a>, ...] (via vendored|.spec|default path|asked) (agon: on|off[ → reason]) (rules: <file>|defaults) (policy: <path>|none)
 ```
 
-Reasons: `not installed`, `machine: no`, `repo: off`, `ask unanswered`. `addons [...]` lists only the addons loaded at that point, not the enabled set; later loads are announced per Step 1.
+Reasons: `not installed`, `machine: no`, `repo: off`, `ask unanswered`, `policy: off`. `addons [...]` lists only the addons loaded at that point, not the enabled set; later loads are announced per Step 1.
 
 ## `.spec` format
 
@@ -68,6 +94,7 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 | `ticket.prefixes` | e.g. `ABC, XYZ` | only with `jira-ticket` |
 | `ticket.fallback` | e.g. `ABC-XXXX` or empty | only with `jira-ticket`; empty = never invent |
 | `branch.pattern` | e.g. `{type}/{TICKET}-{slug}` | placeholders `{type}`, `{TICKET}`, `{slug}` |
+| `policy` | repo-relative `.md`, e.g. `.nero-spec/policy.md` | company module (Step 0 Policy); wins over machine `policy_paths` |
 | `agon` | `full` \| `restricted` \| `off` \| `ask` | what this repo allows |
 | `agon_engines` | e.g. `claude, codex` | only with `agon: restricted` |
 | `drift` | `record` \| `living` | only with `drift-guard`; default `record` |
@@ -80,13 +107,14 @@ Plain `key: value`, one per line, lists comma-separated, `#` starts a comment.
 
 ## Step 1 — Load
 
-- Always: `core.md`, then `presets/<preset>.md` (its body is the constitution and binds for the whole task), then the machine `rules` file if set.
+- Always: `core.md`, then `presets/<preset>.md` (its body is the constitution and binds for the whole task), then the policy body if one resolved, then the policy `rules` files and the machine `rules` file if set.
+- Policy `addons.require` are enabled; `addons.deny` are blocked even on demand.
 - Enabled addons = preset defaults ± `.spec`. Enabled is the **allowed set**, not the load set.
 - **Depth:** load only the ONE depth addon core step 2 selects (`depth-light` or a single `tier-*`). Selected tier not enabled → load it on demand (team/enterprise; personal stays on `depth-light`).
 - **Other addons:** load each only when its core hook fires. Missing file → warn, continue.
 - `agon-oracle` loads only with effective agon `on`.
 - On demand, even when not enabled (blocked only by an explicit `-name` in `.spec`): `contract-discovery` when a boundary is crossed; `release-contract` for client↔backend releases; `refine` at core step 8; `criteria-test-map` when core step 2 forces it.
-- An addon line `Replaces core <rule>` wins over that core rule while the addon is loaded; the preset constitution still wins over both.
+- An addon line `Replaces core <rule>` wins over that core rule while the addon is loaded; the policy constitution, then the preset constitution, still win over both.
 - Every addon loaded after the Spec line, enabled or not, is announced `+<name> (on demand)` before its hook runs.
 
 ## Step 2 — Run
