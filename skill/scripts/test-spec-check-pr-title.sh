@@ -42,6 +42,9 @@ title 1 "wrong ticket for the spec" --spec "$SP" --pr-title "fix(core): Add thin
 says "does not name the spec's ticket ORG-12"
 title 1 "longer key is not the spec's key" --spec "$SP" --pr-title "fix(core): Add thing #ORG-123" "$A"
 title 1 "link target key is ignored" --spec "$SP" --pr-title "fix(core): Add thing #ORG-99" "$A"
+printf "# Other\n\n**Status:** SPEC\n" > "$A/.claude/specs/ORG-12-thing/noticket.md"
+title 1 "spec without a Ticket key" --spec "$A/.claude/specs/ORG-12-thing/noticket.md" --pr-title "fix(core): Add thing #ORG-12" "$A"
+says "has no **Ticket:** key"
 title 2 "empty title" --pr-title "" "$A"
 title 2 "multi-line title" --pr-title "fix(core): Add thing #ORG-12
 fix(core): Add thing #ORG-12" "$A"
@@ -51,7 +54,10 @@ pr.regex: ^(feat|fix): [A-Z].* #ORG-\d+$
 '
 title 0 "pr.regex match" --pr-title "fix: Add thing #ORG-12" "$A"
 title 1 "pr.regex wins over the looser template" --pr-title "fix: add thing #ORG-12" "$A"
+says "pr.regex ^(feat|fix)"
 
+printf -- '---\nformat: nero-spec-policy/v1\npr.title: <fix>: <Summary> #ORG-<n>\n---\n' > "$A/.nero-spec/policy.md"
+title 2 "--spec without ticket.regex" --spec "$SP" --pr-title "fix: Add thing #ORG-12" "$A"
 policy 'headers: Ticket
 '
 title 2 "policy without a PR format" --pr-title "fix: Add thing #ORG-12" "$A"

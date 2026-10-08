@@ -35,7 +35,7 @@
 # Policy: `.spec` `policy: <repo-relative .md>`, else the local lookup in spec-check-policy-local.sh when present.
 # Invalid policy file → exit 2.
 # --pr-title TITLE: only checks a PR title against the policy (pr.regex, else pr.title with <n> = digits,
-# <a|b> = one of, any other <x> = text) and, with --spec, that it names the spec's Ticket key. Exit 0 ok, 1 no, 2 no policy.
+# <a|b> = one of, any other <x> = text) and, with --spec, that it names the spec's Ticket key. Exit 0 ok, 1 no (or the spec has no Ticket key), 2 no policy, no format, or --spec without ticket.regex.
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
