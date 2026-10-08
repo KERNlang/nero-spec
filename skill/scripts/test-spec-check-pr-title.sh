@@ -70,5 +70,8 @@ rm "$A/.spec"
 title 2 "no policy" --pr-title "fix: Add thing #ORG-12" "$A"
 says "needs a company policy"
 
+title 2 "missing spec file" --spec "$A/nope.md" --pr-title "fix(core): Add thing #ORG-12" "$A"
+says "no such spec"
+
 echo "test-spec-check-pr-title: $PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]

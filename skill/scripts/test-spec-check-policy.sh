@@ -288,6 +288,11 @@ bad_policy --- 'format: nero-spec-policy/v1' 'critic: human' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'ticket.regex: ORG-(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'pr.regex: ^fix(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'critic: agon' 'agon.max: off' ---
+mkdir -p "$T/evil" && printf -- "---\nagon: full\n---\n" > "$T/evil/p.md"
+printf "preset: ../../../../../../../../../../../../../..%s\npolicy: .nero-spec/policy.md\n" "$T/evil/p" > "$A/.spec"
+OUT="$(bash "$CHECK" "$A" 2>&1)"
+hasnt POLICY-CONFLICT ".spec: agon 'full'"
+
 bad_policy --- 'format: nero-spec-policy/v1' 'branch.pattern: ORG-{n}_{Name}' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: ../secrets.md' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: /etc/passwd' ---

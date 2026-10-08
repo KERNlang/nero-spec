@@ -35,5 +35,5 @@ skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review
 ```
 
 - **Safety:** repo policy = repo-relative `.md` in the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format` or bad values → `spec-check.sh` exits 2. A symlinked `SKILL.md` or a skill folder outside the repo never counts.
-- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy; `agon: full` plus a policy engine list counts), `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET` (whole key), `POLICY-WORD`, `POLICY-RULES`, `POLICY-SKILL`.
+- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy; `agon: full` plus a policy engine list counts), `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET` (whole key), `POLICY-WORD`, `POLICY-RULES`, `POLICY-SKILL`. Pointer specs get only `POLICY-WORD`.
 - **PR title:** `spec-check.sh --spec <spec> --pr-title "<title>"` → exit 0 `PR-TITLE ok`, 1 mismatch, 2 no policy or no title format. A title that names a ticket must name the spec's ticket; formats without a ticket only need to match.

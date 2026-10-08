@@ -187,8 +187,10 @@ items() { printf '%s' "$1" | tr ',' '\n' | awk '{ $1 = $1 } $0 != ""'; }
 agon_rank() { case "$1" in off) echo 0 ;; ask) echo 1 ;; restricted) echo 2 ;; full) echo 3 ;; esac; }
 
 preset_key() {
-  local f
-  f="$HERE/../presets/$(cfg preset | tr -d ' ').md"
+  local f p
+  p="$(cfg preset | tr -d ' ')"
+  case "$p" in ''|*[!A-Za-z0-9_-]*) return 0 ;; esac
+  f="$HERE/../presets/$p.md"
   [ -f "$f" ] && awk -v k="$1" 'NR == 1 { next } $0 == "---" { exit } index($0, k ":") == 1 { sub(/^[^:]*:[ \t]*/, ""); print; exit }' "$f"
 }
 
