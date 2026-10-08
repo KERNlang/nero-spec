@@ -147,6 +147,7 @@ Checklist, not a review.
 - Each AC → `PASS` (test name + load-bearing output line), `GAP` (what is missing), or moved to Out of Scope with a reason. Device-check ACs PASS only with the screenshot/recording. With `## Intent`, DONE also needs the human `Picked` confirmation.
 - `git diff --name-only <Verified at>..HEAD` (each repo) vs Changes → list files outside it. dir-hash anchor → re-run `--dir-hash`, record the new value at DONE; files outside Changes cannot be diffed without git, so list the files you edited.
 - Add `## As-built delta`: what differs from the spec and why.
+- PR title proposed or set and the company policy has `pr.title`/`pr.regex` → `scripts/spec-check.sh --spec <spec> --pr-title "<title>"` must print `PR-TITLE ok` before the title is handed over; CI lints titles too, a typo costs a failed build.
 - **DONE only when every AC is checked `- [x]` or moved out of scope**, and every consumer in Changes is merged on its shipping branch. Otherwise IN PROGRESS.
 
 ## Principles

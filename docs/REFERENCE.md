@@ -121,7 +121,7 @@ Instead of forking the skill, a company keeps one policy file: in its repo (`.sp
 format: nero-spec-policy/v1
 ticket.regex: ORG-\d+
 branch.pattern: ORG-{n}_{Name}
-pr.title: <type>: <summary> #ORG-<n>
+pr.title: <feat|fix|docs>: <Summary> #ORG-<n>
 headers: Ticket, Confidence
 sections: Release Notes
 words.deny: codename
@@ -142,6 +142,7 @@ skills.path: .ai/skills
 - **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
 - **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
 - **Onboarding:** `/spec init` step 2e asks where the policy lives (repo or this machine), collects formats, AI ceiling and rules, then runs `scripts/list-skills.sh` and asks per step which repo skills to map (suggestions are keyword guesses), writes the file and validates it with `spec-check.sh`.
+- **PR title:** `spec-check.sh --spec <spec> --pr-title "<title>"` checks a title against `pr.regex` (exact ERE), else the `pr.title` template (`<n>` digits, `<a|b>` one of, other `<x>` any text), plus the spec's Ticket key as a whole word. Exit 0 `PR-TITLE ok`, 1 mismatch, 2 no policy or no format. Run it before a title is handed over: CI title lints fail on a stray character.
 - **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
 
 ## `.spec`

@@ -48,7 +48,8 @@ Frontmatter: flat `key: value`, whole-line `#` comments, unknown or duplicate ke
 | Key | Meaning |
 |---|---|
 | `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy: they replace the preset and `.spec` values |
-| `pr.title` | PR title format, e.g. `<type>: <summary> #ORG-<n>` |
+| `pr.title` | PR title format, e.g. `<feat\|fix>: <Summary> #ORG-<n>` (`<n>` = digits, `<a\|b>` = one of, other `<x>` = any text) |
+| `pr.regex` | Optional exact ERE for the title when the format has rules a template can't say (case, scope); wins over `pr.title` for `--pr-title` |
 | `headers` | Header fields every spec must carry, e.g. `Ticket, Confidence` |
 | `sections` | Sections required from READY TO BUILD on, e.g. `Release Notes` |
 | `words.deny` | Words a spec must never contain (internal tool names, codenames) |

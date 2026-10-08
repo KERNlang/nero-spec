@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: spec-check.sh [--strict] [--spec FILE] [--repos name=path[,...]] [--stale] [--touching LIST]
 #                      [--shipped-pct N] [--repeat-fix N] [--repeat-days D] [--ref-cap N] [--field-window N]
-#                      [--dir-hash] [repo-dir]
+#                      [--dir-hash] [--pr-title TITLE] [repo-dir]
 #
 # Mechanical health checks for claim-tagged specs. Exit 1 for strict findings, 2 for broken invocation or config.
 # One line per finding, then a summary. Kinds:
@@ -34,6 +34,8 @@
 #                  (sections only at READY/IN PROGRESS/DONE), Ticket fails ticket.regex, or uses a denied word
 # Policy: `.spec` `policy: <repo-relative .md>`, else the local lookup in spec-check-policy-local.sh when present.
 # Invalid policy file → exit 2.
+# --pr-title TITLE: only checks a PR title against the policy (pr.regex, else pr.title with <n> = digits,
+# <a|b> = one of, any other <x> = text) and, with --spec, that it names the spec's Ticket key. Exit 0 ok, 1 no, 2 no policy.
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
@@ -58,7 +60,7 @@ done
 # shellcheck disable=SC1091 # optional helper, absent in vendored copies
 [ -r "$HERE/spec-check-policy-local.sh" ] && . "$HERE/spec-check-policy-local.sh"
 
-STRICT=0; DIR=""; ONE=""; REPOS_ARG=""; SHIPPED_PCT=80; SHIPPED_MIN=3; STALE_FLAG=0; TOUCHING=""; DIRHASH=0
+STRICT=0; DIR=""; ONE=""; PRTITLE=""; PRTITLE_SET=0; REPOS_ARG=""; SHIPPED_PCT=80; SHIPPED_MIN=3; STALE_FLAG=0; TOUCHING=""; DIRHASH=0
 REPEAT_MIN=4; REPEAT_DAYS=30; REF_CAP=20; FIELD_WINDOW=15
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -74,6 +76,7 @@ while [ $# -gt 0 ]; do
     --field-window) FIELD_WINDOW="${2:-15}"; shift ;;
     --stale) STALE_FLAG=1 ;;
     --dir-hash) DIRHASH=1 ;;
+    --pr-title) PRTITLE="${2-}"; PRTITLE_SET=1; shift ;;
     --touching) TOUCHING="${2:-}"; shift ;;
     -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
     -*) echo "spec-check: unknown flag $1" >&2; exit 2 ;;
@@ -131,6 +134,10 @@ drift_guard_on() {
 }
 STALE_FALLBACK=0; drift_guard_on && STALE_FALLBACK=1
 policy_load || exit 2
+if [ "$PRTITLE_SET" = 1 ]; then
+  [ -n "$POLICY_FILE" ] || { echo "spec-check: --pr-title needs a company policy" >&2; exit 2; }
+  policy_check_pr_title "$PRTITLE" "$ONE"; exit $?
+fi
 
 REPOMAP=""
 add_repos() {
