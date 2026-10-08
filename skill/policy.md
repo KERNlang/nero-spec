@@ -19,7 +19,7 @@ One file per company instead of a fork: in the repo (`.spec` `policy: .nero-spec
 ---
 format: nero-spec-policy/v1
 ticket.regex: ORG-\d+
-branch.pattern: ORG-{n}_{Name}
+branch.pattern: {TICKET}_{slug}
 pr.title: <feat|fix|docs>: <Summary> #ORG-<n>
 headers: Ticket, Confidence
 sections: Release Notes

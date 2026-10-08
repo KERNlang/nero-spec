@@ -40,7 +40,7 @@ cat > "$A/.nero-spec/policy.md" <<'EOF'
 format: nero-spec-policy/v1
 # comment lines are ignored
 ticket.regex: ORG-\d+
-branch.pattern: ORG-{n}_{Name}
+branch.pattern: {TICKET}_{slug}
 pr.title: <type>: <summary> #ORG-<n>
 headers: Ticket, Confidence
 sections: Release Notes
@@ -288,6 +288,7 @@ bad_policy --- 'format: nero-spec-policy/v1' 'critic: human' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'ticket.regex: ORG-(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'pr.regex: ^fix(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'critic: agon' 'agon.max: off' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'branch.pattern: ORG-{n}_{Name}' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: ../secrets.md' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: /etc/passwd' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'skills: deploy=dev' ---
