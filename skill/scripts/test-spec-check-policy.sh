@@ -51,6 +51,7 @@ agon.max: restricted
 agon_engines: alpha, beta
 critic: subagent
 rules: docs/guidelines.md
+skills: build=dev|ui-dev, review=code-review, tests=ext, retro=empty
 ---
 
 ## Constitution
@@ -61,6 +62,9 @@ cat > "$A/.spec" <<'EOF'
 preset: personal
 policy: ./.nero-spec/policy.md
 EOF
+mkdir -p "$A/.agents/skills/dev" "$A/.agents/skills/code-review" "$A/.agents/skills/empty" "$T/extskill"
+echo dev > "$A/.agents/skills/dev/SKILL.md"; echo review > "$A/.agents/skills/code-review/SKILL.md"
+echo ext > "$T/extskill/SKILL.md"; ln -s "$T/extskill" "$A/.agents/skills/ext"
 
 spec good <<'EOF'
 # Good
@@ -163,6 +167,11 @@ hasnt POLICY-SECTION .claude/specs/suffixed-section/spec.md
 has POLICY-WORD .claude/specs/pointer/spec.md
 hasnt POLICY-HEADER .claude/specs/pointer/spec.md
 has POLICY-RULES ".spec: rules file 'docs/guidelines.md'"
+has POLICY-SKILL ".spec: skill 'ui-dev' for step 'build'"
+has POLICY-SKILL ".spec: skill 'ext' for step 'tests'"
+has POLICY-SKILL ".spec: skill 'empty' for step 'retro'"
+hasnt POLICY-SKILL ".spec: skill 'dev'"
+hasnt POLICY-SKILL ".spec: skill 'code-review'"
 has POLICY-WORD ".claude/specs/word/spec.md: line 5"
 hasnt POLICY-WORD .claude/specs/good/spec.md
 has POLICY-CONFLICT ".spec: agon 'full' exceeds policy agon.max 'restricted'"
@@ -202,6 +211,14 @@ sed 's/^format: nero-spec-policy\/v1$/format: nero-spec-policy\/v1\nticket.fallb
 sed -i.bak 's#^policy: .*#policy: .nero-spec/fallback.md#' "$A/.spec"
 OUT="$(bash "$CHECK" "$A" 2>&1)"
 has POLICY-CONFLICT ".spec: ticket.fallback 'ORG-XXXX' differs"
+mkdir -p "$A/.config/ai-skills/ui-dev" && echo web > "$A/.config/ai-skills/ui-dev/SKILL.md"
+ln -s "$A/.config/ai-skills/ui-dev" "$A/.config/ai-skills/web-link"
+printf -- '---\nformat: nero-spec-policy/v1\nskills.path: .config/ai-skills\nskills: build=ui-dev|web-link|dev\n---\n' > "$A/.nero-spec/skills.md"
+sed -i.bak 's#^policy: .*#policy: .nero-spec/skills.md#' "$A/.spec"
+OUT="$(bash "$CHECK" "$A" 2>&1)"
+hasnt POLICY-SKILL ".spec: skill 'ui-dev'"
+hasnt POLICY-SKILL ".spec: skill 'web-link'"
+has POLICY-SKILL ".spec: skill 'dev' for step 'build' has no SKILL.md under .config/ai-skills"
 awk '{ printf "%s\r\n", $0 }' "$A/.nero-spec/policy.md" > "$A/.nero-spec/crlf.md"
 sed -i.bak 's#^policy: .*#policy: .nero-spec/crlf.md#' "$A/.spec"
 exits 0 "CRLF policy parses" bash "$CHECK" "$A"
@@ -265,6 +282,11 @@ bad_policy --- 'format: nero-spec-policy/v1' 'ticket.regex: ORG-(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'critic: agon' 'agon.max: off' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: ../secrets.md' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: /etc/passwd' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: deploy=dev' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=../dev' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=dev|.hidden' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills.path: ../skills' ---
 bad_policy 'format: nero-spec-policy/v1'
 bad_policy --- 'format: nero-spec-policy/v1'
 

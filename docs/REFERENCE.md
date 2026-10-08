@@ -128,6 +128,8 @@ addons.require: refine, criteria-test-map
 agon.max: off
 critic: subagent
 rules: docs/coding-guidelines.md, AGENTS.md
+skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review, critic=design-critic
+skills.path: .ai/skills
 ---
 
 ## Constitution
@@ -138,7 +140,7 @@ rules: docs/coding-guidelines.md, AGENTS.md
 
 - **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
 - **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
-- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
+- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
 
 ## `.spec`
 

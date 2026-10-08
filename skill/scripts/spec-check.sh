@@ -29,6 +29,7 @@
 #   NO-GIT         target outside any git repo: root = repo-dir, else the spec's dir; git-based kinds skipped
 #   POLICY-CONFLICT  .spec loosens the company policy (owned format keys, agon above agon.max, engines, addons)
 #   POLICY-RULES   a policy rules file is missing, a symlink or outside the repo
+#   POLICY-SKILL   a skill named in the policy `skills` has no SKILL.md inside the repo
 #   POLICY-HEADER / POLICY-SECTION / POLICY-TICKET / POLICY-WORD  spec misses a required header or section
 #                  (sections only at READY/IN PROGRESS/DONE), Ticket fails ticket.regex, or uses a denied word
 # Policy: `.spec` `policy: <repo-relative .md>`, else the local lookup in spec-check-policy-local.sh when present.

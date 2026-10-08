@@ -3,7 +3,9 @@
 # Policy = one company module: `.spec` `policy:` (repo file), else policy_local_path from the optional
 # spec-check-policy-local.sh (not shipped in vendored copies).
 
-POLICY_KEYS=" format ticket.regex ticket.prefixes ticket.fallback branch.pattern pr.title headers sections words.deny addons.require addons.deny agon.max agon_engines critic rules "
+POLICY_KEYS=" format ticket.regex ticket.prefixes ticket.fallback branch.pattern pr.title headers sections words.deny addons.require addons.deny agon.max agon_engines critic rules skills skills.path "
+POLICY_STEPS=" understand design critic build tests review tickets retro "
+SKILL_DIRS_DEFAULT=".agents/skills .claude/skills .ai/skills"
 POLICY_OWNED="ticket.regex ticket.prefixes ticket.fallback branch.pattern"
 POLICY_FILE=""; POLICY_KV=""
 
@@ -68,7 +70,47 @@ policy_validate() {
   done <<EOF
 $(items "$(pol rules)")
 EOF
+  if [ -n "$(pol skills.path)" ]; then
+    repo_rel_path "$(pol skills.path)" >/dev/null || { policy_fail "$POLICY_FILE: skills.path must be repo-relative without . or .. components"; return 2; }
+  fi
+  while IFS= read -r r; do
+    [ -n "$r" ] || continue
+    case "$r" in *=*) ;; *) policy_fail "$POLICY_FILE: skills entry '$r' must be <step>=<skill>[|<skill>]"; return 2 ;; esac
+    case "$POLICY_STEPS" in *" ${r%%=*} "*) ;; *) policy_fail "$POLICY_FILE: skills step '${r%%=*}' must be one of:$POLICY_STEPS"; return 2 ;; esac
+    skill_names "$r" | grep -qvE '^[A-Za-z0-9_][A-Za-z0-9._-]*$' &&
+      { policy_fail "$POLICY_FILE: skills entry '$r' has an invalid skill name"; return 2; }
+  done <<EOF
+$(items "$(pol skills)")
+EOF
   return 0
+}
+
+skill_names() { printf '%s' "${1#*=}" | tr '|' '\n' | awk '{ $1 = $1; print }'; }
+
+skill_found() {
+  local d c
+  for d in ${SKILL_DIRS:-$SKILL_DIRS_DEFAULT}; do
+    [ -f "$d/$1/SKILL.md" ] || continue
+    c="$(cd "$d/$1" 2>/dev/null && pwd -P)" || continue
+    case "$c" in "$ROOT"/*) return 0 ;; esac
+  done
+  return 1
+}
+
+policy_check_skills() {
+  local r s
+  SKILL_DIRS="$(pol skills.path)"
+  while IFS= read -r r; do
+    [ -n "$r" ] || continue
+    while IFS= read -r s; do
+      skill_found "$s" ||
+        emit POLICY-SKILL .spec "skill '$s' for step '${r%%=*}' has no SKILL.md under ${SKILL_DIRS:-$SKILL_DIRS_DEFAULT} inside the repo"
+    done <<EOF
+$(skill_names "$r")
+EOF
+  done <<EOF
+$(items "$(pol skills)")
+EOF
 }
 
 policy_load() {
@@ -144,6 +186,7 @@ EOF
   done <<EOF
 $(items "$(pol rules)")
 EOF
+  policy_check_skills
 }
 
 policy_check_words() {
