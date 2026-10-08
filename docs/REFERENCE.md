@@ -27,6 +27,7 @@ skill/
     spec-check-contract.sh  contract checks sourced by spec-check.sh
     spec-check-policy.sh    company policy load + checks sourced by spec-check.sh
     spec-check-policy-local.sh  optional policy_paths lookup (not copied into vendored repos)
+    list-skills.sh      read-only scan of the repo's own agent skills with a suggested step (used by /spec init 2e)
     pre-commit-spec-check.sh  optional advisory git hook (staged specs + specs whose Changes are staged)
     spec-drift.sh       alias for spec-check.sh
     test-spec-check.sh  fixture tests for spec-check.sh
@@ -140,6 +141,7 @@ skills.path: .ai/skills
 
 - **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
 - **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
+- **Onboarding:** `/spec init` step 2e asks where the policy lives (repo or this machine), collects formats, AI ceiling and rules, then runs `scripts/list-skills.sh` and asks per step which repo skills to map (suggestions are keyword guesses), writes the file and validates it with `spec-check.sh`.
 - **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
 
 ## `.spec`
