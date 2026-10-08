@@ -80,7 +80,7 @@ policy_check_pr_title() {
   fi
   if [ -n "$spec" ] && [ -n "$(pol ticket.regex)" ] && names_key "$title" "$(ticket_re)"; then
     key="$(header Ticket "$spec" | sed 's/([^)]*)//g' | grep -oE -- "$(ticket_re)" | head -n 1)"
-    [ -n "$key" ] || { echo "PR-TITLE '$title' names a ticket but the spec has no **Ticket:** key"; return 1; }
+    [ -n "$key" ] || { echo "PR-TITLE '$title' names a ticket but the spec has no **Ticket:** key matching ticket.regex"; return 1; }
     names_key "$title" "$(printf '%s' "$key" | sed 's/[][\.*^$(){}+?|/]/\\&/g')" ||
       { echo "PR-TITLE '$title' does not name the spec's ticket $key"; return 1; }
   fi

@@ -43,7 +43,7 @@ Merge: preset frontmatter defaults ← `.spec` values. Unknown keys → warn onc
 
 A company's conventions live in one policy file, so the skill stays unchanged. Resolve: `.spec` `policy:` (repo-relative `.md` inside the git root, no symlinks) → else machine `policy_paths` → else none. Invalid or unreadable → stop and report; never run with half a policy.
 
-Apply it: `## Constitution` is binding; `rules` files join the Rules of record; its formats (`ticket.*`, `branch.pattern`, `pr.title`) replace preset and `.spec` values; `agon.max`, `agon_engines`, `critic` can only tighten; `.spec` keeps operational keys (`stack`, `repos`, extra addons). `scripts/spec-check.sh` enforces the mechanical part (`POLICY-*`, `--pr-title`). Keys: REFERENCE.md "Company policy".
+Apply it: `## Constitution` is binding; `rules` files join the Rules of record; its formats (`ticket.*`, `branch.pattern`, `pr.title`, `pr.regex`) replace preset and `.spec` values; `agon.max`, `agon_engines`, `critic` can only tighten; `.spec` keeps operational keys (`stack`, `repos`, extra addons). `scripts/spec-check.sh` enforces the mechanical part (`POLICY-*`, `--pr-title`). Keys: this skill's `policy.md`.
 
 **Repo skills** (`skills: <step>=<skill>[|<skill>]`): load the named skill at its step and announce `+skill <name> (policy: <step>)`; several names → the one matching the touched area, else the first. Steps: `understand` core 1 · `design` core 4 options · `critic` refine e (fresh context, still bound by agon/`critic`) · `build` after approval · `tests` the tests `criteria-test-map` names · `review` before core 9 · `tickets` splitting an approved spec · `retro` after core 9. The spec owns WHAT (ACs, evidence, gates, Status); the skill owns HOW and never lowers a gate.
 

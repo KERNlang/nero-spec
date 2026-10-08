@@ -178,7 +178,7 @@ Show the draft and ask to write it; never overwrite an existing `e2e.md` without
 
 ## 2e. Company policy and repo skills (only on yes)
 
-One policy file gives every colleague the same conventions and skills. Keys: REFERENCE.md "Company policy".
+One policy file gives every colleague the same conventions and skills. Keys: this skill's `policy.md`.
 
 1. **Where** — `vendored` → in the repo. Else ask: repo (`.nero-spec/policy.md` + `.spec` `policy:`) or this machine until shared (`policy_paths: <repo dir>=<absolute .md>`). Default: repo for enterprise.
 2. **Detect, then ask** — read-only scan for rules the repo already enforces: commitlint / semantic-PR configs, CI scripts that lint PR titles or extract ticket keys, branch-name checks. Propose `ticket.regex`, `branch.pattern`, `pr.title` (plus `pr.regex` when the lint has rules a template can't say, e.g. case) with the `file:line` each came from. Ask only what is still missing: required headers and sections, denied words.
@@ -186,7 +186,7 @@ One policy file gives every colleague the same conventions and skills. Keys: REF
 4. **Rules of record** — propose the guideline and `AGENTS.md` files the scan found; the user picks.
 5. **Repo skills** — `scripts/list-skills.sh`; none → skip. Ask step by step from its suggestions (a keyword guess, the user decides); several skills per step are fine; ask before mapping skills that change shared files; set `skills.path` when they sit outside the default folders; same name twice → ask which.
 6. **Write** — frontmatter + `## Constitution` from the commit/push/release answers; show it, save on yes. Machine choice → add the `policy_paths` entry.
-7. **Validate** — `scripts/spec-check.sh`: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix before finishing; other `POLICY-*` on older specs → list them, the user decides. A recent real PR title must pass `--pr-title`. The Spec line must show `(policy: <path>)`.
+7. **Validate** — `scripts/spec-check.sh`: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix before finishing; other `POLICY-*` on older specs → list them, the user decides. With `pr.title` or `pr.regex` set, a recent real PR title must pass `--pr-title`. The Spec line must show `(policy: <path>)`.
 8. Suggest committing a repo policy with `.spec`; never commit.
 
 ## 3. Finish
