@@ -114,35 +114,7 @@ Every run prints: `Spec: preset <x> + addons [...] (via vendored|.spec|default p
 
 ## Company policy
 
-Instead of forking the skill, a company keeps one policy file: in its repo (`.spec` `policy: .nero-spec/policy.md`) or, before it is shared, on one machine (`policy_paths`). Full key table: `skill/SKILL.md` Step 0 Policy.
-
-```markdown
----
-format: nero-spec-policy/v1
-ticket.regex: ORG-\d+
-branch.pattern: ORG-{n}_{Name}
-pr.title: <type>: <summary> #ORG-<n>
-headers: Ticket, Confidence
-sections: Release Notes
-words.deny: codename
-addons.require: refine, criteria-test-map
-agon.max: off
-critic: subagent
-rules: docs/coding-guidelines.md, AGENTS.md
-skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review, critic=design-critic
-skills.path: .ai/skills
----
-
-## Constitution
-
-- Every spec belongs to an ORG ticket. Never invent a key.
-- Release notes in the product language; mark internal-only changes.
-```
-
-- **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
-- **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
-- **Onboarding:** `/spec init` step 2e asks where the policy lives (repo or this machine), collects formats, AI ceiling and rules, then runs `scripts/list-skills.sh` and asks per step which repo skills to map (suggestions are keyword guesses), writes the file and validates it with `spec-check.sh`.
-- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
+Keys, example and checks: [`skill/policy.md`](../skill/policy.md) (ships with the skill).
 
 ## `.spec`
 

@@ -23,6 +23,7 @@ Every spec belongs to a tracker ticket. Hook: core step 1, before anything else.
 3. Still none → `ticket.fallback` if set: mark it **provisional** in the header and remind the user to rename the spec folder once the real ticket exists.
 4. No fallback → **never invent a key**. Draft in scratchpad and say so.
 5. New branch → fill `branch.pattern` (`{type}` = feat|fix|chore|refactor|docs, `{slug}` = short kebab-case). Never rename an existing branch unasked.
+6. PR title → fill the policy `pr.title` with this key; check it with `spec-check.sh --spec <spec> --pr-title "<title>"` (core step 9).
 
 ## What it adds to the spec
 

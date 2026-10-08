@@ -286,6 +286,7 @@ bad_policy --- 'format: nero-spec-policy/v2' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'agon.max: yes' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'critic: human' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'ticket.regex: ORG-(' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'pr.regex: ^fix(' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'critic: agon' 'agon.max: off' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: ../secrets.md' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: /etc/passwd' ---

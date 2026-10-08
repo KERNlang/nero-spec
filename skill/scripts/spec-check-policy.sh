@@ -3,7 +3,7 @@
 # Policy = one company module: `.spec` `policy:` (repo file), else policy_local_path from the optional
 # spec-check-policy-local.sh (not shipped in vendored copies).
 
-POLICY_KEYS=" format ticket.regex ticket.prefixes ticket.fallback branch.pattern pr.title headers sections words.deny addons.require addons.deny agon.max agon_engines critic rules skills skills.path "
+POLICY_KEYS=" format ticket.regex ticket.prefixes ticket.fallback branch.pattern pr.title pr.regex headers sections words.deny addons.require addons.deny agon.max agon_engines critic rules skills skills.path "
 POLICY_STEPS=" understand design critic build tests review tickets retro "
 SKILL_DIRS_DEFAULT=".agents/skills .claude/skills .ai/skills"
 POLICY_OWNED="ticket.regex ticket.prefixes ticket.fallback branch.pattern"
@@ -54,6 +54,41 @@ policy_parse() {
 
 ticket_re() { pol ticket.regex | sed 's/\\d/[0-9]/g'; }
 
+pr_title_re() {
+  if [ -n "$(pol pr.regex)" ]; then pol pr.regex | sed 's/\\d/[0-9]/g'; return 0; fi
+  [ -n "$(pol pr.title)" ] || return 0
+  pol pr.title | awk '
+    function esc(t,  r, i, c) { r = ""; for (i = 1; i <= length(t); i++) { c = substr(t, i, 1); r = r (index("\\.[]()*+?{}|^$", c) ? "\\" : "") c } return r }
+    function alts(t,  n, a, i, r) { n = split(t, a, "|"); r = ""; for (i = 1; i <= n; i++) r = r (i > 1 ? "|" : "") esc(a[i]); return "(" r ")" }
+    { s = $0; out = ""
+      while (match(s, /<[^<>]+>/)) {
+        ph = substr(s, RSTART + 1, RLENGTH - 2)
+        out = out esc(substr(s, 1, RSTART - 1)) (ph == "n" ? "[0-9]+" : index(ph, "|") ? alts(ph) : ".+")
+        s = substr(s, RSTART + RLENGTH)
+      }
+      print "^" out esc(s) "$" }'
+}
+
+policy_check_pr_title() {
+  local title="$1" spec="$2" re key
+  case "$title" in ''|*$'\n'*|*$'\r'*) echo "spec-check: --pr-title needs a one-line title" >&2; return 2 ;; esac
+  re="$(pr_title_re)"
+  [ -n "$re" ] || { echo "spec-check: --pr-title needs pr.title or pr.regex in the company policy" >&2; return 2; }
+  if ! printf '%s\n' "$title" | grep -Eq -- "$re"; then
+    if [ -n "$(pol pr.regex)" ]; then key="pr.regex $(pol pr.regex)"; else key="$(pol pr.title)"; fi
+    echo "PR-TITLE '$title' does not match the policy format: $key"; return 1
+  fi
+  if [ -n "$spec" ] && [ -n "$(pol ticket.regex)" ] && names_key "$title" "$(ticket_re)"; then
+    key="$(header Ticket "$spec" | sed 's/([^)]*)//g' | grep -oE -- "$(ticket_re)" | head -n 1)"
+    [ -n "$key" ] || { echo "PR-TITLE '$title' names a ticket but the spec has no **Ticket:** key matching ticket.regex"; return 1; }
+    names_key "$title" "$(printf '%s' "$key" | sed 's/[][\.*^$(){}+?|/]/\\&/g')" ||
+      { echo "PR-TITLE '$title' does not name the spec's ticket $key"; return 1; }
+  fi
+  echo "PR-TITLE ok"
+}
+
+names_key() { printf '%s\n' "$1" | grep -Eq -- "(^|[^A-Za-z0-9_-])($2)([^A-Za-z0-9_-]|\$)"; }
+
 policy_validate() {
   local r
   [ "$(pol format)" = "nero-spec-policy/v1" ] || { policy_fail "$POLICY_FILE: format must be nero-spec-policy/v1"; return 2; }
@@ -63,6 +98,10 @@ policy_validate() {
   if [ -n "$(pol ticket.regex)" ]; then
     printf '' | grep -E -- "$(ticket_re)" >/dev/null 2>&1
     [ $? -le 1 ] || { policy_fail "$POLICY_FILE: ticket.regex is not a valid extended regex"; return 2; }
+  fi
+  if [ -n "$(pol pr.regex)$(pol pr.title)" ]; then
+    printf '' | grep -E -- "$(pr_title_re)" >/dev/null 2>&1
+    [ $? -le 1 ] || { policy_fail "$POLICY_FILE: pr.regex (or the regex built from pr.title) is not a valid extended regex"; return 2; }
   fi
   while IFS= read -r r; do
     [ -n "$r" ] || continue
@@ -232,7 +271,7 @@ $(items "$(pol headers)")
 EOF
   re="$(ticket_re)"
   t="$(header Ticket "$f" | sed 's/([^)]*)//g')"
-  if [ -n "$re" ] && [ -n "$t" ] && ! printf '%s' "$t" | grep -Eq -- "(^|[^A-Za-z0-9_-])($re)([^A-Za-z0-9_-]|$)"; then
+  if [ -n "$re" ] && [ -n "$t" ] && ! names_key "$t" "$re"; then
     emit POLICY-TICKET "$f" "Ticket '$(printf '%s' "$t" | cut -c1-40)' does not match policy ticket.regex"
   fi
   case "$(status_norm "$status")" in "READY TO BUILD"|"IN PROGRESS"|DONE)
