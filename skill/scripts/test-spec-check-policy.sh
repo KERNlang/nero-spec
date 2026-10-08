@@ -294,6 +294,7 @@ OUT="$(bash "$CHECK" "$A" 2>&1)"
 hasnt POLICY-CONFLICT ".spec: agon 'full'"
 
 bad_policy --- 'format: nero-spec-policy/v1' 'branch.pattern: ORG-{n}_{Name}' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'branch.pattern: feat/{slug{type}}' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: ../secrets.md' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'rules: /etc/passwd' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'skills: deploy=dev' ---

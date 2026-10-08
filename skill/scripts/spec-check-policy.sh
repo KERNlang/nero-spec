@@ -95,7 +95,7 @@ policy_validate() {
   case "$(pol agon.max)" in ''|off|ask|restricted|full) ;; *) policy_fail "$POLICY_FILE: agon.max must be off|ask|restricted|full"; return 2 ;; esac
   case "$(pol critic)" in ''|subagent|agon|any) ;; *) policy_fail "$POLICY_FILE: critic must be subagent|agon|any"; return 2 ;; esac
   [ "$(pol critic)" = agon ] && case "$(pol agon.max)" in off|ask) policy_fail "$POLICY_FILE: critic agon needs agon.max restricted or full"; return 2 ;; esac
-  case "$(pol branch.pattern | sed 's/{type}//g; s/{TICKET}//g; s/{slug}//g')" in
+  case "$(pol branch.pattern | sed -E 's/[{](type|TICKET|slug)[}]/_/g')" in
     *[{}]*) policy_fail "$POLICY_FILE: branch.pattern placeholders are {type}, {TICKET}, {slug}"; return 2 ;;
   esac
   if [ -n "$(pol ticket.regex)" ]; then

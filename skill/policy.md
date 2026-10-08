@@ -5,7 +5,7 @@ One file per company instead of a fork: in the repo (`.spec` `policy: .nero-spec
 | Key | Meaning |
 |---|---|
 | `format` | Required: `nero-spec-policy/v1` |
-| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy; replace preset and `.spec` values |
+| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy; replace preset and `.spec` values. `branch.pattern` placeholders: `{type}`, `{TICKET}`, `{slug}` (case-sensitive) |
 | `pr.title` | Title template: `<n>` digits, `<a\|b>` one of, other `<x>` any text, e.g. `<feat\|fix>(ORG-<n>): <Summary>` |
 | `pr.regex` | Optional exact ERE when the lint has rules a template can't say (case, scopes); wins over `pr.title` |
 | `headers`, `sections` | Required header fields; sections required from READY TO BUILD on |
