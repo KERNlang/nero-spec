@@ -78,17 +78,16 @@ policy_check_pr_title() {
     if [ -n "$(pol pr.regex)" ]; then key="pr.regex $(pol pr.regex)"; else key="$(pol pr.title)"; fi
     echo "PR-TITLE '$title' does not match the policy format: $key"; return 1
   fi
-  if [ -n "$spec" ]; then
-    [ -n "$(pol ticket.regex)" ] || { echo "spec-check: --pr-title with --spec needs ticket.regex in the company policy" >&2; return 2; }
+  if [ -n "$spec" ] && [ -n "$(pol ticket.regex)" ] && names_key "$title" "$(ticket_re)"; then
     key="$(header Ticket "$spec" | sed 's/([^)]*)//g' | grep -oE -- "$(ticket_re)" | head -n 1)"
-    [ -n "$key" ] || { echo "PR-TITLE spec has no **Ticket:** key matching ticket.regex, so the title cannot be tied to it"; return 1; }
-    if ! printf '%s\n' "$title" |
-      grep -Eq -- "(^|[^A-Za-z0-9_-])$(printf '%s' "$key" | sed 's/[][\.*^$(){}+?|/]/\\&/g')([^A-Za-z0-9_-]|\$)"; then
-      echo "PR-TITLE '$title' does not name the spec's ticket $key"; return 1
-    fi
+    [ -n "$key" ] || { echo "PR-TITLE '$title' names a ticket but the spec has no **Ticket:** key"; return 1; }
+    names_key "$title" "$(printf '%s' "$key" | sed 's/[][\.*^$(){}+?|/]/\\&/g')" ||
+      { echo "PR-TITLE '$title' does not name the spec's ticket $key"; return 1; }
   fi
   echo "PR-TITLE ok"
 }
+
+names_key() { printf '%s\n' "$1" | grep -Eq -- "(^|[^A-Za-z0-9_-])($2)([^A-Za-z0-9_-]|\$)"; }
 
 policy_validate() {
   local r
@@ -272,7 +271,7 @@ $(items "$(pol headers)")
 EOF
   re="$(ticket_re)"
   t="$(header Ticket "$f" | sed 's/([^)]*)//g')"
-  if [ -n "$re" ] && [ -n "$t" ] && ! printf '%s' "$t" | grep -Eq -- "(^|[^A-Za-z0-9_-])($re)([^A-Za-z0-9_-]|$)"; then
+  if [ -n "$re" ] && [ -n "$t" ] && ! names_key "$t" "$re"; then
     emit POLICY-TICKET "$f" "Ticket '$(printf '%s' "$t" | cut -c1-40)' does not match policy ticket.regex"
   fi
   case "$(status_norm "$status")" in "READY TO BUILD"|"IN PROGRESS"|DONE)

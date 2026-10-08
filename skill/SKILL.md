@@ -41,29 +41,11 @@ Merge: preset frontmatter defaults ← `.spec` values. Unknown keys → warn onc
 
 ### Policy (company module)
 
-One file holds a company's conventions so the skill itself stays unchanged. Resolve: `.spec` `policy:` (repo-relative `.md` inside the git root, no symlinks) → else machine `policy_paths` → else none. Invalid or unreadable policy → stop and report; never run with half a policy.
+A company's conventions live in one policy file, so the skill stays unchanged. Resolve: `.spec` `policy:` (repo-relative `.md` inside the git root, no symlinks) → else machine `policy_paths` → else none. Invalid or unreadable → stop and report; never run with half a policy.
 
-Frontmatter: flat `key: value`, whole-line `#` comments, unknown or duplicate key = invalid. `format: nero-spec-policy/v1` is required.
+Apply it: `## Constitution` is binding; `rules` files join the Rules of record; its formats (`ticket.*`, `branch.pattern`, `pr.title`) replace preset and `.spec` values; `agon.max`, `agon_engines`, `critic` can only tighten; `.spec` keeps operational keys (`stack`, `repos`, extra addons). `scripts/spec-check.sh` enforces the mechanical part (`POLICY-*`, `--pr-title`). Keys: REFERENCE.md "Company policy".
 
-| Key | Meaning |
-|---|---|
-| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy: they replace the preset and `.spec` values |
-| `pr.title` | PR title format, e.g. `<feat\|fix>: <Summary> #ORG-<n>` (`<n>` = digits, `<a\|b>` = one of, other `<x>` = any text) |
-| `pr.regex` | Optional exact ERE for the title when the format has rules a template can't say (case, scope); wins over `pr.title` for `--pr-title` |
-| `headers` | Header fields every spec must carry, e.g. `Ticket, Confidence` |
-| `sections` | Sections required from READY TO BUILD on, e.g. `Release Notes` |
-| `words.deny` | Words a spec must never contain (internal tool names, codenames) |
-| `addons.require`, `addons.deny` | `.spec` cannot remove a required addon or enable a denied one |
-| `agon.max` | `off` \| `ask` \| `restricted` \| `full` — ceiling; effective repo agon = the lower of `.spec`/preset and this |
-| `agon_engines` | Allowed engines; effective list = `.spec` list ∩ this |
-| `critic` | `subagent` \| `agon` \| `any` — who may run the refine critique (`subagent` = never an external AI) |
-| `rules` | Rules-of-record files (repo-relative), read with the machine `rules` file |
-| `skills` | The company's own repo skills per step: `<step>=<skill>[\|<skill>], ...`, steps `understand`, `design`, `critic`, `build`, `tests`, `review`, `tickets`, `retro` |
-| `skills.path` | Repo-relative folders holding `<skill>/SKILL.md`, comma list, first match wins; default `.agents/skills`, `.claude/skills`, `.ai/skills`. A `SKILL.md` that is a symlink, or a skill folder resolving outside the repo, never counts |
-
-**Repo skills per step.** When the policy names a skill for a step, load that skill at the step and announce `+skill <name> (policy: <step>)`; several names = the skill matching the touched area (e.g. frontend vs backend), else the first. Steps: `understand` core 1 (unclear ticket, terms) · `design` core 4 Implementation Options · `critic` refine step e, run in a fresh context and still bound by agon/`critic` · `build` implementation after approval · `tests` writing the tests `criteria-test-map` names · `review` before core 9 Converge · `tickets` splitting an approved spec · `retro` after Converge. Split: the spec owns WHAT (ACs, claim tags, evidence, gates, Status); the repo skill owns HOW (code style, test patterns, review axes) and wins on those. A skill never lowers a spec gate.
-
-Body: `## Constitution` (binding prose) and optional `## Header and extra sections`. Precedence: the policy may only tighten agon and the critic, never loosen them; its formats win over preset and `.spec`; `.spec` still owns operational keys (`stack`, `repos`, extra addons). `scripts/spec-check.sh` enforces the mechanical part (`POLICY-*` findings).
+**Repo skills** (`skills: <step>=<skill>[|<skill>]`): load the named skill at its step and announce `+skill <name> (policy: <step>)`; several names → the one matching the touched area, else the first. Steps: `understand` core 1 · `design` core 4 options · `critic` refine e (fresh context, still bound by agon/`critic`) · `build` after approval · `tests` the tests `criteria-test-map` names · `review` before core 9 · `tickets` splitting an approved spec · `retro` after core 9. The spec owns WHAT (ACs, evidence, gates, Status); the skill owns HOW and never lowers a gate.
 
 ### Effective agon
 

@@ -178,21 +178,16 @@ Show the draft and ask to write it; never overwrite an existing `e2e.md` without
 
 ## 2e. Company policy and repo skills (only on yes)
 
-One file for the whole company, so every colleague gets the same conventions and skills without their own setup. Shape and keys: SKILL.md Step 0 Policy, REFERENCE.md "Company policy".
+One policy file gives every colleague the same conventions and skills. Keys: REFERENCE.md "Company policy".
 
-1. **Where** — mode `vendored` → in the repo (a vendored copy has no machine lookup). Otherwise ask: in the repo (`.nero-spec/policy.md` + `.spec` `policy:`; everyone who pulls gets it) or only on this machine until it is shared (machine `policy_paths: <repo dir>=<absolute .md>`, a folder outside the repo). Default: repo for enterprise, this machine when the user is trying it out first.
-2. **Formats** — reuse the enterprise answers (ticket prefixes, fallback, branch pattern, commit convention); ask only what is missing: PR title format, required headers, sections required from READY TO BUILD on, words a spec must never contain (internal tool names, codenames).
-3. **AI** — `agon.max`, `agon_engines`, `critic` (`subagent` when no external AI is approved) from the allowed-tooling answer.
-4. **Rules of record** — propose the repo's guideline files and `AGENTS.md` files found by a read-only scan; the user picks.
-5. **Repo skills** — run `scripts/list-skills.sh` (read-only). No skills found → skip. Otherwise:
-   - show the skills grouped by suggested step (`understand`, `design`, `critic`, `build`, `tests`, `review`, `tickets`, `retro`, `-` = no match), name + one-line description;
-   - ask one step at a time: "build → `ui-dev`, `api-dev`? (Enter = yes, or name others, `none`)". The suggestion is a keyword guess; the user decides;
-   - several skills per step are fine (`build=ui-dev|api-dev`): at that step the agent loads the one matching the touched area;
-   - skills that change shared files (retros, docs publishing, ticket creation) → ask explicitly before mapping them;
-   - set `skills.path` to the folders of the chosen skills (comma list; skipped when all sit in `.agents/skills`, `.claude/skills` or `.ai/skills`). The same skill name in two folders → ask which one and list that folder first.
-6. **Write** the file (frontmatter + `## Constitution` from the commit/push/release answers), show it, and on yes save it. Machine choice → also add the `policy_paths` entry to the machine file.
-7. **Validate** — run `scripts/spec-check.sh` on the repo: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix with the user before finishing. `POLICY-HEADER/SECTION/TICKET/WORD` on specs written before the policy → list them; the user decides whether to update those specs now, later, or leave them. Print the Spec line; it must show `(policy: <path>)`.
-8. **Repo choice** — suggest committing `.nero-spec/policy.md` with `.spec`, but do not commit.
+1. **Where** — `vendored` → in the repo. Else ask: repo (`.nero-spec/policy.md` + `.spec` `policy:`) or this machine until shared (`policy_paths: <repo dir>=<absolute .md>`). Default: repo for enterprise.
+2. **Detect, then ask** — read-only scan for rules the repo already enforces: commitlint / semantic-PR configs, CI scripts that lint PR titles or extract ticket keys, branch-name checks. Propose `ticket.regex`, `branch.pattern`, `pr.title` (plus `pr.regex` when the lint has rules a template can't say, e.g. case) with the `file:line` each came from. Ask only what is still missing: required headers and sections, denied words.
+3. **AI** — `agon.max`, `agon_engines`, `critic` (`subagent` when no external AI is approved).
+4. **Rules of record** — propose the guideline and `AGENTS.md` files the scan found; the user picks.
+5. **Repo skills** — `scripts/list-skills.sh`; none → skip. Ask step by step from its suggestions (a keyword guess, the user decides); several skills per step are fine; ask before mapping skills that change shared files; set `skills.path` when they sit outside the default folders; same name twice → ask which.
+6. **Write** — frontmatter + `## Constitution` from the commit/push/release answers; show it, save on yes. Machine choice → add the `policy_paths` entry.
+7. **Validate** — `scripts/spec-check.sh`: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix before finishing; other `POLICY-*` on older specs → list them, the user decides. A recent real PR title must pass `--pr-title`. The Spec line must show `(policy: <path>)`.
+8. Suggest committing a repo policy with `.spec`; never commit.
 
 ## 3. Finish
 

@@ -114,7 +114,20 @@ Every run prints: `Spec: preset <x> + addons [...] (via vendored|.spec|default p
 
 ## Company policy
 
-Instead of forking the skill, a company keeps one policy file: in its repo (`.spec` `policy: .nero-spec/policy.md`) or, before it is shared, on one machine (`policy_paths`). Full key table: `skill/SKILL.md` Step 0 Policy.
+One file per company instead of a fork: in the repo (`.spec` `policy: .nero-spec/policy.md`) or, until it is shared, on one machine (`policy_paths`). Set up with `/spec init` step 2e. Frontmatter is flat `key: value` with whole-line `#` comments.
+
+| Key | Meaning |
+|---|---|
+| `format` | Required: `nero-spec-policy/v1` |
+| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy; replace preset and `.spec` values |
+| `pr.title` | Title template: `<n>` digits, `<a\|b>` one of, other `<x>` any text, e.g. `<feat\|fix>(ORG-<n>): <Summary>` |
+| `pr.regex` | Optional exact ERE when the lint has rules a template can't say (case, scopes); wins over `pr.title` |
+| `headers`, `sections` | Required header fields; sections required from READY TO BUILD on |
+| `words.deny` | Words a spec must never contain (internal tool names, codenames) |
+| `addons.require`, `addons.deny` | `.spec` cannot drop a required addon or enable a denied one |
+| `agon.max`, `agon_engines`, `critic` | Ceilings: `off`\|`ask`\|`restricted`\|`full`; allowed engines; `subagent`\|`agon`\|`any` for the refine critic |
+| `rules` | Repo-relative rules-of-record files |
+| `skills`, `skills.path` | Repo skills per step (`build=ui-dev\|api-dev`); folders holding `<skill>/SKILL.md`, default `.agents/skills`, `.claude/skills`, `.ai/skills` |
 
 ```markdown
 ---
@@ -124,26 +137,20 @@ branch.pattern: ORG-{n}_{Name}
 pr.title: <feat|fix|docs>: <Summary> #ORG-<n>
 headers: Ticket, Confidence
 sections: Release Notes
-words.deny: codename
-addons.require: refine, criteria-test-map
 agon.max: off
 critic: subagent
 rules: docs/coding-guidelines.md, AGENTS.md
-skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review, critic=design-critic
-skills.path: .ai/skills
+skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review
 ---
 
 ## Constitution
 
 - Every spec belongs to an ORG ticket. Never invent a key.
-- Release notes in the product language; mark internal-only changes.
 ```
 
-- **Ratchet:** the policy sets ceilings (`agon.max`, `agon_engines`, `critic`) that `.spec` may only tighten; format keys belong to the policy; `.spec` keeps operational keys (`stack`, `repos`, extra addons).
-- **Safety:** repo policy = repo-relative `.md` inside the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format`, or bad values → `spec-check.sh` exits 2.
-- **Onboarding:** `/spec init` step 2e asks where the policy lives (repo or this machine), collects formats, AI ceiling and rules, then runs `scripts/list-skills.sh` and asks per step which repo skills to map (suggestions are keyword guesses), writes the file and validates it with `spec-check.sh`.
-- **PR title:** `spec-check.sh --spec <spec> --pr-title "<title>"` checks a title against `pr.regex` (exact ERE), else the `pr.title` template (`<n>` digits, `<a|b>` one of, other `<x>` any text), plus the spec's Ticket key as a whole word. Exit 0 `PR-TITLE ok`, 1 mismatch or a spec without a Ticket key, 2 no policy, no format, or `--spec` without `ticket.regex`. Run it before a title is handed over: CI title lints fail on a stray character.
-- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy), `POLICY-HEADER`, `POLICY-SECTION` (from READY TO BUILD on, fenced examples ignored), `POLICY-TICKET` (whole-key match, link targets ignored), `POLICY-WORD` (also in pointer specs), `POLICY-RULES` (a `rules` file is missing, a symlink or outside the repo), `POLICY-SKILL` (a named skill has no `SKILL.md` inside the repo). A `.spec` with `agon: full` plus a policy `agon_engines` list is a conflict: set `restricted`.
+- **Safety:** repo policy = repo-relative `.md` in the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format` or bad values → `spec-check.sh` exits 2. A symlinked `SKILL.md` or a skill folder outside the repo never counts.
+- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy; `agon: full` plus a policy engine list counts), `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET` (whole key), `POLICY-WORD`, `POLICY-RULES`, `POLICY-SKILL`.
+- **PR title:** `spec-check.sh --spec <spec> --pr-title "<title>"` → exit 0 `PR-TITLE ok`, 1 mismatch, 2 no policy or no title format. A title that names a ticket must name the spec's ticket; formats without a ticket only need to match.
 
 ## `.spec`
 

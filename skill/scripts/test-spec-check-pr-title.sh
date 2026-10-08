@@ -57,7 +57,12 @@ title 1 "pr.regex wins over the looser template" --pr-title "fix: add thing #ORG
 says "pr.regex ^(feat|fix)"
 
 printf -- '---\nformat: nero-spec-policy/v1\npr.title: <fix>: <Summary> #ORG-<n>\n---\n' > "$A/.nero-spec/policy.md"
-title 2 "--spec without ticket.regex" --spec "$SP" --pr-title "fix: Add thing #ORG-12" "$A"
+title 0 "no ticket.regex: no ticket tie" --spec "$SP" --pr-title "fix: Add thing #ORG-12" "$A"
+policy 'pr.title: <feat|fix>(<scope>): <Summary>
+'
+title 0 "format without a ticket: title without a key passes" --spec "$SP" --pr-title "fix(ui): Add thing" "$A"
+title 1 "a key in the title must be the spec's" --spec "$SP" --pr-title "fix(ORG-13): Add thing" "$A"
+title 0 "ticket-scope style" --spec "$SP" --pr-title "fix(ORG-12): Add thing" "$A"
 policy 'headers: Ticket
 '
 title 2 "policy without a PR format" --pr-title "fix: Add thing #ORG-12" "$A"
