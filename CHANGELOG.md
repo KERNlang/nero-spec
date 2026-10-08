@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Changed
 
+- Refine: `agon nero` always gets exactly one engine (`-e <one>`), never a list to auto-pick from.
 - Every addon loaded after the Spec line is announced `+<name> (on demand)`; the Spec line lists only loaded addons.
 - Non-git targets: the target directory plays the git root for `.spec` and `default_paths`; the `default_paths` example gains a dotfile root.
 - Refine: the mutation probe runs in parallel with the step e critic instead of before it, and round 2 is skipped when round 1 only added Tricky inputs or citations.
@@ -19,6 +20,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 ### Added
 
 - Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Tricky inputs, the length budget and the OPEN cap while active; the critic stays mandatory and the operator review comes on top; the other overrides ship as addons.
+- Company policy module: one `.md` file (`.spec` `policy:` inside the repo, or machine `policy_paths` for a local file) carries ticket/branch/PR formats, required headers and sections, denied words, required/denied addons, an agon ceiling, allowed engines and the critic runtime, plus a `## Constitution` body. It may only tighten agon and the critic. `spec-check.sh` validates it (exit 2 on unsafe paths, unknown or duplicate keys) and reports `POLICY-CONFLICT`, `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET`, `POLICY-WORD` and `POLICY-RULES`; the machine lookup lives in the optional `spec-check-policy-local.sh`, which vendored copies leave out; `test-spec-check-policy.sh`.
 - Addons `ticket-interpretation` (replaces Intent), `changed-things` (replaces Callers / Real usage) and `completion-conditions` (replaces Done when / As-built delta); each states the core rule it replaces. `visual-grid` now replaces the per-AC `Device check:` for UI ACs.
 - Addon `visual-grid` with `scripts/shotgrid.mjs`: one low-RAM screenshot grid (desktop + mobile × light + dark) per UI change.
 - `spec-check.sh` findings `NO-GIT`, `OPEN-CAP` and `REFINE-STEPS`; `--dir-hash` prints a `dir-hash <sha256> root <dir>` anchor so non-git targets can be drift-checked; `test-spec-check-nogit.sh`.

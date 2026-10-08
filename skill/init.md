@@ -61,6 +61,7 @@ One question at a time. Always offer the default from the chosen preset; Enter =
    - branch pattern (`branch.pattern`), default `feat/{TICKET}-{slug}`;
    - commit convention and whether AI co-author trailers are allowed (goes into the constitution, not `.spec`);
    - allowed AI tooling: `full`, `restricted` (+ which engines → `agon_engines`), `off`. Unsure → `ask`.
+   - company policy: offer to collect the answers above (plus required headers/sections, denied words, critic runtime) into one policy file instead of `.spec` and a vendored copy — in the repo (`.spec` `policy:`), or kept on this machine until it is shared (machine `policy_paths`). Shape: REFERENCE.md "Company policy". Then run `scripts/spec-check.sh` to validate it.
 4. **`agon`** (personal/team) — confirm the preset default. Machine `agon: no` → note that the repo setting has no effect on this machine.
 5. **`drift`** — unless `drift-guard` was removed: `record` (default) or `living`.
 6. **`specs.path`** — show the preset default; accept or change. Keep it repo-relative; the bundled scanners reject absolute paths, leading `-`, `.`/`..` components, and symlink escapes. Directory names may contain spaces.
@@ -92,7 +93,7 @@ Ask for the location; default `.agents/skills/spec/`. Write:
   SKILL.md        new router that reads the repo .spec (template below)
   core.md         copy, then scrubbed
   addons/<name>.md   only the chosen addons, scrubbed
-  scripts/           spec-check.sh, spec-check-lib.sh, spec-check-contract.sh, pre-commit-spec-check.sh (refine and drift-guard call them); + e2e-matrix.sh with e2e-sweep
+  scripts/           spec-check.sh, spec-check-lib.sh, spec-check-contract.sh, spec-check-policy.sh (never spec-check-policy-local.sh), pre-commit-spec-check.sh (refine and drift-guard call them); + e2e-matrix.sh with e2e-sweep
 <git root>/.spec     machine-readable repo config shared by the checker, hook, and E2E matrix
 ```
 
