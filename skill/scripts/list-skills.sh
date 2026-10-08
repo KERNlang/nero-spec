@@ -5,7 +5,7 @@
 #   <suggested step>	<name>	<repo-relative dir>	<description, max 160 chars>
 # Searches every `skills/<name>/SKILL.md` up to 5 levels deep inside the git root (repo-dir when not in git),
 # skipping node_modules and .git. Symlinks are not followed, so a symlinked skills folder is listed once, at its
-# real place, and only when that place is inside the repo. Suggested step: tests, review, critic, tickets, retro, understand, design,
+# real place, and only when that place is inside the repo; a SKILL.md that is itself a symlink is skipped. Suggested step: tests, review, critic, tickets, retro, understand, design,
 # build, or - (keyword match on name + description, first hit in that order). A suggestion, never a decision.
 set -uo pipefail
 
@@ -49,6 +49,7 @@ suggest() {
 
 find . -maxdepth 5 \( -name node_modules -o -name .git \) -prune -o -path '*/skills/*/SKILL.md' -print 2>/dev/null |
   sort | while IFS= read -r f; do
+  [ -L "$f" ] && continue
   d="${f%/SKILL.md}"; d="${d#./}"
   name="$(basename "$d")"; desc="$(describe "$f")"
   printf '%s\t%s\t%s\t%s\n' "$(suggest "$name" "$desc")" "$name" "$d" "$desc"

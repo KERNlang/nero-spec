@@ -58,7 +58,7 @@ Frontmatter: flat `key: value`, whole-line `#` comments, unknown or duplicate ke
 | `critic` | `subagent` \| `agon` \| `any` — who may run the refine critique (`subagent` = never an external AI) |
 | `rules` | Rules-of-record files (repo-relative), read with the machine `rules` file |
 | `skills` | The company's own repo skills per step: `<step>=<skill>[\|<skill>], ...`, steps `understand`, `design`, `critic`, `build`, `tests`, `review`, `tickets`, `retro` |
-| `skills.path` | Repo-relative folder holding `<skill>/SKILL.md`; default `.agents/skills`, `.claude/skills`, `.ai/skills` |
+| `skills.path` | Repo-relative folders holding `<skill>/SKILL.md`, comma list, first match wins; default `.agents/skills`, `.claude/skills`, `.ai/skills`. A `SKILL.md` that is a symlink, or a skill folder resolving outside the repo, never counts |
 
 **Repo skills per step.** When the policy names a skill for a step, load that skill at the step and announce `+skill <name> (policy: <step>)`; several names = the skill matching the touched area (e.g. frontend vs backend), else the first. Steps: `understand` core 1 (unclear ticket, terms) · `design` core 4 Implementation Options · `critic` refine step e, run in a fresh context and still bound by agon/`critic` · `build` implementation after approval · `tests` writing the tests `criteria-test-map` names · `review` before core 9 Converge · `tickets` splitting an approved spec · `retro` after Converge. Split: the spec owns WHAT (ACs, claim tags, evidence, gates, Status); the repo skill owns HOW (code style, test patterns, review axes) and wins on those. A skill never lowers a spec gate.
 

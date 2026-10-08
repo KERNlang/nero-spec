@@ -123,9 +123,12 @@ argument-hint: "[feature or change description]"
 Define WHAT before HOW. Read the repo `.spec`, load `core.md` + the addons below, then run core step by step.
 
 ## Config
-Read `preset`, `specs.path`, `addons`, ticket/branch keys, and `agon` from the repo `.spec`.
+Read `preset`, `specs.path`, `addons`, ticket/branch keys, `agon` and `policy` from the repo `.spec`.
+`policy` set → read that file before anything else and apply it: its format keys replace `.spec`, `agon.max`/`agon_engines`/`critic` only tighten, `addons.require`/
+`addons.deny`, `rules` files join the Rules of record, its `## Constitution` wins over the one below on conflict,
+and each `skills` step loads that repo skill (spec owns WHAT, skill owns HOW). Invalid policy → stop and report.
 
-Print: `Spec: vendored + addons [...]`
+Print: `Spec: vendored + addons [...] (policy: <path>|none)`
 
 ## Rules of record
 <confidence, challenge and review policy of this team, or "self-audit + fresh-context subagent in the approved runtime + team PR review">
@@ -177,7 +180,7 @@ Show the draft and ask to write it; never overwrite an existing `e2e.md` without
 
 One file for the whole company, so every colleague gets the same conventions and skills without their own setup. Shape and keys: SKILL.md Step 0 Policy, REFERENCE.md "Company policy".
 
-1. **Where** — ask: in the repo (`.nero-spec/policy.md` + `.spec` `policy:`; everyone who pulls gets it) or only on this machine until it is shared (machine `policy_paths: <repo dir>=<absolute .md>`, a folder outside the repo). Default: repo for enterprise, this machine when the user is trying it out first.
+1. **Where** — mode `vendored` → in the repo (a vendored copy has no machine lookup). Otherwise ask: in the repo (`.nero-spec/policy.md` + `.spec` `policy:`; everyone who pulls gets it) or only on this machine until it is shared (machine `policy_paths: <repo dir>=<absolute .md>`, a folder outside the repo). Default: repo for enterprise, this machine when the user is trying it out first.
 2. **Formats** — reuse the enterprise answers (ticket prefixes, fallback, branch pattern, commit convention); ask only what is missing: PR title format, required headers, sections required from READY TO BUILD on, words a spec must never contain (internal tool names, codenames).
 3. **AI** — `agon.max`, `agon_engines`, `critic` (`subagent` when no external AI is approved) from the allowed-tooling answer.
 4. **Rules of record** — propose the repo's guideline files and `AGENTS.md` files found by a read-only scan; the user picks.
@@ -186,9 +189,9 @@ One file for the whole company, so every colleague gets the same conventions and
    - ask one step at a time: "build → `ui-dev`, `api-dev`? (Enter = yes, or name others, `none`)". The suggestion is a keyword guess; the user decides;
    - several skills per step are fine (`build=ui-dev|api-dev`): at that step the agent loads the one matching the touched area;
    - skills that change shared files (retros, docs publishing, ticket creation) → ask explicitly before mapping them;
-   - all skills in one folder → set `skills.path` to it.
+   - set `skills.path` to the folders of the chosen skills (comma list; skipped when all sit in `.agents/skills`, `.claude/skills` or `.ai/skills`). The same skill name in two folders → ask which one and list that folder first.
 6. **Write** the file (frontmatter + `## Constitution` from the commit/push/release answers), show it, and on yes save it. Machine choice → also add the `policy_paths` entry to the machine file.
-7. **Validate** — run `scripts/spec-check.sh` on the repo: exit 2 or any `POLICY-*` finding → fix with the user before finishing. Print the Spec line; it must show `(policy: <path>)`.
+7. **Validate** — run `scripts/spec-check.sh` on the repo: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix with the user before finishing. `POLICY-HEADER/SECTION/TICKET/WORD` on specs written before the policy → list them; the user decides whether to update those specs now, later, or leave them. Print the Spec line; it must show `(policy: <path>)`.
 8. **Repo choice** — suggest committing `.nero-spec/policy.md` with `.spec`, but do not commit.
 
 ## 3. Finish

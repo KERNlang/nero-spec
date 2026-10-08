@@ -70,13 +70,17 @@ policy_validate() {
   done <<EOF
 $(items "$(pol rules)")
 EOF
-  if [ -n "$(pol skills.path)" ]; then
-    repo_rel_path "$(pol skills.path)" >/dev/null || { policy_fail "$POLICY_FILE: skills.path must be repo-relative without . or .. components"; return 2; }
-  fi
+  while IFS= read -r r; do
+    [ -n "$r" ] || continue
+    repo_rel_path "$r" >/dev/null || { policy_fail "$POLICY_FILE: skills.path entry '$r' must be repo-relative without . or .. components"; return 2; }
+  done <<EOF
+$(items "$(pol skills.path)")
+EOF
   while IFS= read -r r; do
     [ -n "$r" ] || continue
     case "$r" in *=*) ;; *) policy_fail "$POLICY_FILE: skills entry '$r' must be <step>=<skill>[|<skill>]"; return 2 ;; esac
     case "$POLICY_STEPS" in *" ${r%%=*} "*) ;; *) policy_fail "$POLICY_FILE: skills step '${r%%=*}' must be one of:$POLICY_STEPS"; return 2 ;; esac
+    case "|${r#*=}|" in *'||'*|'| |'*) policy_fail "$POLICY_FILE: skills entry '$r' has an empty skill name"; return 2 ;; esac
     skill_names "$r" | grep -qvE '^[A-Za-z0-9_][A-Za-z0-9._-]*$' &&
       { policy_fail "$POLICY_FILE: skills entry '$r' has an invalid skill name"; return 2; }
   done <<EOF
@@ -87,24 +91,31 @@ EOF
 
 skill_names() { printf '%s' "${1#*=}" | tr '|' '\n' | awk '{ $1 = $1; print }'; }
 
+skill_dirs() {
+  if [ -n "$(pol skills.path)" ]; then items "$(pol skills.path)"; else printf '%s\n' $SKILL_DIRS_DEFAULT; fi
+}
+
 skill_found() {
   local d c
-  for d in ${SKILL_DIRS:-$SKILL_DIRS_DEFAULT}; do
-    [ -f "$d/$1/SKILL.md" ] || continue
+  while IFS= read -r d; do
+    [ -n "$d" ] || continue
+    [ -f "$d/$1/SKILL.md" ] && [ ! -L "$d/$1/SKILL.md" ] || continue
     c="$(cd "$d/$1" 2>/dev/null && pwd -P)" || continue
     case "$c" in "$ROOT"/*) return 0 ;; esac
-  done
+  done <<EOF
+$(skill_dirs)
+EOF
   return 1
 }
 
 policy_check_skills() {
-  local r s
-  SKILL_DIRS="$(pol skills.path)"
+  local r s where
+  where="$(skill_dirs | paste -sd ',' - | sed 's/,/, /g')"
   while IFS= read -r r; do
     [ -n "$r" ] || continue
     while IFS= read -r s; do
       skill_found "$s" ||
-        emit POLICY-SKILL .spec "skill '$s' for step '${r%%=*}' has no SKILL.md under ${SKILL_DIRS:-$SKILL_DIRS_DEFAULT} inside the repo"
+        emit POLICY-SKILL .spec "skill '$s' for step '${r%%=*}' has no SKILL.md under $where inside the repo"
     done <<EOF
 $(skill_names "$r")
 EOF

@@ -23,9 +23,9 @@ A="$T/repo"; S="$A/tools/ai/skills"
 mkdir -p "$A"; git -C "$A" init -q
 skill() { mkdir -p "$S/$1"; cat > "$S/$1/SKILL.md"; }
 
-skill plan-critic <<'EOF'
+skill design-critic <<'EOF'
 ---
-name: plan-critic
+name: design-critic
 description: Adds a check when reviewing plans and stress-testing designs.
 ---
 EOF
@@ -51,6 +51,7 @@ no frontmatter here
 description: ignored
 EOF
 mkdir -p "$S/long"; printf -- '---\ndescription: %0200d\n---\n' 0 > "$S/long/SKILL.md"
+mkdir -p "$S/linked"; printf -- '---\ndescription: secret outside\n---\n' > "$T/outside.md"; ln -s "$T/outside.md" "$S/linked/SKILL.md"
 mkdir -p "$A/.claude"; ln -s "$S" "$A/.claude/skills"
 mkdir -p "$T/outside/skills/leak"; echo '---' > "$T/outside/skills/leak/SKILL.md"
 mkdir -p "$A/.agents/skills"; ln -s "$T/outside/skills/leak" "$A/.agents/skills/leak"
@@ -58,14 +59,16 @@ mkdir -p "$A/node_modules/pkg/skills/vendored"
 echo x > "$A/node_modules/pkg/skills/vendored/SKILL.md"
 
 OUT="$(bash "$LIST" "$A" 2>&1)"
-line "critic	plan-critic	tools/ai/skills/plan-critic	Adds a check when reviewing plans and stress-testing designs."
+line "critic	design-critic	tools/ai/skills/design-critic	Adds a check when reviewing plans and stress-testing designs."
 line "build	ui-dev	tools/ai/skills/ui-dev	Senior web developer"
 line "tests	helper	tools/ai/skills/helper	Writes unit tests for services."
 line "-	notes	tools/ai/skills/notes	Keeps notes tidy."
 line "-	bare	tools/ai/skills/bare	"
 line "-	long	tools/ai/skills/long	$(printf '%0160d' 0)"
-count "	plan-critic	" 1
+count "	design-critic	" 1
 noline "leak"
+noline "secret outside"
+noline "	linked	"
 noline "vendored"
 
 mkdir -p "$T/plain/skills/solo"; printf -- '---\ndescription: Breaks a spec into Jira tickets\n---\n' > "$T/plain/skills/solo/SKILL.md"

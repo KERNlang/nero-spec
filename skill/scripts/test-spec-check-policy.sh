@@ -219,6 +219,13 @@ OUT="$(bash "$CHECK" "$A" 2>&1)"
 hasnt POLICY-SKILL ".spec: skill 'ui-dev'"
 hasnt POLICY-SKILL ".spec: skill 'web-link'"
 has POLICY-SKILL ".spec: skill 'dev' for step 'build' has no SKILL.md under .config/ai-skills"
+mkdir -p "$A/apps/web/my skills/api-dev" "$A/apps/web/my skills/fake"
+echo api > "$A/apps/web/my skills/api-dev/SKILL.md"; ln -s "$T/extskill/SKILL.md" "$A/apps/web/my skills/fake/SKILL.md"
+printf -- '---\nformat: nero-spec-policy/v1\nskills.path: .config/ai-skills, apps/web/my skills\nskills: build=ui-dev|api-dev, tests=fake\n---\n' > "$A/.nero-spec/skills.md"
+OUT="$(bash "$CHECK" "$A" 2>&1)"
+hasnt POLICY-SKILL ".spec: skill 'ui-dev'"
+hasnt POLICY-SKILL ".spec: skill 'api-dev'"
+has POLICY-SKILL ".spec: skill 'fake' for step 'tests' has no SKILL.md under .config/ai-skills, apps/web/my skills"
 awk '{ printf "%s\r\n", $0 }' "$A/.nero-spec/policy.md" > "$A/.nero-spec/crlf.md"
 sed -i.bak 's#^policy: .*#policy: .nero-spec/crlf.md#' "$A/.spec"
 exits 0 "CRLF policy parses" bash "$CHECK" "$A"
@@ -287,6 +294,11 @@ bad_policy --- 'format: nero-spec-policy/v1' 'skills: build' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=../dev' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=dev|.hidden' ---
 bad_policy --- 'format: nero-spec-policy/v1' 'skills.path: ../skills' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills.path: ok, ../skills' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=dev|' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=|dev' ---
+bad_policy --- 'format: nero-spec-policy/v1' 'skills: build=dev| |api' ---
 bad_policy 'format: nero-spec-policy/v1'
 bad_policy --- 'format: nero-spec-policy/v1'
 
