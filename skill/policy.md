@@ -5,7 +5,7 @@ One file per company instead of a fork: in the repo (`.spec` `policy: .nero-spec
 | Key | Meaning |
 |---|---|
 | `format` | Required: `nero-spec-policy/v1` |
-| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy; replace preset and `.spec` values |
+| `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pattern` | Owned by the policy; replace preset and `.spec` values. `branch.pattern` placeholders: `{type}`, `{TICKET}`, `{slug}` (case-sensitive) |
 | `pr.title` | Title template: `<n>` digits, `<a\|b>` one of, other `<x>` any text, e.g. `<feat\|fix>(ORG-<n>): <Summary>` |
 | `pr.regex` | Optional exact ERE when the lint has rules a template can't say (case, scopes); wins over `pr.title` |
 | `headers`, `sections` | Required header fields; sections required from READY TO BUILD on |
@@ -19,7 +19,7 @@ One file per company instead of a fork: in the repo (`.spec` `policy: .nero-spec
 ---
 format: nero-spec-policy/v1
 ticket.regex: ORG-\d+
-branch.pattern: ORG-{n}_{Name}
+branch.pattern: {TICKET}_{slug}
 pr.title: <feat|fix|docs>: <Summary> #ORG-<n>
 headers: Ticket, Confidence
 sections: Release Notes
@@ -35,5 +35,5 @@ skills: build=ui-dev|api-dev, tests=ui-test|api-test, review=code-review
 ```
 
 - **Safety:** repo policy = repo-relative `.md` in the git root, no symlinks, no `..`; machine policy = absolute `.md`. Unknown or duplicate keys, a missing `format` or bad values → `spec-check.sh` exits 2. A symlinked `SKILL.md` or a skill folder outside the repo never counts.
-- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy; `agon: full` plus a policy engine list counts), `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET` (whole key), `POLICY-WORD`, `POLICY-RULES`, `POLICY-SKILL`.
+- **Checks:** `POLICY-CONFLICT` (`.spec` loosens the policy; `agon: full` plus a policy engine list counts), `POLICY-HEADER`, `POLICY-SECTION`, `POLICY-TICKET` (whole key), `POLICY-WORD`, `POLICY-RULES`, `POLICY-SKILL`. Pointer specs get only `POLICY-WORD`.
 - **PR title:** `spec-check.sh --spec <spec> --pr-title "<title>"` → exit 0 `PR-TITLE ok`, 1 mismatch, 2 no policy or no title format. A title that names a ticket must name the spec's ticket; formats without a ticket only need to match.

@@ -95,6 +95,9 @@ policy_validate() {
   case "$(pol agon.max)" in ''|off|ask|restricted|full) ;; *) policy_fail "$POLICY_FILE: agon.max must be off|ask|restricted|full"; return 2 ;; esac
   case "$(pol critic)" in ''|subagent|agon|any) ;; *) policy_fail "$POLICY_FILE: critic must be subagent|agon|any"; return 2 ;; esac
   [ "$(pol critic)" = agon ] && case "$(pol agon.max)" in off|ask) policy_fail "$POLICY_FILE: critic agon needs agon.max restricted or full"; return 2 ;; esac
+  case "$(pol branch.pattern | sed -E 's/[{](type|TICKET|slug)[}]/_/g')" in
+    *[{}]*) policy_fail "$POLICY_FILE: branch.pattern placeholders are {type}, {TICKET}, {slug}"; return 2 ;;
+  esac
   if [ -n "$(pol ticket.regex)" ]; then
     printf '' | grep -E -- "$(ticket_re)" >/dev/null 2>&1
     [ $? -le 1 ] || { policy_fail "$POLICY_FILE: ticket.regex is not a valid extended regex"; return 2; }
@@ -184,8 +187,10 @@ items() { printf '%s' "$1" | tr ',' '\n' | awk '{ $1 = $1 } $0 != ""'; }
 agon_rank() { case "$1" in off) echo 0 ;; ask) echo 1 ;; restricted) echo 2 ;; full) echo 3 ;; esac; }
 
 preset_key() {
-  local f
-  f="$HERE/../presets/$(cfg preset | tr -d ' ').md"
+  local f p
+  p="$(cfg preset | tr -d ' ')"
+  case "$p" in ''|*[!A-Za-z0-9_-]*) return 0 ;; esac
+  f="$HERE/../presets/$p.md"
   [ -f "$f" ] && awk -v k="$1" 'NR == 1 { next } $0 == "---" { exit } index($0, k ":") == 1 { sub(/^[^:]*:[ \t]*/, ""); print; exit }' "$f"
 }
 

@@ -38,6 +38,14 @@ skill/
     test-spec-review-compat.sh  review compatibility regressions
     e2e-matrix.sh       collects `Device check:` ACs into a matrix section for an e2e-sweep report
     test-e2e-matrix.sh  fixture tests for e2e-matrix.sh
+    shotgrid.mjs        4-shot visual grid (desktop/mobile × light/dark) for visual-grid
+    test-shotgrid.sh    argument tests for shotgrid.mjs (no browser)
+    test-spec-check-nogit.sh  non-git target, dir-hash, OPEN-CAP, REFINE-STEPS fixtures
+    test-spec-check-stacks.sh  stack fixtures sourced by test-spec-check.sh
+    test-spec-check-policy.sh  company policy fixtures
+    test-spec-check-pr-title.sh  --pr-title fixtures
+    test-list-skills.sh  fixture tests for list-skills.sh
+    test-install-copy-mode.sh  installer copy-mode regression
 ```
 
 ## Presets
@@ -169,6 +177,7 @@ skill/scripts/spec-check.sh --stale [repo-dir]      # DONE specs without a sha: 
 skill/scripts/spec-check.sh --strict [repo-dir]     # exit 1 on any finding
 skill/scripts/pre-commit-spec-check.sh              # git hook; advisory unless SPEC_STRICT=1 (`/spec init` offers it)
 skill/scripts/spec-check.sh --spec <file> --dir-hash <root>  # print the dir-hash anchor for a non-git target
+skill/scripts/spec-check.sh --spec <file> --pr-title "<title>"  # PR title vs company policy; exit 0 ok, 1 mismatch, 2 no format
 skill/scripts/test-spec-check.sh                    # fixture tests
 skill/scripts/test-spec-check-nogit.sh              # non-git target, dir-hash, OPEN-CAP, REFINE-STEPS fixtures
 ```
@@ -195,6 +204,11 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, a
 | `UNMERGED` | Status READY/DONE but ADDED paths are not on that repo's default branch |
 | `NO-GIT` | target is not in a git repo: file-only checks run, git checks are skipped; counts as a finding under `--strict` |
 | `OPEN-CAP` | more than 3 lines tagged OPEN (`OPEN-CAP <spec>: N OPEN (max 3) — decide the rest as ASSUMED with reasoning (core step 5)`) |
+| `POLICY-CONFLICT` | `.spec` loosens the company policy (owned format keys, `agon` above `agon.max`, `agon: full` with `agon_engines`, an engine outside `agon_engines`, a dropped required or enabled denied addon) |
+| `POLICY-HEADER` / `POLICY-SECTION` | a spec lacks a policy `headers` field, or a policy `sections` heading from READY TO BUILD on |
+| `POLICY-TICKET` | the spec's Ticket header has no whole key matching `ticket.regex` |
+| `POLICY-WORD` | a spec contains a `words.deny` word (pointer specs get only this check) |
+| `POLICY-RULES` / `POLICY-SKILL` | a policy `rules` file, or a `skills` entry's `SKILL.md`, is missing inside the repo |
 | `REFINE-STEPS` | Full / tier 2+ spec (`**Depth:**`) whose `## Refine` names a Critic but records no `a–g` step coverage (`Steps:` may omit the conditional b) |
 
 Covered paths come from `## Changes`, else `Covers:`, else the Blast Radius section (backtick paths and path-like first cells; a cell like "backend \`app/x.py\`" resolves `backend` through `repos`).
