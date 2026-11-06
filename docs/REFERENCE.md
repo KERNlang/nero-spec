@@ -63,7 +63,7 @@ On demand, regardless of preset: `contract-discovery` when a boundary is crossed
 
 | Add-on | Purpose |
 |---|---|
-| `refine` | After drafting, on resume, before release: spec-check, contract compare (producer + every consumer, file:line both sides), re-verify VERIFIED/ASSUMED, ≤ 6 blind-spot questions → ACs, critique by risk (Agon or fresh subagent), max 2 rounds, ≤ 6-line `## Refine` block |
+| `refine` | After drafting, on resume, before release: spec-check, contract compare (producer + every consumer, file:line both sides), re-verify VERIFIED/ASSUMED, ≤ 6 blind-spot questions → ACs, critique by risk (Agon or fresh subagent), max 2 rounds, ≤ 7-line `## Refine` block |
 | `drift-guard` | `## Changes` as the drift anchor; STALE / XREPO / REPEAT-FIX; record or living specs |
 | `contract-discovery` / `release-contract` | Both sides of a boundary; old clients, compat window, deploy order |
 | `criteria-test-map` | AC ↔ test both ways, mutation-proven |
@@ -177,14 +177,14 @@ skill/scripts/spec-check.sh --stale [repo-dir]      # DONE specs without a sha: 
 skill/scripts/spec-check.sh --strict [repo-dir]     # exit 1 on any finding
 skill/scripts/pre-commit-spec-check.sh              # git hook; advisory unless SPEC_STRICT=1 (`/spec init` offers it)
 skill/scripts/spec-check.sh --spec <file> --dir-hash <root>  # print the dir-hash anchor for a non-git target
-skill/scripts/spec-check.sh --spec <file> --pr-title "<title>"  # PR title vs company policy; exit 0 ok, 1 mismatch, 2 no format
+skill/scripts/spec-check.sh --spec <file> --pr-title "<title>"  # PR title vs company policy, plus PR-OPEN-AC for unchecked ACs; exit 0 ok, 1 mismatch or open ACs, 2 no format, 3 invalid policy
 skill/scripts/test-spec-check.sh                    # fixture tests
 skill/scripts/test-spec-check-nogit.sh              # non-git target, dir-hash, OPEN-CAP, REFINE-STEPS fixtures
 ```
 
 Installed with the skill (e.g. `~/.claude/skills/spec/scripts/…`). Reads `specs.path` and `repos` from `.spec` (default folders `.claude/specs` and `.agents/specs`; files `spec.md`, `spec-*.md`, `*-spec.md`). `specs.path` must stay inside the repo; absolute paths, leading `-`, dot components, and symlink escapes are rejected. Spaces in directory names work. Discovered spec paths containing newline, CR, or tab fail with exit 2. Needs only bash 3.2+, git, awk.
 
-The checker returns 0 when no strict finding blocks it, 1 for strict findings, and 2 for a broken invocation, installation, or configured repo that cannot be read. Advisory checks still return 2 for broken configuration.
+The checker returns 0 when no strict finding blocks it, 1 for strict findings, 2 for a broken invocation, installation, or configured repo that cannot be read, and 3 for an invalid company policy (unknown policy keys only warn). Advisory checks still return 2 for broken configuration.
 
 | Finding | Fires when |
 |---|---|
@@ -193,12 +193,12 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, a
 | `DEAD-CITE` | a VERIFIED citation names a file that is gone, or a line past EOF |
 | `STALE-CITE` | VERIFIED `file:line` ranges changed or moved since the spec's anchor (`Date:` → last commit before it) |
 | `STATUS-OPEN` | Status DONE with unchecked `- [ ]` under Acceptance Criteria (`(post-deploy: …)` and out-of-scope lines skipped) |
-| `STATUS-SHIPPED` | Status IN PROGRESS/READY and ≥ 80 % (`--shipped-pct`) of covered paths known to the default branch changed there after the spec (commits in `<anchor>..<default branch>`, anchor = Verified at / Baseline or the commit that added the spec; otherwise a last change strictly after `Date:`) |
+| `STATUS-SHIPPED` | Status IN PROGRESS/IN REVIEW/READY and ≥ 80 % (`--shipped-pct`) of covered paths known to the default branch changed there after the spec (commits in `<anchor>..<default branch>`, anchor = Verified at / Baseline or the commit that added the spec; otherwise a last change strictly after `Date:`) |
 | `POINTER` | a short pointer spec names a `…specs/…md` target that does not exist |
 | `STATUS-ENUM` | Status does not start with the enum (free text, or a synonym such as BUILT or IMPLEMENTED, instead of `DONE — note`) |
 | `REPEAT-FIX` | ≥ 4 (`--repeat-fix`) fix/hotfix/revert commits on covered paths within 30 days (`--repeat-days`) of `Date:` → escalate, write a bigger spec |
 | `NO-STATUS` | no Status header |
-| `NO-REVIEW` | Status READY/IN PROGRESS/DONE but no `## Refine` section with a non-empty `Critic:` (or `Critics:`) line |
+| `NO-REVIEW` | Status READY/IN PROGRESS/IN REVIEW/DONE but no `## Refine` section with a non-empty `Critic:` (or `Critics:`) line |
 | `CONTRACT-MISSING` | a `METHOD /path` in `## Contract` is absent from a named repo's default branch or HEAD; lists the branches that have it |
 | `CONTRACT-FIELDS` | a consumer's call sites of an endpoint never name a contract field the producer has |
 | `UNMERGED` | Status READY/DONE but ADDED paths are not on that repo's default branch |

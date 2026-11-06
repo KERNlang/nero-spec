@@ -45,7 +45,7 @@ policy_parse() {
     {
       i = index($0, ":"); if (!i) { print "bad line: " $0; bad = 1; exit }
       k = substr($0, 1, i - 1); v = substr($0, i + 1); gsub(/^[ \t]+|[ \t]+$/, "", k); gsub(/^[ \t]+|[ \t]+$/, "", v)
-      if (index(keys, " " k " ") == 0) { print "warn: unknown key " k " ignored"; next }
+      if (index(keys, " " k " ") == 0) { if (!(k in warned)) print "warn: unknown key " k " ignored"; warned[k] = 1; next }
       if (k in seen) { print "duplicate key: " k; bad = 1; exit }
       seen[k] = 1; print k "\t" v > "/dev/stderr"
     }

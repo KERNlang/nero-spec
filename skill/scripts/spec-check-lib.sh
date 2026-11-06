@@ -235,7 +235,7 @@ unchecked_acs() {
       if (!inac && tolower($0) ~ /acceptance|criteria|definition of done|done when/) { inac = 1; al = lvl($0) }
       next
     }
-    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope|\(post-deploy:/ { n++ }
+    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope|^[ \t]*[-*] \[ \] [*]*ac-[0-9a-z.]+[*]*[ \t]*\(post-deploy:/ { n++ }
     END { print n + 0 }' "$1"
 }
 

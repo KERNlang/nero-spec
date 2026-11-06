@@ -141,9 +141,9 @@ policy_load || exit 3
 if [ "$PRTITLE_SET" = 1 ]; then
   [ -n "$POLICY_FILE" ] || { echo "spec-check: --pr-title needs a company policy" >&2; exit 2; }
   policy_check_pr_title "$PRTITLE" "$ONE"; rc=$?
-  if [ "$rc" != 2 ] && [ -n "$ONE" ]; then
+  if [ -n "$ONE" ]; then
     n="$(unchecked_acs "$ONE")"
-    [ "$n" -gt 0 ] && { echo "PR-OPEN-AC $ONE: $n unchecked acceptance criteria — verify and tick them (manual ones too), write them (post-deploy: <env>, <owner>) if only a deploy can verify them, or move them to Out of Scope before the PR"; rc=1; }
+    [ "$n" -gt 0 ] && { echo "PR-OPEN-AC $ONE: $n unchecked acceptance criteria — verify and tick them (manual ones too), write them (post-deploy: <env>, <owner>) if only a deploy can verify them, or move them to Out of Scope before the PR"; [ "$rc" = 0 ] && rc=1; }
   fi
   exit "$rc"
 fi

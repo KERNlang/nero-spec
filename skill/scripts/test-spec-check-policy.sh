@@ -279,10 +279,10 @@ bad_policy() {
   printf 'preset: personal\nagon: off\naddons: -agon-oracle\npolicy: .nero-spec/bad.md\n' > "$A/.spec"
   exits 3 "bad policy: $*" bash "$CHECK" "$A"
 }
-printf -- '---\nformat: nero-spec-policy/v1\ntickt.regex: X\n---\n' > "$A/.nero-spec/bad.md"
+printf -- '---\nformat: nero-spec-policy/v1\ntickt.regex: X\ntickt.regex: Y\n---\n' > "$A/.nero-spec/bad.md"
 printf 'preset: personal\nagon: off\naddons: -agon-oracle\npolicy: .nero-spec/bad.md\n' > "$A/.spec"
 exits 0 "unknown key only warns" bash "$CHECK" "$A"
-grep -qF "bad.md: unknown key tickt.regex ignored" "$T/out" && PASS=$((PASS + 1)) || { FAIL=$((FAIL + 1)); echo "FAIL unknown key warning missing"; cat "$T/out"; }
+[ "$(grep -cF "bad.md: unknown key tickt.regex ignored" "$T/out")" = 1 ] && PASS=$((PASS + 1)) || { FAIL=$((FAIL + 1)); echo "FAIL unknown key warning missing"; cat "$T/out"; }
 bad_policy --- 'format: nero-spec-policy/v1' 'headers: A' 'headers: B' ---
 bad_policy --- 'headers: A' ---
 bad_policy --- 'format: nero-spec-policy/v2' ---
