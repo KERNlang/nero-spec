@@ -45,6 +45,11 @@ title 1 "link target key is ignored" --spec "$SP" --pr-title "fix(core): Add thi
 printf "# Other\n\n**Status:** SPEC\n" > "$A/.claude/specs/ORG-12-thing/noticket.md"
 title 1 "spec without a Ticket key" --spec "$A/.claude/specs/ORG-12-thing/noticket.md" --pr-title "fix(core): Add thing #ORG-12" "$A"
 says "has no **Ticket:** key"
+printf '\n## Acceptance Criteria\n- [x] AC-1 automated\n- [ ] AC-2 manual upload\n' >> "$SP"
+title 1 "unchecked AC blocks the PR" --spec "$SP" --pr-title "fix(core): Add thing #ORG-12" "$A"
+says "PR-OPEN-AC"
+perl -pi -e 's/- \[ \] AC-2/- [x] AC-2/' "$SP"
+title 0 "all ACs ticked" --spec "$SP" --pr-title "fix(core): Add thing #ORG-12" "$A"
 title 2 "empty title" --pr-title "" "$A"
 title 2 "multi-line title" --pr-title "fix(core): Add thing #ORG-12
 fix(core): Add thing #ORG-12" "$A"

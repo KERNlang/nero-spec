@@ -36,7 +36,8 @@
 # Invalid policy file → exit 2.
 # --pr-title TITLE: only checks a PR title against the policy (pr.regex, else pr.title with <n> = digits,
 # <a|b> = one of, any other <x> = text). With --spec and ticket.regex, a title that names a ticket must name the spec's
-# Ticket key. Exit 0 ok, 1 mismatch (or the title names a ticket the spec lacks), 2 no policy or no title format.
+# Ticket key; with --spec, unchecked acceptance criteria fail as PR-OPEN-AC (a PR ships every AC verified).
+# Exit 0 ok, 1 mismatch, wrong ticket or open ACs, 2 no policy or no title format.
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
@@ -137,7 +138,12 @@ STALE_FALLBACK=0; drift_guard_on && STALE_FALLBACK=1
 policy_load || exit 2
 if [ "$PRTITLE_SET" = 1 ]; then
   [ -n "$POLICY_FILE" ] || { echo "spec-check: --pr-title needs a company policy" >&2; exit 2; }
-  policy_check_pr_title "$PRTITLE" "$ONE"; exit $?
+  policy_check_pr_title "$PRTITLE" "$ONE"; rc=$?
+  if [ "$rc" != 2 ] && [ -n "$ONE" ]; then
+    n="$(unchecked_acs "$ONE")"
+    [ "$n" -gt 0 ] && { echo "PR-OPEN-AC $ONE: $n unchecked acceptance criteria — verify and tick them (manual ones too) or move them to Out of Scope before the PR"; rc=1; }
+  fi
+  exit "$rc"
 fi
 
 REPOMAP=""
