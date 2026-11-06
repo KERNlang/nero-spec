@@ -11,6 +11,8 @@ Built-in defaults (no `rules` file):
 - < 0.90 → one independent challenge: a second AI if available (Agon when effective agon is on), else a fresh-context subagent — say it is same-model and weaker.
 - < 0.70 → stop, gather evidence, say what would raise it. No implementing.
 - After implementation: run the project's tests, typecheck and build before calling anything done.
+- Newer rule wins: check `git log` on the rule files and copy the newest code of the rule owner, not old code nearby.
+- A written rule is waived only with the rule owner's OK, and the waiver goes in the PR text, never silently into the spec.
 
 ## 1. Understand the request
 
@@ -55,7 +57,7 @@ Base template. Addons add header lines and sections; the depth addon decides whi
 **Depth:** <Surgical | Full | tier-N>
 **Verified at:** <git rev-parse --short HEAD> | dir-hash <sha256> root <dir>
 **Confidence:** 0.XX
-**Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE [— short note]
+**Status:** SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE [— short note]
 
 ## Executive Summary
 ## Intent
@@ -88,14 +90,15 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 ```
 
 - **Verified at** — non-git target: `scripts/spec-check.sh --spec <file> --dir-hash <root>` prints the `dir-hash <sha256> root <dir>` value.
-- **Status** — the enum first; anything else goes after ` — `. Never invent a new status word.
+- **Status** — the enum first; anything else goes after ` — `. Never invent a new status word (`BUILT`, `IMPLEMENTED`, `SHIPPED` are not statuses). `IN REVIEW` = built, PR open: the spec ships in that PR so it cannot say DONE yet; merging the PR makes it DONE.
 - **Intent** — user-facing changes only (step 1). `Picked` is the reading the user confirmed, `Not this` the plausible ones they rejected. Unconfirmed → one OPEN for the whole reading, not one per line, and Status stays SPEC. Not user-facing → omit the section, never leave it empty. Before DONE a human confirms the built behaviour matches `Picked`: the Device check for UI, one real run (sent email, notification, permission attempt) otherwise.
 - **Changes** — one line per file or glob, backtick paths, other repos as `repo:path` (name from `.spec` `repos:`), one phrase each. It is the scope fence and the drift anchor (`spec-check.sh` reads it). Generated code → list the source.
 - **Contract** — one endpoint row per `METHOD /path`, backtick values (`` `POST /api/x` `` · `` `access_token`, `expires_in` ``), repo names from `repos:`. `spec-check.sh` greps each side's default branch and HEAD for it; other contract facts go in the second table.
 - **Callers** — the spec changes the semantics of a function, type or field → one `Callers:` line per symbol: every call site and every construction path (constructor, factory, pool, literal construction, tests), from a cited grep, each marked `changes` or `same`.
-- **Acceptance Criteria** — binary pass/fail, testable, numbered `AC-n`, written so a discriminating test falls out. Optional EARS: `WHEN <trigger> [WHILE <state>] THE SYSTEM SHALL <response>`. Non-functional needs (text length, grammar, offline, a11y) are ACs too. Any UI change carries the `Device check:` AC.
+- **Acceptance Criteria** — binary pass/fail, testable, numbered `AC-n`, written so a discriminating test falls out. Optional EARS: `WHEN <trigger> [WHILE <state>] THE SYSTEM SHALL <response>`. Non-functional needs (text length, grammar, offline, a11y) are ACs too. Any UI change carries the `Device check:` AC. An AC only a deploy can verify is written `- [ ] AC-n (post-deploy: <env>, <owner>) …`: it stays unchecked, does not count as open for `PR-OPEN-AC` or `STATUS-OPEN`, and becomes a follow-up checklist on the ticket.
 - **Tricky inputs** — every AC names ≥ 2 concrete inputs or states (Surgical ≥ 1), never "edge cases". Pick what applies: empty, zero or root values; renamed or aliased fields; repeated or chained calls; partial state left by an earlier step; an object built outside its constructor; a value that exists only in degenerate form; concurrent calls — name the runtime's concurrency model and fire them through the real entry point, not a call counter.
-- **A named tricky input is never waived.** Each gets a test through the public entry point. "Safe / no handling needed" is allowed only as a VERIFIED claim citing the code that makes it safe; otherwise it is still tested.
+- **A named tricky input is never waived.** It gets a test through the public entry point whenever a realistic bug would break it; one no realistic bug breaks is dropped from the list, not tested for coverage. "Safe / no handling needed" is allowed only as a VERIFIED claim citing the code that makes it safe; otherwise it is tested.
+- **New tests** go into the system-under-test's existing test file, in its setup and style: one parameterised test per behaviour with readable inline data, no parameter that never varies. A third-party library's behaviour is checked once as evidence, not kept as a test, unless it guards a risk our change creates.
 - **Downstream** — whenever our output feeds another layer (parser, consumer, storage, validator, generator, other repo): one line on what that layer rejects, owns (memory, lifetimes) or throws on. "Out of scope" is never an answer for the layer we feed.
 - **History** — past fixes in the Changes paths are the cheapest risk list; each relevant one becomes a Tricky input. Skip when the command returns nothing.
 - **Preserved behaviour** — "keep as is", verbatim port or byte-identical output is ASSUMED-correct, not VERIFIED: list the odd inputs the preserved code sees (forks, empty graphs, reentry) as Tricky inputs of the AC that preserves it.
@@ -105,8 +108,8 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 
 ## 5. Claim tags — evidence binding
 
-- **VERIFIED** — confirmed by reading source, running a command, or calling an API, **and cites the exact artifact**: `path` or `path` › symbol (`:line` only when the line itself matters), `repo@sha:path`, the command plus its load-bearing output, or a captured response. An external source counts only with URL + section + fetch date. No citation → ASSUMED. VERIFIED is provenance, not confidence.
-- **Negative evidence** counts only with command + date: "`grep -rn foo src` → 0 hits, 2026-01-31". Absence claims rot fastest.
+- **VERIFIED** — confirmed by reading source, running a command, or calling an API, **and cites the exact artifact**: `path` or `path` › symbol (`:line` only when the line itself matters), `repo@sha:path`, the command plus its load-bearing output, or a captured response. An external source counts only with URL + section + fetch date. No citation → ASSUMED. VERIFIED is provenance, not confidence. A check counts only if it could have shown the opposite.
+- **Negative evidence** counts only with command + date: "`grep -rn foo src` → 0 hits, 2026-01-31". Absence claims rot fastest. An absence claim needs a search or listing of the thing itself, never one guessed path or URL returning 404.
 - **ASSUMED** — inferred from patterns, docs, or memory; not source-checked. Carries its date; older than the anchor → re-check or OPEN (`refine` c).
 - **OPEN** — explicitly unknown; needs human input or access not available.
 - Every number carries the command that produced it.
@@ -142,13 +145,14 @@ History: `git log --oneline -i --grep=fix -- <Changes paths>` → fixes that bec
 
 Checklist, not a review.
 
+- Repeated review nits are never optional: the same nit twice is fixed everywhere, not per comment. The last review before the PR covers the whole diff against the base branch, not the last delta.
 - Always re-run the commands behind load-bearing VERIFIED claims (all repos); changed results → Corrections Log. Release or go-live → `refine` a + b + c first.
 - Hooks: `criteria-test-map` "Prove the tests"; `drift-guard` AC-link check; `e2e-sweep` device-check rows (UI specs).
 - Each AC → `PASS` (test name + load-bearing output line), `GAP` (what is missing), or moved to Out of Scope with a reason. Device-check ACs PASS only with the screenshot/recording. With `## Intent`, DONE also needs the human `Picked` confirmation.
 - `git diff --name-only <Verified at>..HEAD` (each repo) vs Changes → list files outside it. dir-hash anchor → re-run `--dir-hash`, record the new value at DONE; files outside Changes cannot be diffed without git, so list the files you edited.
 - Add `## As-built delta`: what differs from the spec and why.
-- PR title proposed or set and the company policy has `pr.title`/`pr.regex` → `scripts/spec-check.sh --spec <spec> --pr-title "<title>"` must print `PR-TITLE ok` and no `PR-OPEN-AC` before the title is handed over; CI lints titles too, a typo costs a failed build. Manual ACs are run and ticked before the PR, never left for the reviewer to find.
-- **DONE only when every AC is checked `- [x]` or moved out of scope**, and every consumer in Changes is merged on its shipping branch. Otherwise IN PROGRESS.
+- PR title proposed or set and the company policy has `pr.title`/`pr.regex` → `scripts/spec-check.sh --spec <spec> --pr-title "<title>"` must print `PR-TITLE ok` and no `PR-OPEN-AC` before the title is handed over; CI lints titles too, a typo costs a failed build. Manual ACs are run and ticked before the PR, never left for the reviewer to find; only `(post-deploy: <env>, <owner>)` ACs stay open.
+- **DONE only when every AC is checked `- [x]`, moved out of scope or marked post-deploy**, and every consumer in Changes is merged on its shipping branch. Otherwise IN PROGRESS, or IN REVIEW while the PR is open.
 
 ## Principles
 

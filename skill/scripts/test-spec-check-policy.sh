@@ -253,14 +253,14 @@ for s in spec-check.sh spec-check-lib.sh spec-check-contract.sh spec-check-polic
 OUT="$(SPEC_MACHINE="$T/machine" bash "$V/spec-check.sh" "$A" 2>&1)"
 hasnt POLICY-HEADER .claude/specs/no-header/spec.md
 printf 'policy_paths: %s=relative.md\n' "$T" > "$T/machine-bad"
-exits 2 "machine policy must be absolute" env SPEC_MACHINE="$T/machine-bad" bash "$CHECK" "$A"
+exits 3 "machine policy must be absolute" env SPEC_MACHINE="$T/machine-bad" bash "$CHECK" "$A"
 printf 'policy_paths: /nonexistent-dir=%s\n' "$T/policies/org.md" > "$T/machine-other"
 OUT="$(SPEC_MACHINE="$T/machine-other" bash "$CHECK" "$A" 2>&1)"
 hasnt POLICY-HEADER .claude/specs/no-header/spec.md
 
 invalid() {
   printf 'preset: personal\nagon: off\naddons: -agon-oracle\npolicy: %s\n' "$1" > "$A/.spec"
-  exits 2 "$2" bash "$CHECK" "$A"
+  exits 3 "$2" bash "$CHECK" "$A"
 }
 invalid ../outside.md "parent path"
 invalid "$A/.nero-spec/policy.md" "absolute path"
@@ -277,9 +277,12 @@ invalid escdir/p.md "symlinked dir escape"
 bad_policy() {
   printf '%s\n' "$@" > "$A/.nero-spec/bad.md"
   printf 'preset: personal\nagon: off\naddons: -agon-oracle\npolicy: .nero-spec/bad.md\n' > "$A/.spec"
-  exits 2 "bad policy: $*" bash "$CHECK" "$A"
+  exits 3 "bad policy: $*" bash "$CHECK" "$A"
 }
-bad_policy --- 'format: nero-spec-policy/v1' 'tickt.regex: X' ---
+printf -- '---\nformat: nero-spec-policy/v1\ntickt.regex: X\n---\n' > "$A/.nero-spec/bad.md"
+printf 'preset: personal\nagon: off\naddons: -agon-oracle\npolicy: .nero-spec/bad.md\n' > "$A/.spec"
+exits 0 "unknown key only warns" bash "$CHECK" "$A"
+grep -qF "bad.md: unknown key tickt.regex ignored" "$T/out" && PASS=$((PASS + 1)) || { FAIL=$((FAIL + 1)); echo "FAIL unknown key warning missing"; cat "$T/out"; }
 bad_policy --- 'format: nero-spec-policy/v1' 'headers: A' 'headers: B' ---
 bad_policy --- 'headers: A' ---
 bad_policy --- 'format: nero-spec-policy/v2' ---

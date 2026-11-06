@@ -26,7 +26,7 @@ Work with collaborators: shared repos, public APIs with downstream consumers, PR
 **Issue:** <link>    (omit when none)
 **Date:** YYYY-MM-DD
 **Confidence:** 0.XX
-**Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE [— note]
+**Status:** SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE [— note]
 ```
 
 ## Constitution

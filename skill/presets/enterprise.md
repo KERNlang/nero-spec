@@ -29,7 +29,7 @@ Company work driven by a tracker. Every spec belongs to a ticket; the company's 
 ```markdown
 # [Title]
 **Ticket:** KEY-123 (provisional?)
-**Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE [— note]
+**Status:** SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE [— note]
 **Date:** YYYY-MM-DD
 **Confidence:** 0.XX
 ```

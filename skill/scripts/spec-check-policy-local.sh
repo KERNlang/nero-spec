@@ -19,7 +19,7 @@ policy_local_path() {
     case "$ROOT/" in "$dir"/*) [ "${#dir}" -gt "$bestlen" ] && { best="$file"; bestlen="${#dir}"; } ;; esac
   done
   [ -n "$best" ] || return 0
-  case "$best" in /*.md) ;; *) policy_fail "$best (policy_paths needs an absolute .md path)"; return 2 ;; esac
-  [ -f "$best" ] || { policy_fail "$best (file not found)"; return 2; }
+  case "$best" in /*.md) ;; *) policy_fail "$best (policy_paths needs an absolute .md path)"; return 3 ;; esac
+  [ -f "$best" ] || { policy_fail "$best (file not found)"; return 3; }
   printf '%s\n' "$best"
 }

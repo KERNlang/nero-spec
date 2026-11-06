@@ -169,11 +169,20 @@ status_of() {
   printf '%s' "$s"
 }
 
+status_word() {
+  printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | sed -E 's/^[^A-Z]*//; s/[[:space:]]*(—|--| - |\(|;|,).*//; s/[[:space:]]+$//'
+}
+
+status_synonym() {
+  case "$(status_word "$1")" in IMPLEMENTED|SHIPPED|COMPLETE|BUILT|MERGED|DEPLOYED|LIVE) return 0 ;; esac
+  return 1
+}
+
 status_norm() {
-  local s; s="$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | sed -E 's/^[^A-Z]*//; s/[[:space:]]*(—|--| - |\(|;|,).*//; s/[[:space:]]+$//')"
-  case "$s" in
+  case "$(status_word "$1")" in
     DONE|IMPLEMENTED|SHIPPED|COMPLETE|BUILT|MERGED|DEPLOYED|LIVE) echo DONE ;;
     "IN PROGRESS"|IN-PROGRESS|WIP|BUILDING) echo "IN PROGRESS" ;;
+    "IN REVIEW"|IN-REVIEW) echo "IN REVIEW" ;;
     "READY TO BUILD"|READY|APPROVED) echo "READY TO BUILD" ;;
     SPEC|DRAFT) echo SPEC ;;
     SUPERSEDED|"SUPERSEDED BY "*|ABANDONED|CANCELLED|CANCELED|WONTFIX) echo CLOSED ;;
@@ -183,7 +192,7 @@ status_norm() {
 status_class() {
   case "$(status_norm "$1")" in
     DONE) echo "done" ;;
-    "IN PROGRESS"|"READY TO BUILD") echo open ;;
+    "IN PROGRESS"|"IN REVIEW"|"READY TO BUILD") echo open ;;
     *) echo other ;;
   esac
 }
@@ -226,7 +235,7 @@ unchecked_acs() {
       if (!inac && tolower($0) ~ /acceptance|criteria|definition of done|done when/) { inac = 1; al = lvl($0) }
       next
     }
-    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope/ { n++ }
+    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope|\(post-deploy:/ { n++ }
     END { print n + 0 }' "$1"
 }
 

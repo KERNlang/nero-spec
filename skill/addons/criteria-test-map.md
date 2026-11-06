@@ -24,11 +24,13 @@ Unmapped tests: none.
 
 ## Rules
 
-- **Forward**: every AC and every one of its `Tricky inputs:` has its own row and a test, fixture, or an explicit `manual:` check with steps. The test name carries the input.
+- **Forward**: every AC has a row and a test, fixture, or an explicit `manual:` check with steps. Each of its `Tricky inputs:` gets its own row when a realistic bug would break it (the test name carries the input); one no realistic bug breaks is dropped from the list.
+- New tests go into the system-under-test's existing test file, in its setup and style, one parameterised test per behaviour.
+- **Manual rows** are run before the PR; Status holds the evidence `PASS <date> <env>`. A row that only a deploy can verify belongs to a `(post-deploy: <env>, <owner>)` AC: name env and owner in the row; it becomes the ticket's follow-up checklist.
 - **Backward**: every planned test names the AC it proves. A test with no AC is either a missing criterion (add it) or scope creep (drop it).
 - Test names carry the AC ID (`AC-3` in the test title or describe block) so the link survives refactors.
 - Test names are concrete (file + test title or command), not "add tests".
-- Status: `planned`, `exists`, `manual`. A tricky input without a row is a gap at step 6.
+- Status: `planned`, `exists`, `manual`, or `PASS <date> <env>` for a manual row already run. A kept tricky input without a row is a gap at step 6.
 - A criterion that cannot be tested is not binary — rewrite it.
 - Success metrics are not mapped here.
 
@@ -42,7 +44,7 @@ Prompt, skill or doc artifacts whose acceptance is agent behaviour get an `Eval:
 - ≥ 1 false-positive probe: a correct look-alike the treatment must not "fix".
 - Run the baseline before the treatment is installed globally; a global or symlinked install contaminates it.
 
-Step 6 check: any AC or tricky input without a row, any test without an AC, any test that would pass on a plausibly wrong implementation?
+Step 6 check: any AC or kept tricky input without a row, any test without an AC, any test that would pass on a plausibly wrong implementation?
 
 ## Prove the tests (step 9)
 

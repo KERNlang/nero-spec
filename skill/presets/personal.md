@@ -24,7 +24,7 @@ Solo projects. No ticket — the slug is the identity.
 # [Title]
 **Date:** YYYY-MM-DD
 **Confidence:** 0.XX
-**Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE [— note]    (multi-session only)
+**Status:** SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE [— note]    (multi-session only)
 ```
 
 ## Constitution

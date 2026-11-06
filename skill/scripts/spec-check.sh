@@ -3,19 +3,21 @@
 #                      [--shipped-pct N] [--repeat-fix N] [--repeat-days D] [--ref-cap N] [--field-window N]
 #                      [--dir-hash] [--pr-title TITLE] [repo-dir]
 #
-# Mechanical health checks for claim-tagged specs. Exit 1 for strict findings, 2 for broken invocation or config.
+# Mechanical health checks for claim-tagged specs. Exit 1 for strict findings, 2 for broken invocation or config,
+# 3 for an invalid company policy.
 # One line per finding, then a summary. Kinds:
 #   STALE          covered files changed since the anchor (same repo), or differ from a dir-hash anchor
 #   XREPO          covered files in another repo changed since the anchor date
 #   DEAD-CITE      VERIFIED citation to a file that is gone, or a line beyond EOF
 #   STALE-CITE     VERIFIED file:line whose lines changed or moved since the anchor
-#   STATUS-OPEN    Status DONE/IMPLEMENTED/SHIPPED/COMPLETE with unchecked acceptance criteria
-#   STATUS-SHIPPED Status IN PROGRESS/READY but >= N% (default 80) of covered paths known to the default
+#   STATUS-OPEN    Status DONE (or a done synonym) with unchecked acceptance criteria; post-deploy and out-of-scope ACs are skipped
+#   STATUS-SHIPPED Status IN PROGRESS/IN REVIEW/READY but >= N% (default 80) of covered paths known to the default
 #                  branch changed there after the spec (commits in anchor..branch, anchor = Verified at/Baseline or
 #                  the commit that added the spec; else last change strictly after Date). Min 3 paths; paths never
 #                  on the branch are ignored
 #   POINTER        pointer spec whose target does not exist
-#   STATUS-ENUM    Status does not start with SPEC | READY TO BUILD | IN PROGRESS | DONE (a " — note" may follow)
+#   STATUS-ENUM    Status does not start with SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE (a " — note" may follow);
+#                  synonyms such as BUILT or IMPLEMENTED are flagged too but still count as DONE
 #   REPEAT-FIX     >= N (default 4) fix/hotfix/revert commits on covered paths within D (default 30) days of Date
 #   NO-STATUS      spec without a **Status:** header
 #   CONTRACT-MISSING  a `METHOD /path` in a ## Contract section is absent from a named repo's default branch or
@@ -23,7 +25,7 @@
 #   CONTRACT-FIELDS   a consumer's call sites of an endpoint (+/- --field-window lines, default 15) never name a
 #                  contract field the producer has (snake_case, camelCase, PascalCase or kebab-case)
 #   UNMERGED       Status READY/DONE but ADDED paths are not on that repo's default branch (branches listed)
-#   NO-REVIEW      Status READY/IN PROGRESS/DONE but no `## Refine` section with a non-empty `Critic:`/`Critics:` line
+#   NO-REVIEW      Status READY/IN PROGRESS/IN REVIEW/DONE but no `## Refine` section with a non-empty `Critic:`/`Critics:` line
 #   REFINE-STEPS   same Status, **Depth:** Full or tier 2-4 and a Critic, but ## Refine has no a–g / `Steps:` coverage
 #   OPEN-CAP       more than 3 lines tagged OPEN outside code, fences, ## Refine and ## Corrections Log
 #   NO-GIT         target outside any git repo: root = repo-dir, else the spec's dir; git-based kinds skipped
@@ -31,13 +33,13 @@
 #   POLICY-RULES   a policy rules file is missing, a symlink or outside the repo
 #   POLICY-SKILL   a skill named in the policy `skills` has no SKILL.md inside the repo
 #   POLICY-HEADER / POLICY-SECTION / POLICY-TICKET / POLICY-WORD  spec misses a required header or section
-#                  (sections only at READY/IN PROGRESS/DONE), Ticket fails ticket.regex, or uses a denied word
+#                  (sections only at READY/IN PROGRESS/IN REVIEW/DONE), Ticket fails ticket.regex, or uses a denied word
 # Policy: `.spec` `policy: <repo-relative .md>`, else the local lookup in spec-check-policy-local.sh when present.
-# Invalid policy file → exit 2.
+# Invalid policy file → exit 3; unknown policy keys only warn on stderr.
 # --pr-title TITLE: only checks a PR title against the policy (pr.regex, else pr.title with <n> = digits,
 # <a|b> = one of, any other <x> = text). With --spec and ticket.regex, a title that names a ticket must name the spec's
 # Ticket key; with --spec, unchecked acceptance criteria fail as PR-OPEN-AC (a PR ships every AC verified).
-# Exit 0 ok, 1 mismatch, wrong ticket or open ACs, 2 no policy or no title format.
+# Exit 0 ok, 1 mismatch, wrong ticket or open ACs, 2 no policy or no title format, 3 invalid policy.
 #
 # Anchor: **Verified at:** sha, else Baseline: sha, else the spec's Date. DONE specs without a sha fall back to
 # their last commit only with --stale or drift-guard on in .spec (preset default unless -drift-guard).
@@ -135,13 +137,13 @@ drift_guard_on() {
   return 1
 }
 STALE_FALLBACK=0; drift_guard_on && STALE_FALLBACK=1
-policy_load || exit 2
+policy_load || exit 3
 if [ "$PRTITLE_SET" = 1 ]; then
   [ -n "$POLICY_FILE" ] || { echo "spec-check: --pr-title needs a company policy" >&2; exit 2; }
   policy_check_pr_title "$PRTITLE" "$ONE"; rc=$?
   if [ "$rc" != 2 ] && [ -n "$ONE" ]; then
     n="$(unchecked_acs "$ONE")"
-    [ "$n" -gt 0 ] && { echo "PR-OPEN-AC $ONE: $n unchecked acceptance criteria — verify and tick them (manual ones too) or move them to Out of Scope before the PR"; rc=1; }
+    [ "$n" -gt 0 ] && { echo "PR-OPEN-AC $ONE: $n unchecked acceptance criteria — verify and tick them (manual ones too), write them (post-deploy: <env>, <owner>) if only a deploy can verify them, or move them to Out of Scope before the PR"; rc=1; }
   fi
   exit "$rc"
 fi
@@ -390,7 +392,7 @@ EOF
 }
 
 check_review() {
-  case "$(status_norm "$2")" in "READY TO BUILD"|"IN PROGRESS"|DONE) ;; *) return 0 ;; esac
+  case "$(status_norm "$2")" in "READY TO BUILD"|"IN PROGRESS"|"IN REVIEW"|DONE) ;; *) return 0 ;; esac
   case "$(refine_critic "$1")" in
     none) emit NO-REVIEW "$1" "Status '${2%% —*}' but no ## Refine section naming a Critic" ;;
     empty) emit NO-REVIEW "$1" "Status '${2%% —*}' but ## Refine names no Critic" ;;
@@ -431,8 +433,9 @@ check_spec() {
   if is_pointer "$f"; then check_pointer "$f"; [ -n "$POLICY_FILE" ] && policy_check_words "$f"; return 0; fi
   status="$(status_of "$f")"; cls="$(status_class "$status")"
   [ -n "$status" ] || emit NO-STATUS "$f" "no **Status:** header"
-  [ -n "$status" ] && [ -z "$(status_norm "$status")" ] &&
-    emit STATUS-ENUM "$f" "'$(printf '%s' "$status" | cut -c1-40)' — lead with SPEC | READY TO BUILD | IN PROGRESS | DONE, note after ' — '"
+  if [ -n "$status" ] && { [ -z "$(status_norm "$status")" ] || status_synonym "$status"; }; then
+    emit STATUS-ENUM "$f" "'$(printf '%s' "$status" | cut -c1-40)' — lead with SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE, note after ' — '"
+  fi
   if [ "$cls" = "done" ]; then
     n="$(unchecked_acs "$f")"
     [ "$n" -gt 0 ] && emit STATUS-OPEN "$f" "Status '${status%% —*}' but $n unchecked acceptance criteria"

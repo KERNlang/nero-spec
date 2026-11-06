@@ -186,7 +186,7 @@ One policy file gives every colleague the same conventions and skills. Keys: thi
 4. **Rules of record** — propose the guideline and `AGENTS.md` files the scan found; the user picks.
 5. **Repo skills** — `scripts/list-skills.sh`; none → skip. Ask step by step from its suggestions (a keyword guess, the user decides); several skills per step are fine; ask before mapping skills that change shared files; set `skills.path` when they sit outside the default folders; same name twice → ask which.
 6. **Write** — frontmatter + `## Constitution` from the commit/push/release answers; show it, save on yes. Machine choice → add the `policy_paths` entry.
-7. **Validate** — `scripts/spec-check.sh`: exit 2, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix before finishing; other `POLICY-*` on older specs → list them, the user decides. With `pr.title` or `pr.regex` set, a recent real PR title must pass `--pr-title`. The Spec line must show `(policy: <path>)`.
+7. **Validate** — `scripts/spec-check.sh`: exit 2 or 3, `POLICY-CONFLICT`, `POLICY-RULES` or `POLICY-SKILL` → fix before finishing; other `POLICY-*` on older specs → list them, the user decides. With `pr.title` or `pr.regex` set, a recent real PR title must pass `--pr-title`. The Spec line must show `(policy: <path>)`.
 8. Suggest committing a repo policy with `.spec`; never commit.
 
 ## 3. Finish

@@ -35,7 +35,7 @@ Carried by addons: `ticket-interpretation` (Intent), `visual-grid` (Device check
 **Date:** YYYY-MM-DD
 **Depth:** <Surgical | Full>
 **Verified at:** <git rev-parse --short HEAD>
-**Status:** SPEC | READY TO BUILD | IN PROGRESS | DONE — slices <x> of <n> done, now <n> (<name>). Implementation authorized for <slices | spec only>.
+**Status:** SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE — slices <x> of <n> done, now <n> (<name>). Implementation authorized for <slices | spec only>.
 ```
 
 The enum keeps `spec-check.sh` happy; the note carries the slice counter and the authorization. Update it in

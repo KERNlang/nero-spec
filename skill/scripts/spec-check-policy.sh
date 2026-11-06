@@ -9,7 +9,7 @@ SKILL_DIRS_DEFAULT=".agents/skills .claude/skills .ai/skills"
 POLICY_OWNED="ticket.regex ticket.prefixes ticket.fallback branch.pattern"
 POLICY_FILE=""; POLICY_KV=""
 
-policy_fail() { echo "spec-check: invalid policy: $1" >&2; return 2; }
+policy_fail() { echo "spec-check: invalid policy: $1" >&2; return 3; }
 
 repo_rel_path() {
   local p="$1"
@@ -29,10 +29,10 @@ inside_root() {
 
 policy_repo_path() {
   local p
-  p="$(repo_rel_path "$1")" || { policy_fail "$1 (repo-relative path without . or .. components required)"; return 2; }
-  case "$p" in *.md) ;; *) policy_fail "$1 (must be a .md file)"; return 2 ;; esac
-  [ -f "$p" ] || { policy_fail "$1 (file not found)"; return 2; }
-  inside_root "$p" || { policy_fail "$1 (a symlink or outside the repo)"; return 2; }
+  p="$(repo_rel_path "$1")" || { policy_fail "$1 (repo-relative path without . or .. components required)"; return 3; }
+  case "$p" in *.md) ;; *) policy_fail "$1 (must be a .md file)"; return 3 ;; esac
+  [ -f "$p" ] || { policy_fail "$1 (file not found)"; return 3; }
+  inside_root "$p" || { policy_fail "$1 (a symlink or outside the repo)"; return 3; }
   printf '%s\n' "$ROOT/$p"
 }
 
@@ -45,7 +45,7 @@ policy_parse() {
     {
       i = index($0, ":"); if (!i) { print "bad line: " $0; bad = 1; exit }
       k = substr($0, 1, i - 1); v = substr($0, i + 1); gsub(/^[ \t]+|[ \t]+$/, "", k); gsub(/^[ \t]+|[ \t]+$/, "", v)
-      if (index(keys, " " k " ") == 0) { print "unknown key: " k; bad = 1; exit }
+      if (index(keys, " " k " ") == 0) { print "warn: unknown key " k " ignored"; next }
       if (k in seen) { print "duplicate key: " k; bad = 1; exit }
       seen[k] = 1; print k "\t" v > "/dev/stderr"
     }
@@ -91,40 +91,40 @@ names_key() { printf '%s\n' "$1" | grep -Eq -- "(^|[^A-Za-z0-9_-])($2)([^A-Za-z0
 
 policy_validate() {
   local r
-  [ "$(pol format)" = "nero-spec-policy/v1" ] || { policy_fail "$POLICY_FILE: format must be nero-spec-policy/v1"; return 2; }
-  case "$(pol agon.max)" in ''|off|ask|restricted|full) ;; *) policy_fail "$POLICY_FILE: agon.max must be off|ask|restricted|full"; return 2 ;; esac
-  case "$(pol critic)" in ''|subagent|agon|any) ;; *) policy_fail "$POLICY_FILE: critic must be subagent|agon|any"; return 2 ;; esac
-  [ "$(pol critic)" = agon ] && case "$(pol agon.max)" in off|ask) policy_fail "$POLICY_FILE: critic agon needs agon.max restricted or full"; return 2 ;; esac
+  [ "$(pol format)" = "nero-spec-policy/v1" ] || { policy_fail "$POLICY_FILE: format must be nero-spec-policy/v1"; return 3; }
+  case "$(pol agon.max)" in ''|off|ask|restricted|full) ;; *) policy_fail "$POLICY_FILE: agon.max must be off|ask|restricted|full"; return 3 ;; esac
+  case "$(pol critic)" in ''|subagent|agon|any) ;; *) policy_fail "$POLICY_FILE: critic must be subagent|agon|any"; return 3 ;; esac
+  [ "$(pol critic)" = agon ] && case "$(pol agon.max)" in off|ask) policy_fail "$POLICY_FILE: critic agon needs agon.max restricted or full"; return 3 ;; esac
   case "$(pol branch.pattern | sed -E 's/[{](type|TICKET|slug)[}]/_/g')" in
-    *[{}]*) policy_fail "$POLICY_FILE: branch.pattern placeholders are {type}, {TICKET}, {slug}"; return 2 ;;
+    *[{}]*) policy_fail "$POLICY_FILE: branch.pattern placeholders are {type}, {TICKET}, {slug}"; return 3 ;;
   esac
   if [ -n "$(pol ticket.regex)" ]; then
     printf '' | grep -E -- "$(ticket_re)" >/dev/null 2>&1
-    [ $? -le 1 ] || { policy_fail "$POLICY_FILE: ticket.regex is not a valid extended regex"; return 2; }
+    [ $? -le 1 ] || { policy_fail "$POLICY_FILE: ticket.regex is not a valid extended regex"; return 3; }
   fi
   if [ -n "$(pol pr.regex)$(pol pr.title)" ]; then
     printf '' | grep -E -- "$(pr_title_re)" >/dev/null 2>&1
-    [ $? -le 1 ] || { policy_fail "$POLICY_FILE: pr.regex (or the regex built from pr.title) is not a valid extended regex"; return 2; }
+    [ $? -le 1 ] || { policy_fail "$POLICY_FILE: pr.regex (or the regex built from pr.title) is not a valid extended regex"; return 3; }
   fi
   while IFS= read -r r; do
     [ -n "$r" ] || continue
-    repo_rel_path "$r" >/dev/null || { policy_fail "$POLICY_FILE: rules entry '$r' must be repo-relative without . or .. components"; return 2; }
+    repo_rel_path "$r" >/dev/null || { policy_fail "$POLICY_FILE: rules entry '$r' must be repo-relative without . or .. components"; return 3; }
   done <<EOF
 $(items "$(pol rules)")
 EOF
   while IFS= read -r r; do
     [ -n "$r" ] || continue
-    repo_rel_path "$r" >/dev/null || { policy_fail "$POLICY_FILE: skills.path entry '$r' must be repo-relative without . or .. components"; return 2; }
+    repo_rel_path "$r" >/dev/null || { policy_fail "$POLICY_FILE: skills.path entry '$r' must be repo-relative without . or .. components"; return 3; }
   done <<EOF
 $(items "$(pol skills.path)")
 EOF
   while IFS= read -r r; do
     [ -n "$r" ] || continue
-    case "$r" in *=*) ;; *) policy_fail "$POLICY_FILE: skills entry '$r' must be <step>=<skill>[|<skill>]"; return 2 ;; esac
-    case "$POLICY_STEPS" in *" ${r%%=*} "*) ;; *) policy_fail "$POLICY_FILE: skills step '${r%%=*}' must be one of:$POLICY_STEPS"; return 2 ;; esac
-    case "|${r#*=}|" in *'||'*|'| |'*) policy_fail "$POLICY_FILE: skills entry '$r' has an empty skill name"; return 2 ;; esac
+    case "$r" in *=*) ;; *) policy_fail "$POLICY_FILE: skills entry '$r' must be <step>=<skill>[|<skill>]"; return 3 ;; esac
+    case "$POLICY_STEPS" in *" ${r%%=*} "*) ;; *) policy_fail "$POLICY_FILE: skills step '${r%%=*}' must be one of:$POLICY_STEPS"; return 3 ;; esac
+    case "|${r#*=}|" in *'||'*|'| |'*) policy_fail "$POLICY_FILE: skills entry '$r' has an empty skill name"; return 3 ;; esac
     skill_names "$r" | grep -qvE '^[A-Za-z0-9_][A-Za-z0-9._-]*$' &&
-      { policy_fail "$POLICY_FILE: skills entry '$r' has an invalid skill name"; return 2; }
+      { policy_fail "$POLICY_FILE: skills entry '$r' has an invalid skill name"; return 3; }
   done <<EOF
 $(items "$(pol skills)")
 EOF
@@ -170,11 +170,13 @@ policy_load() {
   local p err
   POLICY_KV="$TMP/policy.kv"; : > "$POLICY_KV"
   p="$(cfg policy)"
-  if [ -n "$p" ]; then POLICY_FILE="$(policy_repo_path "$p")" || return 2
-  elif command -v policy_local_path >/dev/null 2>&1; then POLICY_FILE="$(policy_local_path)" || return 2; fi
+  if [ -n "$p" ]; then POLICY_FILE="$(policy_repo_path "$p")" || return 3
+  elif command -v policy_local_path >/dev/null 2>&1; then POLICY_FILE="$(policy_local_path)" || return 3; fi
   [ -n "$POLICY_FILE" ] || return 0
   err="$(policy_parse "$POLICY_FILE")"
-  [ -z "$err" ] || { policy_fail "$POLICY_FILE: $err"; return 2; }
+  printf '%s\n' "$err" | awk -v f="$POLICY_FILE" '/^warn: / { sub(/^warn: /, ""); print "spec-check: policy " f ": " $0 }' >&2
+  err="$(printf '%s\n' "$err" | grep -v '^warn: ')"
+  [ -z "$err" ] || { policy_fail "$POLICY_FILE: $err"; return 3; }
   policy_validate
 }
 
@@ -279,7 +281,7 @@ EOF
   if [ -n "$re" ] && [ -n "$t" ] && ! names_key "$t" "$re"; then
     emit POLICY-TICKET "$f" "Ticket '$(printf '%s' "$t" | cut -c1-40)' does not match policy ticket.regex"
   fi
-  case "$(status_norm "$status")" in "READY TO BUILD"|"IN PROGRESS"|DONE)
+  case "$(status_norm "$status")" in "READY TO BUILD"|"IN PROGRESS"|"IN REVIEW"|DONE)
     while IFS= read -r s; do
       [ -n "$s" ] || continue
       has_section "$f" "$(printf '%s' "$s" | tr '[:upper:]' '[:lower:]')" ||

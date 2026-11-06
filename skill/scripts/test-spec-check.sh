@@ -205,7 +205,7 @@ MODIFIED: `src/few.ts` — edit
 EOF
 spec status-note <<'EOF'
 # Status note
-**Status:** implemented — locally verified
+**Status:** DONE — locally verified
 
 ## Acceptance Criteria
 - [x] AC-1 first
@@ -221,6 +221,17 @@ EOF
 spec status-synonym <<'EOF'
 # Status synonym
 **Status:** Implemented - local gate passed
+
+## Acceptance Criteria
+- [ ] AC-1 first
+EOF
+spec status-built <<'EOF'
+# Status built
+**Status:** BUILT
+EOF
+spec status-in-review <<'EOF'
+# Status in review
+**Status:** IN REVIEW — PR open
 
 ## Acceptance Criteria
 - [ ] AC-1 first
@@ -313,7 +324,10 @@ hasnt STATUS-ENUM ".claude/specs/status-note/"
 has STATUS-ENUM ".claude/specs/status-free/"
 hasnt STATUS-OPEN ".claude/specs/status-free/"
 has STATUS-OPEN ".claude/specs/status-synonym/"
-hasnt STATUS-ENUM ".claude/specs/status-synonym/"
+has STATUS-ENUM ".claude/specs/status-synonym/"
+has STATUS-ENUM ".claude/specs/status-built/"
+hasnt STATUS-ENUM ".claude/specs/status-in-review/"
+hasnt STATUS-OPEN ".claude/specs/status-in-review/"
 hasnt STATUS-ENUM ".claude/specs/drift-"
 [ "$RC" = 0 ] && PASS=$((PASS + 1)) || { FAIL=$((FAIL + 1)); echo "FAIL advisory run exited $RC"; }
 

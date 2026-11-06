@@ -78,7 +78,13 @@ Input: the spec (with step d answers already folded in) + open findings only, ne
 | Policy `critic: agon` | an agon row above is required; effective agon off → stop and report, never fall back silently |
 | Effective agon off, or restricted without engines | fresh-context subagent (or a new session, never the writing one) with steps b–d as its checklist; say it is same-model |
 
-Rules of record decide the exact flags. Each critique finding is verified against the code before it changes the spec. Rejecting a finding needs evidence that disproves it: a code citation that covers every construction path, or command output; a requirement, UX or external-system finding needs the owner's decision instead. Without that evidence a code finding becomes a Tricky input with a named test — test it, don't argue it.
+Rules of record decide the exact flags. The critic cannot run (engine unavailable, timeout, no fresh context) → Status stays SPEC; never mark it skipped and proceed.
+
+**Blind second design** (specs with Implementation Options, not Surgical): before the critic sees the draft's options, it designs its own solution from the ticket and code only. Then compare both in Implementation Options and adopt the smaller unless it fails an AC.
+
+The critic audits the check behind each load-bearing VERIFIED claim, not only its output: could the check have shown the opposite? A claim resting on one guessed path or URL returning 404 is ASSUMED until the thing itself is searched or listed.
+
+Each critique finding is verified against the code before it changes the spec. Rejecting a finding needs evidence that disproves it: a code citation that covers every construction path, or command output; a requirement, UX or external-system finding needs the owner's decision instead. Without that evidence a code finding becomes a Tricky input with a named test — test it, don't argue it.
 
 ### f. Decision push
 
@@ -87,10 +93,11 @@ Rules of record decide the exact flags. Each critique finding is verified agains
 - After round 2 every remaining OPEN is either decided — recommended option, recorded `ASSUMED: <choice>, because <why> (owner: <name>)` — or escalated to the user in **one line** each.
 - `Contested:` lines (`contested-decision-scan`) keep their picked reading when forced to ASSUMED; see that addon.
 - Options that nobody will pick are deleted, not kept "for completeness".
+- **Lazy wins, then an over-engineering pass** before READY TO BUILD: pick the option with the fewest new files, types, inputs and concepts that meets every AC; hidden coupling counts as a concept (state read from another component's CSS class or DOM, a "renaming X breaks this" comment) and loses to explicit state; reuse existing components, services, state and styles first. Then per planned change ask: delete? merge into something existing? replace by a smaller existing mechanism?
 
 ### g. Record
 
-Add or replace one `## Refine` block, ≤ 6 lines:
+Add or replace one `## Refine` block, ≤ 7 lines:
 
 ```markdown
 ## Refine
@@ -98,6 +105,7 @@ Round 2/2, 2026-01-31, `Verified at` a1b2c3d. Critic: agon nero (normal risk). S
 Fixed: 4 (contract: `refresh_token` dropped by client type; Callers: 2 missed sites; Tricky input added: expired token on refresh retry).
 Decided: OPEN-2 → ASSUMED keep v1 endpoint (owner: backend lead).
 Rejected: 1 (critic: "`limit` may be negative" — `api/parse.go:12` rejects < 0 before any caller reaches it).
+Over-engineering: 2/10 (0 = nothing to cut). Removed: new `DateRange` type (existing `Period` fits).
 Residual risk: old clients ≤2.2 untested on device.
 Pass: yes (0 HIGH open).
 ```

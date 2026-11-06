@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Changed
 
+- `spec-check.sh`: an unknown company-policy key warns once on stderr and is ignored; any other invalid policy exits 3 (was 2, shared with "no policy").
+- Status synonyms (`BUILT`, `IMPLEMENTED`, `SHIPPED`, ...) now report `STATUS-ENUM`; they still count as DONE for `STATUS-OPEN`.
+- `core.md`: VERIFIED needs a check that could have shown the opposite, an absence claim needs a search or listing, never one guessed 404; a tricky input gets a test only when a realistic bug would break it, in the system-under-test's existing test file; repeated nits are never optional and the last review covers the whole diff against the base branch; the newer rule wins and a waived written rule needs the owner's OK and goes in the PR text.
+- Refine: if the critic cannot run, Status stays SPEC; the critic audits the check behind VERIFIED claims; blind second design; lazy wins plus an over-engineering pass, recorded with a 0-10 score in `## Refine`.
 - Refine: `agon nero` always gets exactly one engine (`-e <one>`), never a list to auto-pick from.
 - Every addon loaded after the Spec line is announced `+<name> (on demand)`; the Spec line lists only loaded addons.
 - Non-git targets: the target directory plays the git root for `.spec` and `default_paths`; the `default_paths` example gains a dotfile root.
@@ -19,6 +23,9 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Added
 
+- Status `IN REVIEW`: built, PR open; the spec ships in that PR, so merging it makes the spec DONE. Treated like IN PROGRESS by every check.
+- Post-deploy ACs: `- [ ] AC-n (post-deploy: <env>, <owner>) ...` stays unchecked without tripping `STATUS-OPEN` or `PR-OPEN-AC`; `criteria-test-map` records `PASS <date> <env>` evidence for manual rows run before the PR.
+- `spec-check.sh --pr-title --spec` reports `PR-OPEN-AC` (exit 1) while any acceptance criterion is unchecked.
 - Opt-in preset `operator-reviewed`: one human owns every decision and reviews each slice. Overrides Tricky inputs, the length budget and the OPEN cap while active; the critic stays mandatory and the operator review comes on top; the other overrides ship as addons.
 - Company policy module: one `.md` file (in the repo via `.spec` `policy:`, or on one machine via `policy_paths`) holds a company's formats, required headers and sections, denied words, addon rules, AI ceilings and repo skills per step; `.spec` can only tighten it. `spec-check.sh` reports `POLICY-*` findings and checks PR titles (`--pr-title`); `/spec init` step 2e detects existing lint rules and repo skills (`scripts/list-skills.sh`) and writes the file.
 - Addons `ticket-interpretation` (replaces Intent), `changed-things` (replaces Callers / Real usage) and `completion-conditions` (replaces Done when / As-built delta); each states the core rule it replaces. `visual-grid` now replaces the per-AC `Device check:` for UI ACs.

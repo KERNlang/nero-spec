@@ -194,7 +194,7 @@ status() {
   local r="$T/status/repo" f s
   new_repo "$r"
   f="$r/.claude/specs/status/spec.md"
-  for s in DONEISH 'READY FOR PLAN'; do
+  for s in DONEISH 'READY FOR PLAN' IMPLEMENTED; do
     spec_file "$f" <<EOF
 # Status
 **Status:** $s
@@ -203,7 +203,7 @@ Critic: reviewer
 EOF
     run_check "$f" "$r"; has 'STATUS-ENUM' "$s invalid"; exit_is 1 "$s invalid"
   done
-  for s in 'DONE — release note' 'DONE - release note' 'DONE (release note)' IMPLEMENTED 'SUPERSEDED by x'; do
+  for s in 'DONE — release note' 'DONE - release note' 'DONE (release note)' 'IN REVIEW — PR open' 'SUPERSEDED by x'; do
     spec_file "$f" <<EOF
 # Status
 **Status:** $s
