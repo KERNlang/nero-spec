@@ -173,8 +173,8 @@ status_word() {
   printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | sed -E 's/^[^A-Z]*//; s/[[:space:]]*(—|--| - |\(|;|,).*//; s/[[:space:]]+$//'
 }
 
-status_synonym() {
-  case "$(status_word "$1")" in IMPLEMENTED|SHIPPED|COMPLETE|BUILT|MERGED|DEPLOYED|LIVE) return 0 ;; esac
+status_canonical() {
+  case "$(status_word "$1")" in SPEC|"READY TO BUILD"|"IN PROGRESS"|"IN REVIEW"|DONE|SUPERSEDED|"SUPERSEDED BY "*) return 0 ;; esac
   return 1
 }
 
@@ -235,7 +235,7 @@ unchecked_acs() {
       if (!inac && tolower($0) ~ /acceptance|criteria|definition of done|done when/) { inac = 1; al = lvl($0) }
       next
     }
-    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope|^[ \t]*[-*] \[ \] [*]*ac-[0-9a-z.]+[*]*[ \t]*\(post-deploy:/ { n++ }
+    inac && /^[ \t]*[-*] \[ \]/ && tolower($0) !~ /out of scope|^[ \t]*[-*] \[ \] [*]*ac-[0-9a-z.]+[*]*[ \t]*\(post-deploy:[ \t]*[^ ,)][^,)]*,[ \t]*[^ ,)][^)]*\)/ { n++ }
     END { print n + 0 }' "$1"
 }
 

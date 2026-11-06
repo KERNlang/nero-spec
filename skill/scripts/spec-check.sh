@@ -17,7 +17,7 @@
 #                  on the branch are ignored
 #   POINTER        pointer spec whose target does not exist
 #   STATUS-ENUM    Status does not start with SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE (a " — note" may follow);
-#                  synonyms such as BUILT or IMPLEMENTED are flagged too but still count as DONE
+#                  aliases such as BUILT, WIP or READY are flagged too but still classify (BUILT counts as DONE)
 #   REPEAT-FIX     >= N (default 4) fix/hotfix/revert commits on covered paths within D (default 30) days of Date
 #   NO-STATUS      spec without a **Status:** header
 #   CONTRACT-MISSING  a `METHOD /path` in a ## Contract section is absent from a named repo's default branch or
@@ -433,7 +433,7 @@ check_spec() {
   if is_pointer "$f"; then check_pointer "$f"; [ -n "$POLICY_FILE" ] && policy_check_words "$f"; return 0; fi
   status="$(status_of "$f")"; cls="$(status_class "$status")"
   [ -n "$status" ] || emit NO-STATUS "$f" "no **Status:** header"
-  if [ -n "$status" ] && { [ -z "$(status_norm "$status")" ] || status_synonym "$status"; }; then
+  if [ -n "$status" ] && ! status_canonical "$status"; then
     emit STATUS-ENUM "$f" "'$(printf '%s' "$status" | cut -c1-40)' — lead with SPEC | READY TO BUILD | IN PROGRESS | IN REVIEW | DONE, note after ' — '"
   fi
   if [ "$cls" = "done" ]; then

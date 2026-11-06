@@ -194,7 +194,7 @@ status() {
   local r="$T/status/repo" f s
   new_repo "$r"
   f="$r/.claude/specs/status/spec.md"
-  for s in DONEISH 'READY FOR PLAN' IMPLEMENTED; do
+  for s in DONEISH 'READY FOR PLAN' IMPLEMENTED WIP READY; do
     spec_file "$f" <<EOF
 # Status
 **Status:** $s

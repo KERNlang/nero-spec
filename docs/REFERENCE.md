@@ -147,7 +147,7 @@ Enterprise adds `ticket.regex`, `ticket.prefixes`, `ticket.fallback`, `branch.pa
 - `refine` runs before approval: pass = no unresolved HIGH finding.
 - At approval the spec emits one `Done when:` line (gate command + AC IDs + "no files outside Changes") for `/goal`, a Stop hook, or a human.
 - After the build, **Converge**: re-run load-bearing VERIFIED checks, each AC → PASS (test + output), GAP, or moved out of scope; `## As-built delta`; DONE only with every AC checked.
-- `**Status:**` is the enum, optionally followed by ` — note`; spec-check normalizes common synonyms (IMPLEMENTED, BUILT, WIP, …).
+- `**Status:**` is the enum, optionally followed by ` — note`; spec-check flags any other word (IMPLEMENTED, BUILT, WIP, READY, …) as STATUS-ENUM but still classifies common aliases.
 
 ## Mutation ladder
 
@@ -195,7 +195,7 @@ The checker returns 0 when no strict finding blocks it, 1 for strict findings, 2
 | `STATUS-OPEN` | Status DONE with unchecked `- [ ]` under Acceptance Criteria (`(post-deploy: …)` and out-of-scope lines skipped) |
 | `STATUS-SHIPPED` | Status IN PROGRESS/IN REVIEW/READY and ≥ 80 % (`--shipped-pct`) of covered paths known to the default branch changed there after the spec (commits in `<anchor>..<default branch>`, anchor = Verified at / Baseline or the commit that added the spec; otherwise a last change strictly after `Date:`) |
 | `POINTER` | a short pointer spec names a `…specs/…md` target that does not exist |
-| `STATUS-ENUM` | Status does not start with the enum (free text, or a synonym such as BUILT or IMPLEMENTED, instead of `DONE — note`) |
+| `STATUS-ENUM` | Status does not start with the enum (free text, or an alias such as BUILT, WIP or READY, instead of the canonical word plus ` — note`) |
 | `REPEAT-FIX` | ≥ 4 (`--repeat-fix`) fix/hotfix/revert commits on covered paths within 30 days (`--repeat-days`) of `Date:` → escalate, write a bigger spec |
 | `NO-STATUS` | no Status header |
 | `NO-REVIEW` | Status READY/IN PROGRESS/IN REVIEW/DONE but no `## Refine` section with a non-empty `Critic:` (or `Critics:`) line |

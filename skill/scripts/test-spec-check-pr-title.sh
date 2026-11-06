@@ -45,10 +45,10 @@ title 1 "link target key is ignored" --spec "$SP" --pr-title "fix(core): Add thi
 printf "# Other\n\n**Status:** SPEC\n" > "$A/.claude/specs/ORG-12-thing/noticket.md"
 title 1 "spec without a Ticket key" --spec "$A/.claude/specs/ORG-12-thing/noticket.md" --pr-title "fix(core): Add thing #ORG-12" "$A"
 says "has no **Ticket:** key"
-printf '\n## Acceptance Criteria\n- [x] AC-1 automated\n- [ ] AC-2 manual upload\n- [ ] AC-3 (post-deploy: prod, ops) check the dashboard\n- [ ] AC-4 export works, no (post-deploy: marker) in prose\n' >> "$SP"
+printf '\n## Acceptance Criteria\n- [x] AC-1 automated\n- [ ] AC-2 manual upload\n- [ ] AC-3 (post-deploy: prod, ops) check the dashboard\n- [ ] AC-4 export works, no (post-deploy: marker) in prose\n- [ ] AC-5 (post-deploy: prod) owner missing\n' >> "$SP"
 title 1 "unchecked AC blocks the PR" --spec "$SP" --pr-title "fix(core): Add thing #ORG-12" "$A"
-says ": 2 unchecked acceptance criteria"
-perl -pi -e 's/- \[ \] AC-([24])/- [x] AC-$1/' "$SP"
+says ": 3 unchecked acceptance criteria"
+perl -pi -e 's/- \[ \] AC-([245])/- [x] AC-$1/' "$SP"
 title 0 "all ACs ticked" --spec "$SP" --pr-title "fix(core): Add thing #ORG-12" "$A"
 title 2 "empty title" --pr-title "" "$A"
 title 2 "multi-line title" --pr-title "fix(core): Add thing #ORG-12

@@ -7,7 +7,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 ### Changed
 
 - `spec-check.sh`: an unknown company-policy key warns once on stderr and is ignored; any other invalid policy exits 3 (was 2, shared with "no policy").
-- Status synonyms (`BUILT`, `IMPLEMENTED`, `SHIPPED`, ...) now report `STATUS-ENUM`; they still count as DONE for `STATUS-OPEN`.
+- Every non-canonical status (`BUILT`, `IMPLEMENTED`, `WIP`, `READY`, ...) now reports `STATUS-ENUM`; aliases still classify, so `BUILT` counts as DONE for `STATUS-OPEN`.
 - `core.md`: VERIFIED needs a check that could have shown the opposite, an absence claim needs a search or listing, never one guessed 404; a tricky input gets a test only when a realistic bug would break it, in the system-under-test's existing test file; repeated nits are never optional and the last review covers the whole diff against the base branch; the newer rule wins and a waived written rule needs the owner's OK and goes in the PR text.
 - Refine: if the critic cannot run, Status stays SPEC; the critic audits the check behind VERIFIED claims; blind second design; lazy wins plus an over-engineering pass, recorded with a 0-10 score in `## Refine`.
 - Refine: `agon nero` always gets exactly one engine (`-e <one>`), never a list to auto-pick from.
